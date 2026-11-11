@@ -10,9 +10,8 @@ import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.jsonPrimitive
 
 /**
- * Clock's backup file (SPEC §3.9.5), in the same shape as Music's: for now the settings alone;
- * alarms, cities and timer presets join it with their stages, as optional fields of format
- * version 1. Never in it: running timers, the stopwatch, skip and snooze state, the app language
+ * Clock's backup file (SPEC §3.9.5), in the same shape as Music's: the settings and the cities;
+ * alarms and timer presets join it with their stages, as optional fields of format version 1. Never in it: running timers, the stopwatch, skip and snooze state, the app language
  * and the last used destination. Pure Kotlin, so the format is unit-tested.
  */
 @Serializable
@@ -24,6 +23,8 @@ data class BackupFile(
     /** ISO 8601, UTC. */
     val createdAt: String,
     val settings: BackupSettings = BackupSettings(),
+    /** Zone ids of the Clock destination's cities, in the user's order; absent in backups from before cities, which then stay as they are. */
+    val cities: List<String>? = null,
 ) {
     companion object {
         const val FORMAT = "sh.hnet.clock.backup"
@@ -33,18 +34,20 @@ data class BackupFile(
 
 /**
  * The settings. Every field is optional and enum values go by name: a field absent from the file,
- * or a name from a later version, falls back to the default on restore. Empty until the first
- * setting exists.
+ * or a name from a later version, falls back to the default on restore.
  */
 @Serializable
-class BackupSettings {
-    override fun equals(other: Any?) = other is BackupSettings
-    override fun hashCode() = 0
+data class BackupSettings(val clock: Clock? = null) {
+    /** Settings › Clock. */
+    @Serializable
+    data class Clock(val showSeconds: Boolean? = null, val homeClock: Boolean? = null, val homeZone: String? = null)
 }
 
 /** What a picked file turned out to be, before anything changes. */
 sealed interface BackupCheck {
-    data class Valid(val backup: BackupFile) : BackupCheck
+    data class Valid(val backup: BackupFile) : BackupCheck {
+        val cities: Int get() = backup.cities.orEmpty().size
+    }
 
     /** Not JSON, or JSON of something else. */
     data class NotOurs(val details: String) : BackupCheck

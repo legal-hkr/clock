@@ -99,7 +99,7 @@ fun ResetScreen(onBack: () -> Unit) {
             onConfirm = {
                 confirming = false
                 scope.launch {
-                    preferences.restoreDefaults()
+                    preferences.restoreDefaults(java.time.ZoneId.systemDefault().id)
                     Toast.makeText(context, done, Toast.LENGTH_SHORT).show()
                     // Last: a language change recreates the activity
                     if (currentLanguageTag(context).isNotEmpty()) setLanguage(context, "")

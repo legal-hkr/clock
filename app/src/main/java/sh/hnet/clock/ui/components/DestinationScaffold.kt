@@ -3,6 +3,7 @@
 package sh.hnet.clock.ui.components
 
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -32,7 +33,7 @@ fun DestinationScaffold(
     onOpenSettings: () -> Unit,
     subtitle: String? = null,
     subtitleColor: Color = MaterialTheme.colorScheme.onSurfaceVariant,
-    content: @Composable () -> Unit,
+    content: @Composable BoxScope.() -> Unit,
 ) {
     Column(Modifier.fillMaxSize()) {
         TopAppBar(
@@ -46,6 +47,6 @@ fun DestinationScaffold(
             },
             actions = { TooltipIconButton(R.drawable.ic_settings, stringResource(R.string.content_description_settings), onOpenSettings) },
         )
-        Box(Modifier.fillMaxSize()) { content() }
+        Box(Modifier.fillMaxSize(), content = content)
     }
 }

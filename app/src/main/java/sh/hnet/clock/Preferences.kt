@@ -1,6 +1,7 @@
 package sh.hnet.clock
 
 import android.content.Context
+import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
@@ -8,6 +9,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import sh.hnet.clock.backup.BackupSettings
+import sh.hnet.clock.time.zoneOrNull
 import sh.hnet.clock.ui.Tab
 
 private val Context.settings by preferencesDataStore("settings")
@@ -23,23 +25,68 @@ class Preferences(private val context: Context) {
 
     suspend fun setLastDestination(tab: Tab) = context.settings.edit { it[lastDestinationKey] = tab.name }
 
+    private val showSecondsKey = booleanPreferencesKey("show_seconds")
+
+    /** Seconds after the local time on the Clock destination (SPEC §3.9.3); off by default. */
+    val showSeconds: Flow<Boolean> = context.settings.data.map { it[showSecondsKey] ?: false }
+
+    suspend fun setShowSeconds(on: Boolean) = context.settings.edit { it[showSecondsKey] = on }
+
+    private val homeClockKey = booleanPreferencesKey("home_clock")
+
+    /** The Home row while the phone is on another time than home (SPEC §3.5.6); on by default. */
+    val homeClock: Flow<Boolean> = context.settings.data.map { it[homeClockKey] ?: true }
+
+    suspend fun setHomeClock(on: Boolean) = context.settings.edit { it[homeClockKey] = on }
+
+    private val homeZoneKey = stringPreferencesKey("home_zone")
+
+    /** The home time zone's id; null until [ensureHomeZone] has noted one. */
+    val homeZone: Flow<String?> = context.settings.data.map { it[homeZoneKey] }
+
+    suspend fun setHomeZone(zoneId: String) = context.settings.edit { it[homeZoneKey] = zoneId }
+
+    /**
+     * Home is where the phone was when the app first ran (and again after Restore defaults or a
+     * restore that names no home): notes [systemZoneId] unless a home zone is already known.
+     */
+    suspend fun ensureHomeZone(systemZoneId: String) = context.settings.edit { prefs ->
+        if (prefs[homeZoneKey] == null) prefs[homeZoneKey] = systemZoneId
+    }
+
     /**
      * Restore defaults (Settings › Reset): every setting of this store back to its default. The last
-     * used destination is a memory, not a setting, and stays.
+     * used destination is a memory, not a setting, and stays. Home becomes the phone's current zone.
      */
-    suspend fun restoreDefaults() = context.settings.edit { prefs ->
+    suspend fun restoreDefaults(systemZoneId: String) = context.settings.edit { prefs ->
         val last = prefs[lastDestinationKey]
         prefs.clear()
         last?.let { prefs[lastDestinationKey] = it }
+        prefs[homeZoneKey] = systemZoneId
     }
 
-    /** The settings as a backup holds them. No setting exists yet: each stage adds its own. */
+    /** The settings as a backup holds them. */
     suspend fun backupSettings(): BackupSettings {
-        context.settings.data.first()
-        return BackupSettings()
+        val prefs = context.settings.data.first()
+        return BackupSettings(
+            clock = BackupSettings.Clock(
+                showSeconds = prefs[showSecondsKey] ?: false,
+                homeClock = prefs[homeClockKey] ?: true,
+                homeZone = prefs[homeZoneKey],
+            ),
+        )
     }
 
-    /** Replaces every setting by the backup's; what the backup doesn't name returns to its default. */
-    @Suppress("UNUSED_PARAMETER")
-    suspend fun restoreSettings(backup: BackupSettings) = restoreDefaults()
+    /**
+     * Replaces every setting by the backup's; what the backup doesn't name returns to its default.
+     * A home zone this phone doesn't know is left out, and home is then the phone's current zone.
+     */
+    suspend fun restoreSettings(backup: BackupSettings, systemZoneId: String) = context.settings.edit { prefs ->
+        val last = prefs[lastDestinationKey]
+        prefs.clear()
+        last?.let { prefs[lastDestinationKey] = it }
+        backup.clock?.showSeconds?.let { prefs[showSecondsKey] = it }
+        backup.clock?.homeClock?.let { prefs[homeClockKey] = it }
+        prefs[homeZoneKey] = backup.clock?.homeZone?.takeIf { zoneOrNull(it) != null } ?: systemZoneId
+    }
 }

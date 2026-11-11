@@ -38,6 +38,7 @@ import androidx.compose.material3.ListItemShapes
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.PlainTooltip
 import androidx.compose.material3.SegmentedListItem
+import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TooltipAnchorPosition
 import androidx.compose.material3.TooltipBox
@@ -272,6 +273,29 @@ fun SettingsLinkRow(shapes: ListItemShapes, @DrawableRes icon: Int, title: Strin
         colors = settingsRowColors(),
         leadingContent = { RowIcon(icon) },
         trailingContent = { Icon(painterResource(R.drawable.ic_open_in_new), contentDescription = null) },
+        supportingContent = supporting?.let { { Text(it) } },
+    ) {
+        Text(title)
+    }
+}
+
+/** A boolean setting: the whole row toggles, the switch shows the state. */
+@Composable
+fun SettingsSwitchRow(
+    shapes: ListItemShapes,
+    @DrawableRes icon: Int,
+    title: String,
+    checked: Boolean,
+    onCheckedChange: (Boolean) -> Unit,
+    supporting: String? = null,
+) {
+    SegmentedListItem(
+        checked = checked,
+        onCheckedChange = onCheckedChange,
+        shapes = shapes,
+        colors = settingsRowColors(),
+        leadingContent = { RowIcon(icon) },
+        trailingContent = { Switch(checked = checked, onCheckedChange = null) },
         supportingContent = supporting?.let { { Text(it) } },
     ) {
         Text(title)

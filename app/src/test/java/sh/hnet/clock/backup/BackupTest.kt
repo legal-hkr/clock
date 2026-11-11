@@ -6,7 +6,13 @@ import org.junit.Test
 
 class BackupTest {
 
-    private val backup = BackupFile(appVersion = "0.1.0", appVersionCode = 1, createdAt = "2026-11-11T18:00:00Z")
+    private val backup = BackupFile(
+        appVersion = "0.1.0",
+        appVersionCode = 1,
+        createdAt = "2026-11-11T18:00:00Z",
+        settings = BackupSettings(clock = BackupSettings.Clock(showSeconds = true, homeClock = false, homeZone = "Europe/Warsaw")),
+        cities = listOf("Atlantic/Reykjavik", "America/New_York", "Asia/Kolkata"),
+    )
 
     @Test
     fun `a backup reads back as it was written`() {
@@ -50,6 +56,25 @@ class BackupTest {
         val check = Backup.check(text)
         assertTrue(check is BackupCheck.Valid)
         assertEquals("0.9.0", (check as BackupCheck.Valid).backup.appVersion)
+    }
+
+    @Test
+    fun `a backup from before cities and clock settings names neither`() {
+        val text = """
+            {"format": "sh.hnet.clock.backup", "formatVersion": 1, "appVersion": "0.1.0", "appVersionCode": 1,
+             "createdAt": "2026-11-11T18:00:00Z", "settings": {}}
+        """.trimIndent()
+        val valid = Backup.check(text) as BackupCheck.Valid
+        assertEquals(null, valid.backup.cities)
+        assertEquals(null, valid.backup.settings.clock)
+        assertEquals(0, valid.cities)
+    }
+
+    @Test
+    fun `the cities keep their order`() {
+        val valid = Backup.check(Backup.encode(backup)) as BackupCheck.Valid
+        assertEquals(listOf("Atlantic/Reykjavik", "America/New_York", "Asia/Kolkata"), valid.backup.cities)
+        assertEquals(3, valid.cities)
     }
 
     @Test

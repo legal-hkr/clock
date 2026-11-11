@@ -56,7 +56,13 @@ import sh.hnet.clock.ClockApplication
 import sh.hnet.clock.R
 import sh.hnet.clock.about.WhatsNew
 import sh.hnet.clock.ui.alarms.AlarmsScreen
+import sh.hnet.clock.ui.clock.AddCityScreen
 import sh.hnet.clock.ui.clock.ClockScreen
+import sh.hnet.clock.ui.clock.ClockViewModel
+import sh.hnet.clock.ui.components.LocalSnackbarLift
+import sh.hnet.clock.ui.settings.ClockSettingsScreen
+import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.compose.runtime.CompositionLocalProvider
 import sh.hnet.clock.ui.settings.AboutScreen
 import sh.hnet.clock.ui.settings.AppLicenseScreen
 import sh.hnet.clock.ui.settings.BackupScreen
@@ -80,6 +86,7 @@ fun ClockApp(startTab: Tab, restored: Boolean = false) {
     val context = LocalContext.current
     val app = context.applicationContext as ClockApplication
     val scope = rememberCoroutineScope()
+    val clock: ClockViewModel = viewModel { ClockViewModel(app) }
     val stack = rememberNavBackStack(Screen.Home)
 
     var tab by rememberSaveable { mutableStateOf(startTab) }
@@ -126,6 +133,9 @@ fun ClockApp(startTab: Tab, restored: Boolean = false) {
     val openSettings = { open(Screen.Settings) }
     // The navigation bar's height (with the system's navigation area), which snackbars stay above on the destinations
     var barHeight by remember { mutableStateOf(0.dp) }
+    // A showing snackbar's height, which a destination's FAB rises by
+    var snackbarHeight by remember { mutableStateOf(0.dp) }
+    val snackbarLift = if (snackbars.currentSnackbarData != null) snackbarHeight else 0.dp
 
     Surface(Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.surface) {
         Box(Modifier.fillMaxSize()) {
@@ -152,6 +162,7 @@ fun ClockApp(startTab: Tab, restored: Boolean = false) {
                             previousTab = null
                         }
                         Column(Modifier.fillMaxSize()) {
+                            CompositionLocalProvider(LocalSnackbarLift provides snackbarLift) {
                             AnimatedContent(
                                 targetState = tab,
                                 // Fade through between destinations
@@ -161,10 +172,11 @@ fun ClockApp(startTab: Tab, restored: Boolean = false) {
                             ) { current ->
                                 when (current) {
                                     Tab.ALARMS -> AlarmsScreen(openSettings)
-                                    Tab.CLOCK -> ClockScreen(openSettings)
+                                    Tab.CLOCK -> ClockScreen(clock, openSettings, onAddCity = { open(Screen.AddCity()) }, snackbars = snackbars, messageScope = scope)
                                     Tab.TIMER -> TimerScreen(openSettings)
                                     Tab.STOPWATCH -> StopwatchScreen(openSettings)
                                 }
+                            }
                             }
                             ShortNavigationBar(Modifier.onSizeChanged { barHeight = with(density) { it.height.toDp() } }) {
                                 Tab.entries.forEach { item ->
@@ -179,9 +191,13 @@ fun ClockApp(startTab: Tab, restored: Boolean = false) {
                             }
                         }
                     }
+                    entry<Screen.AddCity> { key -> AddCityScreen(clock, pickHome = key.home, onBack = back) }
+                    entry<Screen.SettingsClock> { ClockSettingsScreen(clock, onBack = back, onPickHome = { open(Screen.AddCity(home = true)) }) }
                     entry<Screen.Settings> {
                         SettingsRootScreen(
+                            clock = clock,
                             onBack = back,
+                            onOpenClock = { open(Screen.SettingsClock) },
                             onOpenLanguage = { open(Screen.SettingsLanguage) },
                             onOpenBackup = { open(Screen.SettingsBackup) },
                             onOpenReset = { open(Screen.SettingsReset) },
@@ -215,7 +231,11 @@ fun ClockApp(startTab: Tab, restored: Boolean = false) {
             val onHome = stack.lastOrNull() == Screen.Home
             val systemBar = WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding()
             SnackbarHost(snackbars, Modifier.align(Alignment.BottomCenter).padding(bottom = if (onHome) barHeight else systemBar)) { data ->
-                Snackbar(data, shape = MaterialTheme.shapes.extraLarge, modifier = Modifier.padding(horizontal = 12.dp))
+                Snackbar(
+                    data,
+                    shape = MaterialTheme.shapes.extraLarge,
+                    modifier = Modifier.padding(horizontal = 12.dp).onSizeChanged { snackbarHeight = with(density) { it.height.toDp() } },
+                )
             }
         }
     }

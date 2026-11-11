@@ -12,7 +12,9 @@ import kotlinx.coroutines.withContext
 import sh.hnet.clock.BuildConfig
 import sh.hnet.clock.ClockApplication
 import java.io.IOException
+import sh.hnet.clock.time.zoneOrNull
 import java.time.Instant
+import java.time.ZoneId
 
 /**
  * Backup and restore (SPEC §3.9.5, as Music's): writes what a backup holds to a file the user
@@ -68,7 +70,9 @@ class BackupManager(private val app: ClockApplication, private val stamps: Share
 
     /** Replaces everything a backup holds by the file's. */
     suspend fun restore(backup: BackupFile) = withContext(Dispatchers.IO) {
-        app.preferences.restoreSettings(backup.settings)
+        app.preferences.restoreSettings(backup.settings, ZoneId.systemDefault().id)
+        // Cities this phone has no zone for are left out; a backup from before cities says nothing about them
+        backup.cities?.let { ids -> app.cities.replaceAll(ids.filter { zoneOrNull(it) != null }) }
     }
 
     private suspend fun snapshot() = BackupFile(
@@ -76,6 +80,7 @@ class BackupManager(private val app: ClockApplication, private val stamps: Share
         appVersionCode = BuildConfig.VERSION_CODE.toLong(),
         createdAt = Instant.now().toString(),
         settings = app.preferences.backupSettings(),
+        cities = app.cities.current(),
     )
 
     fun displayName(uri: Uri): String? = try {

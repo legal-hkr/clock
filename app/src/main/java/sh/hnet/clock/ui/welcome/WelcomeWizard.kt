@@ -322,6 +322,7 @@ private fun RestorePage(onBack: () -> Unit, onRestored: () -> Unit) {
 private fun BackupContentsCard() {
     Surface(shape = RoundedCornerShape(20.dp), color = MaterialTheme.colorScheme.surfaceContainer, modifier = Modifier.fillMaxWidth()) {
         Column(Modifier.padding(vertical = 6.dp)) {
+            ContentsRow(R.drawable.ic_public, stringResource(R.string.label_backup_item_cities), stringResource(R.string.desc_backup_item_cities))
             ContentsRow(R.drawable.ic_tune, stringResource(R.string.label_backup_item_settings), stringResource(R.string.desc_backup_item_settings))
         }
     }
@@ -342,11 +343,11 @@ private fun ContentsRow(@DrawableRes icon: Int, title: String, supporting: Strin
     }
 }
 
-/** The picked file: its name, the version that made it and when, and Change to pick another. */
+/** The picked file: its name, what it holds and when it was made, and Change to pick another. */
 @Composable
 private fun BackupFileCard(name: String, valid: BackupCheck.Valid, enabled: Boolean, onChange: () -> Unit) {
     val context = LocalContext.current
-    val summary = stringResource(R.string.label_backup_file_summary, valid.backup.appVersion, backupDate(context, valid.backup.createdAt))
+    val summary = stringResource(R.string.label_backup_file_summary, valid.cities, backupDate(context, valid.backup.createdAt))
     Surface(shape = RoundedCornerShape(20.dp), color = MaterialTheme.colorScheme.surfaceContainer, modifier = Modifier.fillMaxWidth()) {
         Row(
             verticalAlignment = Alignment.CenterVertically,

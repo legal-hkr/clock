@@ -18,7 +18,10 @@ enum class Tab(@param:StringRes val label: Int, @param:DrawableRes val icon: Int
 @Serializable
 sealed interface Screen : NavKey {
     @Serializable data object Home : Screen
+    /** The city search; with [home] it chooses the home time zone instead of adding a city. */
+    @Serializable data class AddCity(val home: Boolean = false) : Screen
     @Serializable data object Settings : Screen
+    @Serializable data object SettingsClock : Screen
     @Serializable data object SettingsLanguage : Screen
     @Serializable data object SettingsBackup : Screen
     @Serializable data object SettingsReset : Screen

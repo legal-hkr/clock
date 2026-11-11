@@ -198,7 +198,7 @@ fun rememberBackupFailures(): BackupFailures {
 
 /**
  * Restore's confirmation: destructive, with what the file brings and what it replaces; Replace in
- * the error color, last. The list grows with the stages (alarms, cities, timer presets).
+ * the error color, last. The list grows with the stages (alarms, timer presets).
  */
 @Composable
 private fun RestoreConfirmDialog(picked: BackupManager.Picked, onDismiss: () -> Unit, onConfirm: (BackupCheck.Valid) -> Unit) {
@@ -214,7 +214,11 @@ private fun RestoreConfirmDialog(picked: BackupManager.Picked, onDismiss: () -> 
     ) {
         Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
             Text(boldNamesResource(R.string.msg_restore_from, picked.fileName, backupDate(context, backup.createdAt), backup.appVersion))
-            listOf(stringResource(R.string.msg_restore_settings)).forEach { item ->
+            listOfNotNull(
+                stringResource(R.string.msg_restore_settings),
+                // Absent in a backup from before cities, which then stay as they are
+                valid.backup.cities?.let { stringResource(R.string.msg_restore_cities, it.size) },
+            ).forEach { item ->
                 Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                     Text("–")
                     Text(item)
