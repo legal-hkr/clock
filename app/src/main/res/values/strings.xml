@@ -60,6 +60,26 @@
     <string name="msg_no_city"><![CDATA[No city matches <b>%s</b>]]></string>
     <string name="msg_no_city_help">Clock knows the cities in the phone’s list of time zones. Try a larger city in the same time zone, or the country.</string>
 
+    <!-- Stopwatch -->
+    <string name="label_running">Running</string>
+    <string name="label_paused">Paused</string>
+    <string name="button_start">Start</string>
+    <string name="button_pause">Pause</string>
+    <string name="button_resume">Resume</string>
+    <string name="button_reset">Reset</string>
+    <string name="button_lap">Lap</string>
+    <plurals name="label_laps">
+        <item quantity="one">%d lap</item>
+        <item quantity="other">%d laps</item>
+    </plurals>
+    <string name="label_lap_n">Lap %d</string>
+    <string name="label_lap">Lap</string>
+    <string name="label_total">Total</string>
+    <string name="label_fastest">Fastest</string>
+    <string name="label_slowest">Slowest</string>
+    <string name="content_description_share_laps">Share laps</string>
+    <string name="msg_stopwatch_reset">Stopwatch reset</string>
+
     <!-- Settings -->
     <string name="title_settings">Settings</string>
     <string name="title_settings_group_app">App</string>

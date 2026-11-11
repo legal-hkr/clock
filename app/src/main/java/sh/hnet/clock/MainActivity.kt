@@ -1,6 +1,9 @@
 package sh.hnet.clock
 
+import android.content.Intent
 import android.os.Bundle
+import sh.hnet.clock.notify.Notifications
+import sh.hnet.clock.ui.DestinationRequest
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
@@ -23,10 +26,28 @@ import sh.hnet.clock.ui.welcome.FirstRun
 import sh.hnet.clock.ui.welcome.WelcomeWizard
 
 class MainActivity : ComponentActivity() {
+    /** The destination a notification asked for; the shell follows changes. */
+    private val request = mutableStateOf<DestinationRequest?>(null)
+
+    override fun onNewIntent(intent: Intent) {
+        super.onNewIntent(intent)
+        handle(intent)
+    }
+
+    private fun handle(intent: Intent?) {
+        val tab = intent?.getStringExtra(Notifications.EXTRA_DESTINATION)?.let { name -> Tab.entries.firstOrNull { it.name == name } } ?: return
+        request.value = DestinationRequest(tab, (request.value?.serial ?: 0) + 1)
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         enableEdgeToEdge()
         super.onCreate(savedInstanceState)
-        if (savedInstanceState == null) WhatsNew.recordStart(this)
+        if (savedInstanceState == null) {
+            WhatsNew.recordStart(this)
+            handle(intent)
+        }
+        // Channel names follow the app's language
+        Notifications.ensureChannels(this)
         setContent {
             ClockTheme {
                 val app = application as ClockApplication
@@ -46,7 +67,7 @@ class MainActivity : ComponentActivity() {
                         firstRun = false
                     })
                     start == null -> Box(Modifier.fillMaxSize().background(MaterialTheme.colorScheme.surface))
-                    else -> ClockApp(startTab = start, restored = restored)
+                    else -> ClockApp(startTab = start, restored = restored, request = request.value)
                 }
             }
         }

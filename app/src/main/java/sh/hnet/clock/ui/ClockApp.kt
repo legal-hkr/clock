@@ -18,7 +18,10 @@ import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.Badge
+import androidx.compose.material3.BadgedBox
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ShortNavigationBar
@@ -74,15 +77,19 @@ import sh.hnet.clock.ui.settings.WhatsNewScreen
 import sh.hnet.clock.ui.stopwatch.StopwatchScreen
 import sh.hnet.clock.ui.timer.TimerScreen
 
+/** A destination asked for from outside; [serial] tells two requests for the same one apart. */
+data class DestinationRequest(val tab: Tab, val serial: Int)
+
 /**
  * The app's shell (SPEC §3.1): one back stack whose root holds the four destinations with the
  * navigation bar; Settings and its pages open over it, with Back and without the bar.
  *
  * @param startTab The destination to open on (the one used last)
  * @param restored True when the first-run wizard ended with a restore: says so once
+ * @param request A destination asked for from outside (a tapped notification): shown over whatever was open
  */
 @Composable
-fun ClockApp(startTab: Tab, restored: Boolean = false) {
+fun ClockApp(startTab: Tab, restored: Boolean = false, request: DestinationRequest? = null) {
     val context = LocalContext.current
     val app = context.applicationContext as ClockApplication
     val scope = rememberCoroutineScope()
@@ -98,6 +105,14 @@ fun ClockApp(startTab: Tab, restored: Boolean = false) {
         tab = next
         scope.launch { app.preferences.setLastDestination(next) }
     }
+
+    // A notification or widget opens its own destination, whatever was used last (§3.1.4)
+    LaunchedEffect(request) {
+        val wanted = request?.tab ?: return@LaunchedEffect
+        while (stack.size > 1) stack.removeAt(stack.lastIndex)
+        select(wanted)
+    }
+    val stopwatch by app.stopwatch.state.collectAsStateWithLifecycle()
 
     val snackbars = remember { SnackbarHostState() }
     val restoredText = stringResource(R.string.msg_restored)
@@ -174,7 +189,7 @@ fun ClockApp(startTab: Tab, restored: Boolean = false) {
                                     Tab.ALARMS -> AlarmsScreen(openSettings)
                                     Tab.CLOCK -> ClockScreen(clock, openSettings, onAddCity = { open(Screen.AddCity()) }, snackbars = snackbars, messageScope = scope)
                                     Tab.TIMER -> TimerScreen(openSettings)
-                                    Tab.STOPWATCH -> StopwatchScreen(openSettings)
+                                    Tab.STOPWATCH -> StopwatchScreen(openSettings, snackbars = snackbars, messageScope = scope)
                                 }
                             }
                             }
@@ -184,7 +199,13 @@ fun ClockApp(startTab: Tab, restored: Boolean = false) {
                                     ShortNavigationBarItem(
                                         selected = selected,
                                         onClick = { select(item) },
-                                        icon = { Icon(painterResource(if (selected) item.selectedIcon else item.icon), contentDescription = null) },
+                                        icon = {
+                                            // A dot while the stopwatch runs and another destination shows (§3.1.5)
+                                            val dot = item == Tab.STOPWATCH && stopwatch.running && !selected
+                                            BadgedBox(badge = { if (dot) Badge() }) {
+                                                Icon(painterResource(if (selected) item.selectedIcon else item.icon), contentDescription = null)
+                                            }
+                                        },
                                         label = { Text(stringResource(item.label), maxLines = 1) },
                                     )
                                 }

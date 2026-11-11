@@ -2,7 +2,11 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
 
     <!-- Privacy: no INTERNET, no storage, media or location permission. Permissions for alarms
-         (exact alarms, notifications, full-screen intent, boot) arrive with the stage that needs them. -->
+         (exact alarms, full-screen intent) arrive with the stage that needs them. -->
+    <!-- The running stopwatch's notification; asked for in context, and the app works without it. -->
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+    <!-- Notifications of what is still running are put back after a restart of the phone. -->
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
 
     <application
         android:name=".ClockApplication"
@@ -23,6 +27,20 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
+        <!-- The stopwatch notification's buttons; reached only by the app's own pending intents. -->
+        <receiver
+            android:name=".stopwatch.StopwatchReceiver"
+            android:exported="false" />
+
+        <receiver
+            android:name=".notify.BootReceiver"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="android.intent.action.BOOT_COMPLETED" />
+                <action android:name="android.intent.action.MY_PACKAGE_REPLACED" />
+            </intent-filter>
+        </receiver>
     </application>
 
 </manifest>
