@@ -12,7 +12,10 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import sh.hnet.clock.BuildConfig
 import sh.hnet.clock.ClockApplication
 import sh.hnet.clock.R
+import androidx.compose.ui.res.pluralStringResource
+import sh.hnet.clock.reliability.Ringing
 import sh.hnet.clock.ui.components.SettingsGroup
+import sh.hnet.clock.ui.components.rememberReliability
 import sh.hnet.clock.ui.components.SettingsNavigationRow
 import sh.hnet.clock.ui.components.SettingsPage
 
@@ -28,6 +31,7 @@ fun SettingsRootScreen(
     onOpenClock: () -> Unit,
     onOpenAlarms: () -> Unit,
     onOpenTimers: () -> Unit,
+    onOpenReliability: () -> Unit,
     onOpenLanguage: () -> Unit,
     onOpenBackup: () -> Unit,
     onOpenReset: () -> Unit,
@@ -54,6 +58,17 @@ fun SettingsRootScreen(
                 val timerSound by app.preferences.timerSound.collectAsStateWithLifecycle(SoundChoice.Default)
                 val summary = stringResource(R.string.label_sound_value, soundName(timerSound))
                 SettingsNavigationRow(shapes, R.drawable.ic_hourglass_empty, stringResource(R.string.title_settings_timers), summary, onClick = onOpenTimers)
+            }
+            row { shapes ->
+                // Everything that rings: any enabled alarm with a sound, or the timers' sound
+                val alarms by app.alarms.alarms.collectAsStateWithLifecycle()
+                val timerSound by app.preferences.timerSound.collectAsStateWithLifecycle(SoundChoice.Default)
+                val count = rememberReliability().checks.problems(Ringing.ANY, soundWanted(alarms, timerSound)).size
+                SettingsNavigationRow(
+                    shapes, R.drawable.ic_verified_user, stringResource(R.string.title_reliability),
+                    if (count == 0) stringResource(R.string.msg_reliability_ok) else pluralStringResource(R.plurals.label_problem_count, count, count),
+                    badge = if (count > 0) count.toString() else null, error = count > 0, onClick = onOpenReliability,
+                )
             }
         }
         SettingsGroup(stringResource(R.string.title_settings_group_clock)) {

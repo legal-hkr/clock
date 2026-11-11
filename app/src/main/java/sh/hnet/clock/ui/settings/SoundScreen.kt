@@ -49,6 +49,7 @@ import sh.hnet.clock.ring.Sounds
 import sh.hnet.clock.ring.SystemSound
 import sh.hnet.clock.ui.components.LazySettingsPage
 import sh.hnet.clock.ui.components.RowIcon
+import sh.hnet.clock.ui.components.boldNamesResource
 import sh.hnet.clock.ui.components.SETTINGS_GROUP_GAP
 import sh.hnet.clock.ui.components.SETTINGS_ROW_GAP
 import sh.hnet.clock.ui.components.SettingsGroupHeader
@@ -67,6 +68,9 @@ fun SoundScreen(title: String, current: SoundChoice, onChoose: (SoundChoice) -> 
     val context = LocalContext.current
     val sounds by produceState<List<SystemSound>?>(null) { value = withContext(Dispatchers.IO) { Sounds.list(context) } }
     val defaultTitle by produceState<String?>(null) { value = withContext(Dispatchers.IO) { Sounds.defaultTitle(context) } }
+    // A sound that is gone rings as the phone's default, and shows as it until another is chosen (§3.3.5)
+    val gone = (current as? SoundChoice.Sound)?.takeIf { Sounds.gone(it, sounds?.takeIf { list -> list.isNotEmpty() }?.associate { sound -> sound.uri to sound.title }) }
+    val shown = if (gone != null) SoundChoice.Default else current
     val ringer = remember { Ringer(context) }
     // What is being played: an encoded choice, null when quiet
     var playing by remember { mutableStateOf<String?>(null) }
@@ -95,16 +99,26 @@ fun SoundScreen(title: String, current: SoundChoice, onChoose: (SoundChoice) -> 
     }
 
     LazySettingsPage(title = title, onBack = onBack, state = rememberLazyListState()) {
+        gone?.let { sound ->
+            item(key = "gone") {
+                Surface(shape = RoundedCornerShape(20.dp), color = MaterialTheme.colorScheme.surfaceContainer, modifier = Modifier.fillMaxWidth().padding(bottom = SETTINGS_GROUP_GAP)) {
+                    Row(Modifier.padding(16.dp), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                        Icon(painterResource(R.drawable.ic_music_off), contentDescription = null, tint = MaterialTheme.colorScheme.primary)
+                        Text(boldNamesResource(R.string.msg_sound_gone_card, sound.title), style = MaterialTheme.typography.bodyMedium)
+                    }
+                }
+            }
+        }
         item(key = "volume") { AlarmVolume(Modifier.padding(bottom = SETTINGS_GROUP_GAP)) }
         item(key = "fixed") {
             Column(Modifier.selectableGroup(), verticalArrangement = Arrangement.spacedBy(SETTINGS_ROW_GAP)) {
                 SoundRow(
                     groupShapes(0, 2), stringResource(R.string.label_phone_default), defaultTitle,
-                    selected = current == SoundChoice.Default, playing = playing == SoundChoice.Default.encode(),
+                    selected = shown == SoundChoice.Default, playing = playing == SoundChoice.Default.encode(),
                 ) { choose(SoundChoice.Default) }
                 SoundRow(
                     groupShapes(1, 2), stringResource(R.string.label_silent), stringResource(R.string.desc_silent),
-                    selected = current == SoundChoice.Silent, playing = false,
+                    selected = shown == SoundChoice.Silent, playing = false,
                 ) { choose(SoundChoice.Silent) }
             }
         }
@@ -118,12 +132,31 @@ fun SoundScreen(title: String, current: SoundChoice, onChoose: (SoundChoice) -> 
                 Column(Modifier.padding(bottom = if (position < list.lastIndex) SETTINGS_ROW_GAP else 0.dp)) {
                     SoundRow(
                         groupShapes(position, list.size), sound.title, null,
-                        selected = (current as? SoundChoice.Sound)?.uri == sound.uri, playing = playing == sound.uri,
+                        selected = (shown as? SoundChoice.Sound)?.uri == sound.uri, playing = playing == sound.uri,
                     ) { choose(choice) }
                 }
             }
         }
     }
+}
+
+/** The phone's alarm sounds as address to title; null until read, and when the list can't be read – then nothing is called gone. */
+@Composable
+fun rememberSystemSounds(): Map<String, String>? {
+    val context = LocalContext.current
+    val sounds by produceState<Map<String, String>?>(null) {
+        value = withContext(Dispatchers.IO) { Sounds.list(context) }.associate { it.uri to it.title }.ifEmpty { null }
+    }
+    return sounds
+}
+
+/** The note for a sound that is gone (§3.2.8 #7): "Argon is gone. Rings with the phone's default (Helium)."; null for one that is there. */
+@Composable
+fun soundGoneText(choice: SoundChoice, sounds: Map<String, String>?): String? {
+    if (choice !is SoundChoice.Sound || !Sounds.gone(choice, sounds)) return null
+    val context = LocalContext.current
+    val defaultTitle by produceState<String?>(null) { value = withContext(Dispatchers.IO) { Sounds.defaultTitle(context) } }
+    return defaultTitle?.let { stringResource(R.string.msg_sound_gone, choice.title, it) } ?: stringResource(R.string.msg_sound_gone_unnamed, choice.title)
 }
 
 /** A choice of the list: radio button, the sound's name, and "Playing" with the equalizer mark while it is heard. */

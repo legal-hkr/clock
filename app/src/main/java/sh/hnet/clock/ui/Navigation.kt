@@ -25,6 +25,7 @@ sealed interface Screen : NavKey {
     @Serializable data object Settings : Screen
     @Serializable data object SettingsAlarms : Screen
     @Serializable data object SettingsNewAlarmSound : Screen
+    @Serializable data object SettingsReliability : Screen
     @Serializable data object SettingsClock : Screen
     @Serializable data object SettingsTimers : Screen
     @Serializable data object SettingsTimerSound : Screen

@@ -55,6 +55,27 @@ object Sounds {
         return found.distinctBy { it.uri }.sortedBy { it.title.lowercase() }
     }
 
+    /**
+     * Where a stored sound is on this phone (SPEC §3.9.5: sounds are kept by name). A backup made
+     * on another phone carries that phone's addresses; the sound of the same name here takes its
+     * place. Without one the address stays as it is, and the sound is reported as gone.
+     */
+    fun here(sound: String?, title: String?, sounds: List<SystemSound>): String? {
+        if (SoundChoice.decode(sound, title) !is SoundChoice.Sound || title.isNullOrEmpty()) return sound
+        return sounds.firstOrNull { it.uri == sound && it.title == title }?.uri ?: sounds.firstOrNull { it.title == title }?.uri ?: sound
+    }
+
+    /**
+     * Whether [choice] is a sound this phone no longer has (§3.3.5): its address is unknown, or
+     * belongs to a sound of another name. [sounds] maps addresses to titles; with null – the list
+     * not read yet, or unreadable – nothing is called gone.
+     */
+    fun gone(choice: SoundChoice, sounds: Map<String, String>?): Boolean {
+        if (choice !is SoundChoice.Sound || sounds == null) return false
+        val title = sounds[choice.uri] ?: return true
+        return choice.title.isNotEmpty() && title != choice.title
+    }
+
     /** The phone's default alarm sound; null on a phone that has none set. */
     fun defaultUri(context: Context): Uri? =
         RingtoneManager.getActualDefaultRingtoneUri(context, RingtoneManager.TYPE_ALARM) ?: RingtoneManager.getDefaultUri(RingtoneManager.TYPE_ALARM)

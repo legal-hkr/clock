@@ -9,6 +9,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.withContext
+import sh.hnet.clock.ring.Sounds
 import sh.hnet.clock.BuildConfig
 import sh.hnet.clock.ClockApplication
 import java.io.IOException
@@ -76,7 +77,10 @@ class BackupManager(private val app: ClockApplication, private val stamps: Share
 
     /** Replaces everything a backup holds by the file's. */
     suspend fun restore(backup: BackupFile) = withContext(Dispatchers.IO) {
-        app.preferences.restoreSettings(backup.settings, ZoneId.systemDefault().id)
+        // Sounds are kept by name: one of the same name on this phone takes the place of the other phone's address
+        val sounds = Sounds.list(app)
+        val timers = backup.settings.timers
+        app.preferences.restoreSettings(backup.settings.copy(timers = timers?.copy(sound = Sounds.here(timers.sound, timers.soundTitle, sounds))), ZoneId.systemDefault().id)
         // Cities this phone has no zone for are left out; a backup from before cities says nothing about them
         withContext(Dispatchers.Main) {
             // Alarm settings live with the alarms (readable before the first unlock), not in the settings store
@@ -88,7 +92,7 @@ class BackupManager(private val app: ClockApplication, private val stamps: Share
                     silenceAfterMinutes = stored?.silenceAfterMinutes?.takeIf { it in AlarmSettings.SILENCE_CHOICES } ?: defaults.silenceAfterMinutes,
                     gradualSeconds = stored?.gradualSeconds?.takeIf { it in GRADUAL_CHOICES } ?: defaults.gradualSeconds,
                     volumeButtons = VolumeButtons.entries.firstOrNull { it.name == stored?.volumeButtons } ?: defaults.volumeButtons,
-                    sound = stored?.sound ?: defaults.sound,
+                    sound = Sounds.here(stored?.sound, stored?.soundTitle, sounds) ?: defaults.sound,
                     soundTitle = stored?.soundTitle,
                     vibration = stored?.vibration ?: defaults.vibration,
                     upcomingMinutes = stored?.upcomingMinutes?.takeIf { it in AlarmSettings.UPCOMING_CHOICES } ?: defaults.upcomingMinutes,
@@ -99,7 +103,7 @@ class BackupManager(private val app: ClockApplication, private val stamps: Share
                     alarms.filter { it.hour in 0..23 && it.minute in 0..59 }.map { stored ->
                         Alarm(
                             id = 0, hour = stored.hour, minute = stored.minute, days = stored.days.filter { it in 1..7 }.toSet(), date = stored.date,
-                            label = stored.label.trim().take(Alarm.MAX_LABEL), sound = stored.sound ?: "default", soundTitle = stored.soundTitle,
+                            label = stored.label.trim().take(Alarm.MAX_LABEL), sound = Sounds.here(stored.sound, stored.soundTitle, sounds) ?: "default", soundTitle = stored.soundTitle,
                             vibration = stored.vibration, snooze = stored.snooze, enabled = stored.enabled,
                         )
                     },

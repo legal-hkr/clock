@@ -78,7 +78,12 @@ import sh.hnet.clock.timer.TimerFormat
 import sh.hnet.clock.timer.TimerInput
 import sh.hnet.clock.timer.TimerPreset
 import sh.hnet.clock.timer.shown
+import sh.hnet.clock.reliability.Ringing
+import sh.hnet.clock.ring.SoundChoice
 import sh.hnet.clock.ui.components.DestinationScaffold
+import sh.hnet.clock.ui.components.ProblemCard
+import sh.hnet.clock.ui.components.rememberProblemFix
+import sh.hnet.clock.ui.components.rememberReliability
 import sh.hnet.clock.ui.components.TextDialog
 import sh.hnet.clock.ui.components.TooltipIconButton
 import sh.hnet.clock.ui.components.rememberNotificationAsk
@@ -105,7 +110,17 @@ fun TimerScreen(onOpenSettings: () -> Unit, onEditPresets: () -> Unit, snackbars
         onPauseOrDispose { controller.pageVisible = false }
     }
 
-    val askNotifications = rememberNotificationAsk { controller.refresh() }
+    // What could keep a timer from ringing (§3.2.8), shown while one runs or is being set
+    val reliability = rememberReliability()
+    val timerSound by (context.applicationContext as ClockApplication).preferences.timerSound.collectAsStateWithLifecycle(SoundChoice.Default)
+    val problem = reliability.checks.problems(Ringing.TIMERS, soundWanted = timerSound != SoundChoice.Silent).firstOrNull()
+        ?.takeIf { shown.isEmpty() || timers.any { it.running && !it.ended(now) } }
+    val fix = rememberProblemFix(Ringing.TIMERS, reliability.refresh)
+
+    val askNotifications = rememberNotificationAsk {
+        controller.refresh()
+        reliability.refresh()
+    }
     val start: (Long, String) -> Unit = { duration, label ->
         controller.start(duration, label)
         askNotifications(false)
@@ -141,6 +156,7 @@ fun TimerScreen(onOpenSettings: () -> Unit, onEditPresets: () -> Unit, snackbars
     DestinationScaffold(stringResource(R.string.label_nav_timer), onOpenSettings, subtitle = subtitle) {
         val single = shown.singleOrNull()?.takeIf { !it.ended(now) }
         Column(Modifier.fillMaxSize()) {
+            problem?.let { ProblemCard(it, Ringing.TIMERS, { fix(it) }, Modifier.padding(start = 16.dp, end = 16.dp, bottom = 8.dp)) }
             when {
                 shown.isEmpty() -> {
                     // No timers: the input is the page, and its own empty state (§3.6.3)

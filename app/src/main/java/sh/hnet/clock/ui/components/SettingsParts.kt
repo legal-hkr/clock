@@ -233,7 +233,10 @@ fun RowIcon(@DrawableRes icon: Int, error: Boolean = false) {
     }
 }
 
-/** A row opening a page; [badge] (e.g. "New") before the chevron, as in ComfyChair. */
+/**
+ * A row opening a page; [badge] (e.g. "New") before the chevron, as in ComfyChair. With [error]
+ * the row reports a problem: its icon box, supporting line and badge take the error roles.
+ */
 @Composable
 fun SettingsNavigationRow(
     shapes: ListItemShapes,
@@ -241,24 +244,28 @@ fun SettingsNavigationRow(
     title: String,
     supporting: String? = null,
     badge: String? = null,
+    error: Boolean = false,
     onClick: () -> Unit,
 ) {
     SegmentedListItem(
         onClick = onClick,
         shapes = shapes,
         colors = settingsRowColors(),
-        leadingContent = { RowIcon(icon) },
+        leadingContent = { RowIcon(icon, error) },
         trailingContent = {
             Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 badge?.let {
-                    Badge(containerColor = MaterialTheme.colorScheme.primary, contentColor = MaterialTheme.colorScheme.onPrimary) {
+                    Badge(
+                        containerColor = if (error) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.primary,
+                        contentColor = if (error) MaterialTheme.colorScheme.onError else MaterialTheme.colorScheme.onPrimary,
+                    ) {
                         Text(it, modifier = Modifier.padding(horizontal = 4.dp))
                     }
                 }
                 Icon(painterResource(R.drawable.ic_chevron_right), contentDescription = null)
             }
         },
-        supportingContent = supporting?.let { { Text(it) } },
+        supportingContent = supporting?.let { { Text(it, color = if (error) MaterialTheme.colorScheme.error else Color.Unspecified) } },
     ) {
         Text(title)
     }

@@ -345,4 +345,55 @@
         <item quantity="other">Wersja %1$s, %2$d zmiany</item>
     </plurals>
     <string name="whats_new_updated_snackbar">Zaktualizowano do wersji %1$s</string>
+
+    <!-- Reliability -->
+    <string name="title_problem_notifications">Powiadomienia są wyłączone</string>
+    <string name="msg_problem_notifications">Bez nich Zegar nie zadzwoni ani nie pokaże alarmu.</string>
+    <string name="msg_problem_notifications_timer">Bez nich Zegar nie da znać, że minutnik się skończył.</string>
+    <string name="button_problem_notifications">Zezwól na powiadomienia</string>
+    <string name="title_problem_full_screen">Alarmy na pełnym ekranie są wyłączone</string>
+    <string name="msg_problem_full_screen">Na zablokowanym telefonie alarm pokaże się tylko jako małe powiadomienie.</string>
+    <string name="msg_problem_full_screen_timer">Na zablokowanym telefonie koniec minutnika pokaże się tylko jako małe powiadomienie.</string>
+    <string name="button_problem_full_screen">Zezwól na pełny ekran</string>
+    <string name="title_problem_dnd">Tryb Nie przeszkadzać wycisza alarmy</string>
+    <string name="msg_problem_dnd">Włączona jest całkowita cisza, więc alarmy i minutniki nie wydadzą dźwięku.</string>
+    <string name="button_problem_dnd">Otwórz Nie przeszkadzać</string>
+    <string name="title_problem_battery">Użycie baterii jest ograniczone</string>
+    <string name="msg_problem_battery">Telefon może zatrzymać Zegar, zanim alarm zadzwoni.</string>
+    <string name="msg_problem_battery_timer">Telefon może zatrzymać Zegar, zanim minutnik się skończy.</string>
+    <string name="button_problem_battery">Otwórz ustawienia aplikacji</string>
+    <string name="title_problem_volume">Głośność alarmów jest na zerze</string>
+    <string name="msg_problem_volume">Alarmy i minutniki zadzwonią bez dźwięku.</string>
+    <string name="button_problem_volume">Podgłośnij</string>
+    <string name="msg_alarms_cant_ring">Alarmy nie zadzwonią</string>
+    <string name="msg_alarms_may_not_ring">Alarmy mogą nie zadzwonić</string>
+    <string name="title_reliability">Niezawodność alarmów</string>
+    <string name="msg_reliability_ok">Wszystko jest w porządku</string>
+    <plurals name="msg_reliability_problems">
+        <item quantity="one">%d rzecz może zatrzymać alarmy</item>
+        <item quantity="few">%d rzeczy mogą zatrzymać alarmy</item>
+        <item quantity="many">%d rzeczy może zatrzymać alarmy</item>
+        <item quantity="other">%d rzeczy może zatrzymać alarmy</item>
+    </plurals>
+    <plurals name="label_problem_count">
+        <item quantity="one">%d problem</item>
+        <item quantity="few">%d problemy</item>
+        <item quantity="many">%d problemów</item>
+        <item quantity="other">%d problemu</item>
+    </plurals>
+    <string name="label_check_notifications">Powiadomienia</string>
+    <string name="label_check_full_screen">Alarmy na pełnym ekranie</string>
+    <string name="label_check_dnd">Nie przeszkadzać</string>
+    <string name="label_check_battery">Użycie baterii</string>
+    <string name="label_allowed">Dozwolone</string>
+    <string name="error_check_notifications">Wyłączone. Alarmy i minutniki nie zadzwonią.</string>
+    <string name="error_check_full_screen">Wyłączone. Na zablokowanym telefonie alarm pokaże się tylko jako małe powiadomienie.</string>
+    <string name="label_dnd_ok">Przepuszcza alarmy</string>
+    <string name="error_check_dnd">Całkowita cisza. Alarmy nie wydają dźwięku.</string>
+    <string name="label_battery_ok">Bez ograniczeń</string>
+    <string name="error_check_battery">Ograniczone. Telefon może zatrzymać Zegar.</string>
+    <string name="msg_sound_gone">Dźwięku %1$s nie ma już w telefonie. Zadzwoni domyślny (%2$s).</string>
+    <string name="msg_sound_gone_unnamed">Dźwięku %1$s nie ma już w telefonie. Zadzwoni domyślny.</string>
+    <string name="msg_sound_gone_card"><![CDATA[Dźwięku <b>%s</b> nie ma już w telefonie. Do czasu wybrania innego dzwoni domyślny dźwięk telefonu.]]></string>
+    <string name="button_choose">Wybierz</string>
 </resources>

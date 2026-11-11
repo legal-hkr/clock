@@ -75,6 +75,7 @@ import sh.hnet.clock.ui.settings.AppLicenseScreen
 import sh.hnet.clock.ui.settings.BackupScreen
 import sh.hnet.clock.ui.settings.LanguageScreen
 import sh.hnet.clock.ui.settings.LicensesScreen
+import sh.hnet.clock.ui.settings.ReliabilityScreen
 import sh.hnet.clock.ui.settings.ResetScreen
 import sh.hnet.clock.ui.settings.SettingsRootScreen
 import sh.hnet.clock.ui.settings.WhatsNewScreen
@@ -197,7 +198,7 @@ fun ClockApp(startTab: Tab, restored: Boolean = false, request: DestinationReque
                                 label = "destination",
                             ) { current ->
                                 when (current) {
-                                    Tab.ALARMS -> AlarmsScreen(openSettings, onOpenAlarm = { open(Screen.Alarm(it)) }, snackbars = snackbars, messageScope = scope)
+                                    Tab.ALARMS -> AlarmsScreen(openSettings, onOpenAlarm = { open(Screen.Alarm(it)) }, onOpenSound = { open(Screen.AlarmSound(it)) }, snackbars = snackbars, messageScope = scope)
                                     Tab.CLOCK -> ClockScreen(clock, openSettings, onAddCity = { open(Screen.AddCity()) }, onOpenAlarms = { select(Tab.ALARMS) }, snackbars = snackbars, messageScope = scope)
                                     Tab.TIMER -> TimerScreen(openSettings, onEditPresets = { open(Screen.TimerPresets) }, snackbars = snackbars, messageScope = scope)
                                     Tab.STOPWATCH -> StopwatchScreen(openSettings, snackbars = snackbars, messageScope = scope)
@@ -234,6 +235,7 @@ fun ClockApp(startTab: Tab, restored: Boolean = false, request: DestinationReque
                             onOpenClock = { open(Screen.SettingsClock) },
                             onOpenAlarms = { open(Screen.SettingsAlarms) },
                             onOpenTimers = { open(Screen.SettingsTimers) },
+                            onOpenReliability = { open(Screen.SettingsReliability) },
                             onOpenLanguage = { open(Screen.SettingsLanguage) },
                             onOpenBackup = { open(Screen.SettingsBackup) },
                             onOpenReset = { open(Screen.SettingsReset) },
@@ -245,6 +247,7 @@ fun ClockApp(startTab: Tab, restored: Boolean = false, request: DestinationReque
                     }
                     entry<Screen.AlarmSound> { key -> AlarmSoundScreen(key.id, onBack = back) }
                     entry<Screen.SettingsAlarms> { AlarmSettingsScreen(onBack = back, onOpenSound = { open(Screen.SettingsNewAlarmSound) }) }
+                    entry<Screen.SettingsReliability> { ReliabilityScreen(onBack = back) }
                     entry<Screen.SettingsNewAlarmSound> { NewAlarmSoundScreen(onBack = back) }
                     entry<Screen.SettingsTimers> {
                         TimerSettingsScreen(onBack = back, onOpenSound = { open(Screen.SettingsTimerSound) }, onOpenPresets = { open(Screen.TimerPresets) })

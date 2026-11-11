@@ -57,6 +57,15 @@ import sh.hnet.clock.R
 import sh.hnet.clock.alarm.Alarm
 import sh.hnet.clock.alarm.nextPending
 import sh.hnet.clock.alarm.shown
+import sh.hnet.clock.reliability.Problem
+import sh.hnet.clock.reliability.Reliability
+import sh.hnet.clock.reliability.Ringing
+import sh.hnet.clock.ring.SoundChoice
+import sh.hnet.clock.ui.components.ProblemCard
+import sh.hnet.clock.ui.components.rememberProblemFix
+import sh.hnet.clock.ui.components.rememberReliability
+import sh.hnet.clock.ui.settings.rememberSystemSounds
+import sh.hnet.clock.ui.settings.soundGoneText
 import sh.hnet.clock.ui.components.DestinationScaffold
 import sh.hnet.clock.ui.components.EmptyState
 import sh.hnet.clock.ui.components.FAB_CLEARANCE
@@ -77,8 +86,9 @@ import java.time.ZoneId
  * time and the alarm exists from that tap on (§3.2.2).
  */
 @Composable
-fun AlarmsScreen(onOpenSettings: () -> Unit, onOpenAlarm: (Long) -> Unit, snackbars: SnackbarHostState, messageScope: CoroutineScope) {
-    val controller = (LocalContext.current.applicationContext as ClockApplication).alarms
+fun AlarmsScreen(onOpenSettings: () -> Unit, onOpenAlarm: (Long) -> Unit, onOpenSound: (Long) -> Unit, snackbars: SnackbarHostState, messageScope: CoroutineScope) {
+    val context = LocalContext.current
+    val controller = (context.applicationContext as ClockApplication).alarms
     val resources = LocalResources.current
     val formats = rememberTimeFormats()
     val alarms by controller.alarms.collectAsStateWithLifecycle()
@@ -90,11 +100,22 @@ fun AlarmsScreen(onOpenSettings: () -> Unit, onOpenAlarm: (Long) -> Unit, snackb
     // Seen: the "missed" notes have done their work once the page is left (§3.4.6)
     LifecycleResumeEffect(controller) { onPauseOrDispose { controller.markSeen() } }
 
-    val askNotifications = rememberNotificationAsk { controller.refresh() }
+    // What could keep the alarms that are on from ringing (§3.2.8): the first of them, as the card on top
+    val reliability = rememberReliability()
+    val soundWanted = alarms.any { it.enabled && SoundChoice.decode(it.sound, it.soundTitle) != SoundChoice.Silent }
+    val problem = reliability.checks.problems(Ringing.ALARMS, soundWanted).firstOrNull()?.takeIf { alarms.any { it.enabled } }
+    val fix = rememberProblemFix(Ringing.ALARMS, reliability.refresh)
+    val sounds = rememberSystemSounds()
+
+    val askNotifications = rememberNotificationAsk {
+        controller.refresh()
+        reliability.refresh()
+    }
     /** After an alarm is switched on or saved: when it rings, said once (§3.2.1), and the permission it needs asked for. */
     val announce: (Long) -> Unit = { id ->
         askNotifications(false)
-        controller.alarms.value.firstOrNull { it.id == id }?.pending(zone)?.let { moment ->
+        // Not while something is wrong: "Rings in 7 h" next to "Alarms can't ring" would be a promise
+        if (Reliability.read(context).problems(Ringing.ALARMS, soundWanted = true).isEmpty()) controller.alarms.value.firstOrNull { it.id == id }?.pending(zone)?.let { moment ->
             messageScope.launch {
                 snackbars.currentSnackbarData?.dismiss()
                 snackbars.showSnackbar(ringsInText(resources, moment - System.currentTimeMillis()), duration = SnackbarDuration.Short)
@@ -109,11 +130,13 @@ fun AlarmsScreen(onOpenSettings: () -> Unit, onOpenAlarm: (Long) -> Unit, snackb
     val pending = alarms.nextPending(zone)
     val subtitle = when {
         alarms.isEmpty() -> null
+        problem == Problem.NOTIFICATIONS -> stringResource(R.string.msg_alarms_cant_ring)
+        problem != null -> stringResource(R.string.msg_alarms_may_not_ring)
         snoozed != null -> stringResource(R.string.msg_snoozed_until, formats.time(Instant.ofEpochMilli(snoozed), zone))
         pending != null -> ringsInText(pending.second - now.toEpochMilli())
         else -> stringResource(R.string.label_no_alarms_on)
     }
-    DestinationScaffold(stringResource(R.string.label_nav_alarms), onOpenSettings, subtitle = subtitle) {
+    DestinationScaffold(stringResource(R.string.label_nav_alarms), onOpenSettings, subtitle = subtitle, subtitleColor = if (problem != null) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.onSurfaceVariant) {
         if (shown.isEmpty()) {
             EmptyState(R.drawable.ic_alarm, stringResource(R.string.msg_empty_alarms), Modifier.padding(bottom = FAB_CLEARANCE))
         } else {
@@ -122,12 +145,15 @@ fun AlarmsScreen(onOpenSettings: () -> Unit, onOpenAlarm: (Long) -> Unit, snackb
                 contentPadding = PaddingValues(start = 16.dp, end = 16.dp, top = 8.dp, bottom = FAB_CLEARANCE),
                 verticalArrangement = Arrangement.spacedBy(2.dp),
             ) {
+                problem?.let { item(key = "problem", contentType = "problem") { ProblemCard(it, Ringing.ALARMS, { fix(it) }, Modifier.animateItem().padding(bottom = 14.dp)) } }
                 itemsIndexed(shown, key = { _, alarm -> alarm.id }, contentType = { _, _ -> "alarm" }) { position, alarm ->
                     val shape = groupShapes(position, shown.size).shape
                     Column(Modifier.animateItem()) {
                         SwipeToRemove(shape, onRemove = { delete(alarm) }) {
                             AlarmRow(
                                 alarm, formats, now, zone, shape,
+                                soundGone = soundGoneText(SoundChoice.decode(alarm.sound, alarm.soundTitle), sounds),
+                                onChooseSound = { onOpenSound(alarm.id) },
                                 onOpen = { onOpenAlarm(alarm.id) },
                                 onSwitch = { on ->
                                     controller.setEnabled(alarm.id, on)
@@ -182,7 +208,7 @@ fun <T> deleteWithUndo(removed: T?, message: String, undo: String, snackbars: Sn
  */
 @Composable
 private fun AlarmRow(
-    alarm: Alarm, formats: TimeFormats, now: Instant, zone: ZoneId, shape: Shape,
+    alarm: Alarm, formats: TimeFormats, now: Instant, zone: ZoneId, shape: Shape, soundGone: String?, onChooseSound: () -> Unit,
     onOpen: () -> Unit, onSwitch: (Boolean) -> Unit, onDismissSnooze: () -> Unit, onUndoSkip: () -> Unit, onDelete: () -> Unit,
 ) {
     val resources = LocalResources.current
@@ -212,15 +238,20 @@ private fun AlarmRow(
                     },
                 )
             }
-            alarm.snoozedUntil?.let { until ->
-                Note(R.drawable.ic_snooze, stringResource(R.string.msg_snoozed_until, formats.time(Instant.ofEpochMilli(until), zone)), stringResource(R.string.button_dismiss), onDismissSnooze)
+            // At most two notes, the most pressing first (§5.1): snoozed, missed, skipped, sound
+            val notes = buildList<@Composable () -> Unit> {
+                alarm.snoozedUntil?.let { until ->
+                    add { Note(R.drawable.ic_snooze, stringResource(R.string.msg_snoozed_until, formats.time(Instant.ofEpochMilli(until), zone)), stringResource(R.string.button_dismiss), onDismissSnooze) }
+                }
+                alarm.missed?.let { missed ->
+                    add { Note(R.drawable.ic_notifications_paused, stringResource(R.string.msg_missed, whenText(resources, formats, missed, now, zone)), null) {} }
+                }
+                alarm.skipped?.let { skipped ->
+                    add { Note(R.drawable.ic_event_busy, stringResource(R.string.msg_skipping, formats.shortDate(Instant.ofEpochMilli(skipped), zone, now)), stringResource(R.string.button_undo), onUndoSkip) }
+                }
+                soundGone?.let { text -> add { Note(R.drawable.ic_music_off, text, stringResource(R.string.button_choose), onChooseSound) } }
             }
-            alarm.missed?.let { missed ->
-                Note(R.drawable.ic_notifications_paused, stringResource(R.string.msg_missed, whenText(resources, formats, missed, now, zone)), null) {}
-            }
-            alarm.skipped?.let { skipped ->
-                Note(R.drawable.ic_event_busy, stringResource(R.string.msg_skipping, formats.shortDate(Instant.ofEpochMilli(skipped), zone, now)), stringResource(R.string.button_undo), onUndoSkip)
-            }
+            notes.take(2).forEach { it() }
         }
     }
 }

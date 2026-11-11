@@ -48,6 +48,12 @@ import androidx.core.text.htmlEncode
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import kotlinx.coroutines.CoroutineScope
 import sh.hnet.clock.ClockApplication
+import sh.hnet.clock.reliability.Ringing
+import sh.hnet.clock.ui.components.ProblemCard
+import sh.hnet.clock.ui.components.rememberProblemFix
+import sh.hnet.clock.ui.components.rememberReliability
+import sh.hnet.clock.ui.settings.rememberSystemSounds
+import sh.hnet.clock.ui.settings.soundGoneText
 import sh.hnet.clock.R
 import sh.hnet.clock.alarm.Alarm
 import sh.hnet.clock.alarm.Days
@@ -99,6 +105,11 @@ fun AlarmScreen(id: Long, onBack: () -> Unit, onOpenSound: () -> Unit, snackbars
     val undo = stringResource(R.string.button_undo)
     val sound = SoundChoice.decode(alarm.sound, alarm.soundTitle)
     val silent = sound == SoundChoice.Silent
+    // What could keep this alarm from ringing, while it is on (§3.2.8)
+    val reliability = rememberReliability()
+    val problem = reliability.checks.problems(Ringing.ALARMS, soundWanted = !silent).firstOrNull()?.takeIf { alarm.enabled }
+    val fix = rememberProblemFix(Ringing.ALARMS, reliability.refresh)
+    val soundGone = soundGoneText(sound, rememberSystemSounds())
 
     SettingsPage(title = stringResource(R.string.title_alarm), onBack = onBack) {
         // The time, a button that opens the picker; under it when it rings; the alarm's switch at the end
@@ -112,7 +123,8 @@ fun AlarmScreen(id: Long, onBack: () -> Unit, onOpenSound: () -> Unit, snackbars
                     modifier = Modifier.clip(RoundedCornerShape(16.dp)).clickable(role = Role.Button, onClickLabel = stringResource(R.string.title_select_time)) { pickingTime = true },
                 )
                 val pending = alarm.pending(zone)
-                Text(
+                // With a problem nothing is promised here: the card below says what is wrong
+                if (problem == null) Text(
                     when {
                         alarm.snoozedUntil != null -> stringResource(R.string.msg_snoozed_until, formats.time(Instant.ofEpochMilli(alarm.snoozedUntil), zone))
                         pending != null -> ringsInText(pending - now.toEpochMilli())
@@ -130,6 +142,7 @@ fun AlarmScreen(id: Long, onBack: () -> Unit, onOpenSound: () -> Unit, snackbars
                 },
             )
         }
+        problem?.let { ProblemCard(it, Ringing.ALARMS, { fix(it) }) }
         SettingsGroup {
             val rows = if (alarm.repeating) 2 else 3
             row { _ -> RepeatRow(alarm, groupShapes(0, rows).shape, daysLine(alarm)) { days -> controller.reschedule(id) { it.copy(days = days, date = if (days.isEmpty()) it.date else null) } } }
@@ -155,7 +168,7 @@ fun AlarmScreen(id: Long, onBack: () -> Unit, onOpenSound: () -> Unit, snackbars
             }
         }
         SettingsGroup {
-            row { shapes -> SettingsNavigationRow(shapes, if (silent) R.drawable.ic_music_off else R.drawable.ic_music_note, stringResource(R.string.label_sound), soundName(sound), onClick = onOpenSound) }
+            row { shapes -> SettingsNavigationRow(shapes, if (silent) R.drawable.ic_music_off else R.drawable.ic_music_note, stringResource(R.string.label_sound), soundGone ?: soundName(sound), onClick = onOpenSound) }
             row { shapes ->
                 // A silent alarm without vibration would be an alarm that doesn't ring (§3.3.6): on, and locked
                 SegmentedListItem(
