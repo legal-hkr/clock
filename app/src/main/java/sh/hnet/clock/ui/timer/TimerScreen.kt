@@ -318,12 +318,17 @@ private fun OneTimer(timer: Timer, now: Moment, controller: TimerController, onL
             horizontalArrangement = Arrangement.spacedBy(16.dp, Alignment.CenterHorizontally),
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            FilledTonalIconButton(onClick = { controller.reset(timer.id) }, shapes = IconButtonDefaults.shapes(), modifier = Modifier.size(56.dp)) {
-                Icon(painterResource(R.drawable.ic_replay), contentDescription = stringResource(R.string.button_reset))
+            // The side buttons differ in width: equal slots on both sides keep Pause/Resume on the page's center line
+            Box(Modifier.weight(1f), contentAlignment = Alignment.CenterEnd) {
+                FilledTonalIconButton(onClick = { controller.reset(timer.id) }, shapes = IconButtonDefaults.shapes(), modifier = Modifier.size(56.dp)) {
+                    Icon(painterResource(R.drawable.ic_replay), contentDescription = stringResource(R.string.button_reset))
+                }
             }
             PauseResume(timer, controller, Modifier.size(width = 128.dp, height = 80.dp), iconSize = 32)
-            FilledTonalButton(onClick = { controller.addMinute(timer.id) }, modifier = Modifier.height(56.dp)) {
-                Text(stringResource(R.string.label_plus_minute), style = MaterialTheme.typography.titleMedium)
+            Box(Modifier.weight(1f), contentAlignment = Alignment.CenterStart) {
+                FilledTonalButton(onClick = { controller.addMinute(timer.id) }, modifier = Modifier.height(56.dp)) {
+                    Text(stringResource(R.string.label_plus_minute), style = MaterialTheme.typography.titleMedium)
+                }
             }
         }
     }
