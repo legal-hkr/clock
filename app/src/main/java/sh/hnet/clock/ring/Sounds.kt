@@ -3,6 +3,7 @@ package sh.hnet.clock.ring
 import android.content.Context
 import android.media.RingtoneManager
 import android.net.Uri
+import android.provider.Settings
 import androidx.core.net.toUri
 
 /**
@@ -67,10 +68,15 @@ object Sounds {
         null
     }
 
-    /** What to play for [choice]: null for Silent. A chosen sound is tried first by the player, the default after it. */
+    /**
+     * What to play for [choice], in the order the player tries it: nothing for Silent; else the
+     * chosen sound, the phone's default, and last the default by its address in the system's
+     * settings – the system keeps a copy of that one readable before the phone is first unlocked
+     * after a restart, when the media library is still locked.
+     */
     fun uris(context: Context, choice: SoundChoice): List<Uri> = when (choice) {
         SoundChoice.Silent -> emptyList()
-        SoundChoice.Default -> listOfNotNull(defaultUri(context))
-        is SoundChoice.Sound -> listOfNotNull(choice.uri.toUri(), defaultUri(context))
+        SoundChoice.Default -> listOfNotNull(defaultUri(context), Settings.System.DEFAULT_ALARM_ALERT_URI)
+        is SoundChoice.Sound -> listOfNotNull(choice.uri.toUri(), defaultUri(context), Settings.System.DEFAULT_ALARM_ALERT_URI)
     }
 }

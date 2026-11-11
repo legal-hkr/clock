@@ -51,11 +51,13 @@ class BackupTest {
     fun `fields this version doesn't know are ignored`() {
         val text = """
             {"format": "sh.hnet.clock.backup", "formatVersion": 1, "appVersion": "0.9.0", "appVersionCode": 9,
-             "createdAt": "2027-01-01T00:00:00Z", "settings": {"later": true}, "alarms": [{"time": "06:30"}]}
+             "createdAt": "2027-01-01T00:00:00Z", "settings": {"later": true}, "bedtime": {"start": "22:30"},
+             "alarms": [{"hour": 6, "minute": 30, "color": "red"}]}
         """.trimIndent()
         val check = Backup.check(text)
         assertTrue(check is BackupCheck.Valid)
         assertEquals("0.9.0", (check as BackupCheck.Valid).backup.appVersion)
+        assertEquals(listOf(BackupAlarm(6, 30)), check.backup.alarms)
     }
 
     @Test
@@ -68,6 +70,25 @@ class BackupTest {
         assertEquals(null, valid.backup.cities)
         assertEquals(null, valid.backup.settings.clock)
         assertEquals(0, valid.cities)
+    }
+
+    @Test
+    fun `alarms, their settings and timer presets read back as written`() {
+        val full = backup.copy(
+            settings = backup.settings.copy(
+                alarms = BackupSettings.Alarms(snoozeMinutes = 5, silenceAfterMinutes = 0, volumeButtons = "STOP", sound = "silent", upcomingMinutes = 30),
+                timers = BackupSettings.Timers(sound = "default", vibration = false, gradualSeconds = 30),
+            ),
+            alarms = listOf(
+                BackupAlarm(6, 30, days = listOf(1, 2, 3, 4, 5), label = "Work", sound = "content://media/internal/audio/media/12", soundTitle = "Argon"),
+                BackupAlarm(14, 0, date = "2026-11-20", label = "Flight to Reykjavík", sound = "silent", snooze = false, enabled = false),
+            ),
+            timerPresets = listOf(BackupPreset("Tea", 180), BackupPreset("Pasta", 540)),
+        )
+        val valid = Backup.check(Backup.encode(full)) as BackupCheck.Valid
+        assertEquals(full, valid.backup)
+        assertEquals(2, valid.alarms)
+        assertEquals(2, valid.presets)
     }
 
     @Test

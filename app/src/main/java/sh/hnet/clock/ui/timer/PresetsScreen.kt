@@ -27,11 +27,8 @@ import androidx.compose.material3.SegmentedListItem
 import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.SnackbarResult
-import androidx.compose.material3.SwipeToDismissBox
-import androidx.compose.material3.SwipeToDismissBoxValue
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
-import androidx.compose.material3.rememberSwipeToDismissBoxState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -69,6 +66,7 @@ import sh.hnet.clock.timer.TimerController
 import sh.hnet.clock.timer.TimerFormat
 import sh.hnet.clock.timer.TimerPreset
 import sh.hnet.clock.ui.components.LazySettingsPage
+import sh.hnet.clock.ui.components.SwipeToRemove
 import sh.hnet.clock.ui.components.SETTINGS_GROUP_GAP
 import sh.hnet.clock.ui.components.SETTINGS_ROW_GAP
 import sh.hnet.clock.ui.components.dragHandle
@@ -282,34 +280,6 @@ private fun NumberField(value: String, onChange: (String) -> Unit, unit: Int, na
         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.NumberPassword),
         modifier = modifier.semantics { contentDescription = spoken },
     )
-}
-
-/** A swipe to either side removes the row, the error container showing behind it. */
-@Composable
-private fun SwipeToRemove(shape: androidx.compose.ui.graphics.Shape, enabled: Boolean, onRemove: () -> Unit, content: @Composable () -> Unit) {
-    val dismiss = rememberSwipeToDismissBoxState()
-    LaunchedEffect(dismiss.currentValue) {
-        if (dismiss.currentValue != SwipeToDismissBoxValue.Settled) {
-            onRemove()
-            // Saved per key: a preset put back by Undo would remove itself again
-            dismiss.snapTo(SwipeToDismissBoxValue.Settled)
-        }
-    }
-    SwipeToDismissBox(
-        state = dismiss,
-        enableDismissFromStartToEnd = enabled,
-        enableDismissFromEndToStart = enabled,
-        modifier = Modifier.clip(shape),
-        backgroundContent = {
-            val direction = dismiss.dismissDirection
-            if (direction != SwipeToDismissBoxValue.Settled) Box(
-                Modifier.fillMaxSize().background(MaterialTheme.colorScheme.errorContainer).padding(horizontal = 24.dp),
-                contentAlignment = if (direction == SwipeToDismissBoxValue.StartToEnd) Alignment.CenterStart else Alignment.CenterEnd,
-            ) {
-                Icon(painterResource(R.drawable.ic_delete), contentDescription = null, tint = MaterialTheme.colorScheme.onErrorContainer)
-            }
-        },
-    ) { content() }
 }
 
 private val LIFTED = RoundedCornerShape(16.dp)

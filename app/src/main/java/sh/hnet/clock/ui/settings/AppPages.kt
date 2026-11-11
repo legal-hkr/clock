@@ -100,6 +100,8 @@ fun ResetScreen(onBack: () -> Unit) {
                 confirming = false
                 scope.launch {
                     preferences.restoreDefaults(java.time.ZoneId.systemDefault().id)
+                    // The alarms' shared settings live with the alarms; the alarms themselves stay
+                    app.alarms.setSettings { sh.hnet.clock.alarm.AlarmSettings() }
                     Toast.makeText(context, done, Toast.LENGTH_SHORT).show()
                     // Last: a language change recreates the activity
                     if (currentLanguageTag(context).isNotEmpty()) setLanguage(context, "")

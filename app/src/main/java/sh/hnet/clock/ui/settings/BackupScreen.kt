@@ -217,6 +217,7 @@ private fun RestoreConfirmDialog(picked: BackupManager.Picked, onDismiss: () -> 
             listOfNotNull(
                 stringResource(R.string.msg_restore_settings),
                 // Absent in a backup from before cities, which then stay as they are
+                valid.backup.alarms?.let { stringResource(R.string.msg_restore_alarms, it.size) },
                 valid.backup.cities?.let { stringResource(R.string.msg_restore_cities, it.size) },
                 valid.backup.timerPresets?.let { stringResource(R.string.msg_restore_presets, it.size) },
             ).forEach { item ->

@@ -11,6 +11,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.serialization.SerializationException
 import kotlinx.serialization.builtins.ListSerializer
 import kotlinx.serialization.json.Json
+import sh.hnet.clock.ClockApplication
 import sh.hnet.clock.ring.RingService
 import sh.hnet.clock.stopwatch.Moment
 import sh.hnet.clock.stopwatch.Moments
@@ -79,17 +80,20 @@ class TimerController(private val context: Context) {
         change { list -> list.filter { !it.ringing(now) } }
     }
 
-    /** Timers that rang unanswered for [SILENCE_AFTER] go quiet; they stay, counting, until stopped (§3.6.7). */
+    /** Timers that rang unanswered for the "Silence after" time go quiet; they stay, counting, until stopped (§3.6.7). */
     fun silenceOverdue() {
         val now = now()
-        change { list -> list.map { if (it.ringing(now) && -it.remaining(now) >= SILENCE_AFTER) it.copy(silenced = true) else it } }
+        val after = silenceAfter
+        if (after > 0) change { list -> list.map { if (it.ringing(now) && -it.remaining(now) >= after) it.copy(silenced = true) else it } }
         // Nothing changed, but a timer may just have ended
         refresh()
     }
 
     /** When the next ringing timer is due to go quiet, as time since boot; null with none ringing. */
-    fun nextSilence(now: Moment): Long? =
-        _timers.value.filter { it.ringing(now) }.minOfOrNull { now.sinceBoot + it.remaining(now) + SILENCE_AFTER }
+    fun nextSilence(now: Moment): Long? {
+        val after = silenceAfter
+        return if (after > 0) _timers.value.filter { it.ringing(now) }.minOfOrNull { now.sinceBoot + it.remaining(now) + after } else null
+    }
 
     fun ringing(): List<Timer> = now().let { now -> _timers.value.filter { it.ringing(now) }.shown(now) }
 
@@ -171,21 +175,11 @@ class TimerController(private val context: Context) {
         }
     }
 
-    /** Starts or stops the ringing service to match the timers. */
-    private fun ring() {
-        val any = now().let { now -> _timers.value.any { it.ringing(now) } }
-        val service = Intent(context, RingService::class.java)
-        if (any) {
-            try {
-                context.startForegroundService(service)
-            } catch (_: RuntimeException) {
-                // The system refuses a start from the background (the process came up on its own
-                // with a timer long ended): the timer's notification is there, without the sound
-            }
-        } else {
-            context.stopService(service)
-        }
-    }
+    /** Starts or stops the ringing service to match what rings. */
+    private fun ring() = RingService.sync(context)
+
+    /** "Silence after" of Settings › Alarms, which timers share (§3.6.7); 0 = never. */
+    private val silenceAfter: Long get() = (context.applicationContext as ClockApplication).alarms.settings.value.silenceAfter
 
     private fun nextId(): Long {
         val id = store.getLong(KEY_NEXT_ID, 1)
@@ -208,9 +202,6 @@ class TimerController(private val context: Context) {
         const val MAX_PRESETS = 30
         const val MAX_LABEL = 60
         const val MAX_PRESET_NAME = 30
-
-        /** Until Settings › Alarms brings the setting (stage 5): 10 minutes, its default (§3.9.1). */
-        const val SILENCE_AFTER = 10 * 60_000L
 
         private const val KEY_TIMERS = "timers"
         private const val KEY_PRESETS = "presets"

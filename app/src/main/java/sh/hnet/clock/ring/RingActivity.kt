@@ -48,6 +48,7 @@ import androidx.compose.material3.toShape
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.key
 import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -69,6 +70,11 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import kotlinx.coroutines.delay
 import sh.hnet.clock.ClockApplication
 import sh.hnet.clock.R
+import sh.hnet.clock.alarm.Alarm
+import sh.hnet.clock.alarm.VolumeButtons
+import sh.hnet.clock.ui.components.rememberNow
+import sh.hnet.clock.ui.components.rememberTimeFormats
+import java.time.ZoneId
 import sh.hnet.clock.stopwatch.Moment
 import sh.hnet.clock.timer.Timer
 import sh.hnet.clock.timer.TimerController
@@ -81,12 +87,13 @@ import sh.hnet.clock.ui.theme.ClockTheme
 
 /**
  * The ringing page (SPEC §3.4): full screen over the lock screen, screen on, following the phone's
- * orientation, with nothing on it but what rings and its answers. For timers (§3.4.7, §3.4.8): the
- * big target is Stop – stopping a timer by mistake costs nothing – and Add 1 minute sits below.
- * It closes when nothing rings any more. The volume buttons stop ringing timers (§3.4.9).
+ * orientation, with nothing on it but what rings and its answers. The big target is always the
+ * action that makes it quiet without losing anything (§2.2): Snooze for an alarm, whose Stop takes
+ * a drag; Stop for a timer, with Add 1 minute below. It closes when nothing rings any more.
  */
 class RingActivity : ComponentActivity() {
-    private val timers: TimerController get() = (application as ClockApplication).timers
+    private val app: ClockApplication get() = application as ClockApplication
+    private val timers: TimerController get() = app.timers
 
     override fun onCreate(savedInstanceState: Bundle?) {
         enableEdgeToEdge()
@@ -94,22 +101,35 @@ class RingActivity : ComponentActivity() {
         window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
         setContent {
             ClockTheme {
-                val all by timers.timers.collectAsStateWithLifecycle()
-                val now by produceState(timers.now()) {
-                    while (true) {
-                        value = timers.now()
-                        delay(200)
+                val alarms by app.alarms.alarms.collectAsStateWithLifecycle()
+                val settings by app.alarms.settings.collectAsStateWithLifecycle()
+                val alarm = alarms.filter { it.ringing != null }.minByOrNull { it.ringing ?: 0 }
+                // Before the phone is first unlocked after a restart there are no timers to look at (SPEC §5.8)
+                val unlocked = remember { app.unlocked }
+                val ringing = if (unlocked) {
+                    val all by timers.timers.collectAsStateWithLifecycle()
+                    val now by produceState(timers.now()) {
+                        while (true) {
+                            value = timers.now()
+                            delay(200)
+                        }
                     }
-                }
-                val ringing = all.filter { it.ringing(now) }.shown(now)
-                LaunchedEffect(ringing.isEmpty()) { if (ringing.isEmpty()) finish() }
+                    all.filter { it.ringing(now) }.shown(now) to now
+                } else null
+                val nothing = alarm == null && ringing?.first.isNullOrEmpty()
+                LaunchedEffect(nothing) { if (nothing) finish() }
                 Surface(Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.surface) {
                     Box(Modifier.fillMaxSize().windowInsetsPadding(WindowInsets.safeDrawing).padding(16.dp)) {
-                        val single = ringing.singleOrNull()
+                        val single = ringing?.first?.singleOrNull()
                         when {
-                            ringing.isEmpty() -> Unit
-                            single != null -> OneTimer(single, now, onStop = { timers.delete(single.id) }, onAddMinute = { timers.addMinute(single.id) })
-                            else -> SeveralTimers(ringing, now, timers)
+                            // An alarm comes first; timers follow once it is answered (§3.4.8)
+                            // A page of its own for each alarm: the next one starts with the thumb back at the start
+                            alarm != null -> key(alarm.id) {
+                                AlarmPage(alarm, settings.snoozeMinutes, onSnooze = { app.alarms.snooze(alarm.id) }, onStop = { app.alarms.stop(alarm.id) })
+                            }
+                            ringing == null || ringing.first.isEmpty() -> Unit
+                            single != null -> OneTimer(single, ringing.second, onStop = { timers.delete(single.id) }, onAddMinute = { timers.addMinute(single.id) })
+                            else -> SeveralTimers(ringing.first, ringing.second, timers)
                         }
                     }
                 }
@@ -117,12 +137,72 @@ class RingActivity : ComponentActivity() {
         }
     }
 
+    /**
+     * The volume buttons (§3.4.9): for a ringing alarm what Settings › Alarms says – Snooze by
+     * default, which an alarm without snooze ignores –; for ringing timers always Stop. The power
+     * button is the system's and does nothing here.
+     */
     override fun onKeyDown(keyCode: Int, event: KeyEvent?): Boolean {
-        if (keyCode == KeyEvent.KEYCODE_VOLUME_UP || keyCode == KeyEvent.KEYCODE_VOLUME_DOWN) {
-            timers.stopRinging()
-            return true
+        if (keyCode != KeyEvent.KEYCODE_VOLUME_UP && keyCode != KeyEvent.KEYCODE_VOLUME_DOWN) return super.onKeyDown(keyCode, event)
+        val alarm = app.alarms.ringing().firstOrNull()
+        when {
+            alarm == null -> if (app.unlocked) timers.stopRinging()
+            else -> when (app.alarms.settings.value.volumeButtons) {
+                VolumeButtons.SNOOZE -> app.alarms.snooze(alarm.id)
+                VolumeButtons.STOP -> app.alarms.stop(alarm.id)
+                VolumeButtons.NOTHING -> Unit
+            }
         }
-        return super.onKeyDown(keyCode, event)
+        return true
+    }
+}
+
+/**
+ * A ringing alarm (§3.4.2–4): its label and the time, nothing else. Snooze is the huge easy target
+ * in the middle – a mistaken snooze costs nothing –, Stop the drag below it. An alarm with snooze
+ * off shows the track alone; the cookie's place stays empty. On its side, label, time and track
+ * take the start half and the cookie fills the end half.
+ */
+@Composable
+private fun AlarmPage(alarm: Alarm, snoozeMinutes: Int, onSnooze: () -> Unit, onStop: () -> Unit) {
+    val formats = rememberTimeFormats()
+    val now by rememberNow(everySecond = false)
+    val parts = formats.parts(now, ZoneId.systemDefault())
+    val title: @Composable () -> Unit = {
+        if (alarm.label.isNotEmpty()) {
+            Text(alarm.label, style = MaterialTheme.typography.headlineSmall, maxLines = 1, overflow = TextOverflow.Ellipsis, modifier = Modifier.semantics { heading() })
+        }
+        Row {
+            if (parts.periodFirst) parts.period?.let { Text(it, style = MaterialTheme.typography.titleLarge, modifier = Modifier.alignByBaseline().padding(end = 8.dp)) }
+            Text(parts.digits, style = MaterialTheme.typography.displayLarge.tabular, maxLines = 1, modifier = Modifier.alignByBaseline())
+            if (!parts.periodFirst) parts.period?.let { Text(it, style = MaterialTheme.typography.titleLarge, modifier = Modifier.alignByBaseline().padding(start = 8.dp)) }
+        }
+    }
+    val cookie: @Composable (Dp) -> Unit = { size ->
+        if (alarm.snooze) {
+            RingCookie(stringResource(R.string.button_snooze), null, size, onSnooze, supporting = pluralStringResource(R.plurals.label_minutes_count, snoozeMinutes, snoozeMinutes))
+        }
+    }
+    BoxWithConstraints(Modifier.fillMaxSize()) {
+        if (maxWidth > maxHeight) {
+            Row(Modifier.fillMaxSize(), horizontalArrangement = Arrangement.spacedBy(16.dp)) {
+                Column(Modifier.weight(1f).fillMaxHeight()) {
+                    title()
+                    Spacer(Modifier.weight(1f))
+                    SlideToStop(onStop)
+                }
+                Box(Modifier.weight(1f).fillMaxHeight(), contentAlignment = Alignment.Center) { cookie(min(this@BoxWithConstraints.maxHeight, 300.dp)) }
+            }
+        } else {
+            Column(Modifier.fillMaxSize(), horizontalAlignment = Alignment.CenterHorizontally) {
+                Spacer(Modifier.height(48.dp))
+                title()
+                Spacer(Modifier.weight(1f))
+                cookie(min(this@BoxWithConstraints.maxWidth, 248.dp))
+                Spacer(Modifier.weight(1f))
+                SlideToStop(onStop, Modifier.padding(bottom = 8.dp))
+            }
+        }
     }
 }
 

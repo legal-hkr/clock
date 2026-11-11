@@ -26,10 +26,7 @@ import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.SnackbarResult
 import androidx.compose.material3.Surface
-import androidx.compose.material3.SwipeToDismissBox
-import androidx.compose.material3.SwipeToDismissBoxValue
 import androidx.compose.material3.Text
-import androidx.compose.material3.rememberSwipeToDismissBoxState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -62,12 +59,18 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import sh.hnet.clock.ClockApplication
 import sh.hnet.clock.R
+import sh.hnet.clock.alarm.nextPending
+import sh.hnet.clock.ui.alarms.whenText
+import androidx.compose.material3.AssistChip
+import androidx.compose.material3.AssistChipDefaults
+import androidx.compose.ui.platform.LocalResources
 import sh.hnet.clock.time.TimeDifference
 import sh.hnet.clock.time.ZoneNames
 import sh.hnet.clock.time.isAway
 import sh.hnet.clock.time.mergeOrder
 import sh.hnet.clock.time.zoneOrNull
 import sh.hnet.clock.ui.components.DestinationScaffold
+import sh.hnet.clock.ui.components.SwipeToRemove
 import sh.hnet.clock.ui.components.FAB_CLEARANCE
 import sh.hnet.clock.ui.components.LocalSnackbarLift
 import sh.hnet.clock.ui.components.TimeFormats
@@ -93,6 +96,7 @@ fun ClockScreen(
     viewModel: ClockViewModel,
     onOpenSettings: () -> Unit,
     onAddCity: () -> Unit,
+    onOpenAlarms: () -> Unit,
     snackbars: SnackbarHostState,
     messageScope: CoroutineScope,
 ) {
@@ -116,6 +120,19 @@ fun ClockScreen(
     val visible = remember(stored, away, localId, homeId, zones) {
         stored.orEmpty().filter { id ->
             zoneOrNull(id) != null && !(away && zones.canonical(id).let { it == localId || it == homeId })
+        }
+    }
+    // The next alarm, as a chip under the date that opens Alarms (§3.5.1)
+    val alarms by app.alarms.alarms.collectAsStateWithLifecycle()
+    val resources = LocalResources.current
+    val nextAlarm = alarms.nextPending(local)?.second?.let { whenText(resources, formats, it, now, local) }
+    val alarmChip: @Composable () -> Unit = {
+        nextAlarm?.let { text ->
+            AssistChip(
+                onClick = onOpenAlarms,
+                label = { Text(text) },
+                leadingIcon = { Icon(painterResource(R.drawable.ic_alarm), contentDescription = stringResource(R.string.content_description_next_alarm), modifier = Modifier.size(AssistChipDefaults.IconSize)) },
+            )
         }
     }
     val names = remember(visible, homeId, localId, zones) {
@@ -175,7 +192,7 @@ fun ClockScreen(
         if (stored != null && rows.isEmpty() && visible.isEmpty() && !away) {
             // No cities: the local time is the page, centered (§3.5.5)
             Box(Modifier.fillMaxSize().padding(bottom = FAB_CLEARANCE), contentAlignment = Alignment.Center) {
-                LocalTime(formats, now, local, showSeconds, centered = true)
+                LocalTime(formats, now, local, showSeconds, centered = true, chip = alarmChip)
             }
         } else {
             val count = rows.size + if (away) 1 else 0
@@ -185,7 +202,7 @@ fun ClockScreen(
                 contentPadding = PaddingValues(start = 16.dp, end = 16.dp, bottom = FAB_CLEARANCE),
             ) {
                 item(key = "local", contentType = "local") {
-                    LocalTime(formats, now, local, showSeconds, centered = false, modifier = Modifier.padding(start = 12.dp, top = 8.dp, bottom = 24.dp))
+                    LocalTime(formats, now, local, showSeconds, centered = false, modifier = Modifier.padding(start = 12.dp, top = 8.dp, bottom = 24.dp), chip = alarmChip)
                 }
                 if (away && home != null && homeId != null) {
                     item(key = "home", contentType = "home") {
@@ -249,14 +266,15 @@ fun ClockScreen(
  * written out. Read as one item, and not a live region: it would never stop talking.
  */
 @Composable
-private fun LocalTime(formats: TimeFormats, now: Instant, zone: ZoneId, showSeconds: Boolean, centered: Boolean, modifier: Modifier = Modifier) {
+private fun LocalTime(formats: TimeFormats, now: Instant, zone: ZoneId, showSeconds: Boolean, centered: Boolean, modifier: Modifier = Modifier, chip: @Composable () -> Unit = {}) {
     val parts = formats.parts(now, zone)
     val date = formats.date(now, zone)
     val spoken = formats.time(now, zone) + ", " + date
-    Column(
-        modifier = modifier.clearAndSetSemantics { contentDescription = spoken },
+    Column(modifier = modifier, horizontalAlignment = if (centered) Alignment.CenterHorizontally else Alignment.Start) {
+      Column(
+        modifier = Modifier.clearAndSetSemantics { contentDescription = spoken },
         horizontalAlignment = if (centered) Alignment.CenterHorizontally else Alignment.Start,
-    ) {
+      ) {
         Row {
             val period: @Composable (Modifier) -> Unit = { m ->
                 parts.period?.let { Text(it, style = MaterialTheme.typography.titleLarge, color = MaterialTheme.colorScheme.onSurfaceVariant, modifier = m.alignByBaseline()) }
@@ -275,6 +293,8 @@ private fun LocalTime(formats: TimeFormats, now: Instant, zone: ZoneId, showSeco
             if (!parts.periodFirst) period(Modifier.padding(start = 8.dp))
         }
         Text(date, style = MaterialTheme.typography.bodyLarge, color = MaterialTheme.colorScheme.onSurfaceVariant)
+      }
+        chip()
     }
 }
 
@@ -325,34 +345,6 @@ private fun differenceText(difference: TimeDifference, formats: TimeFormats, now
         else -> formats.weekday(now, zone)
     }
     return stringResource(R.string.label_day_and_difference, day, amount)
-}
-
-/** A swipe to either side removes the row, the error container showing behind it (§3.2.7). */
-@Composable
-private fun SwipeToRemove(shape: Shape, enabled: Boolean, onRemove: () -> Unit, content: @Composable () -> Unit) {
-    val dismiss = rememberSwipeToDismissBoxState()
-    LaunchedEffect(dismiss.currentValue) {
-        if (dismiss.currentValue != SwipeToDismissBoxValue.Settled) {
-            onRemove()
-            // Saved per key: a city put back by Undo would remove itself again
-            dismiss.snapTo(SwipeToDismissBoxValue.Settled)
-        }
-    }
-    SwipeToDismissBox(
-        state = dismiss,
-        enableDismissFromStartToEnd = enabled,
-        enableDismissFromEndToStart = enabled,
-        modifier = Modifier.clip(shape),
-        backgroundContent = {
-            val direction = dismiss.dismissDirection
-            if (direction != SwipeToDismissBoxValue.Settled) Box(
-                Modifier.fillMaxSize().background(MaterialTheme.colorScheme.errorContainer).padding(horizontal = 24.dp),
-                contentAlignment = if (direction == SwipeToDismissBoxValue.StartToEnd) Alignment.CenterStart else Alignment.CenterEnd,
-            ) {
-                Icon(painterResource(R.drawable.ic_delete), contentDescription = null, tint = MaterialTheme.colorScheme.onErrorContainer)
-            }
-        },
-    ) { content() }
 }
 
 private val ROW_GAP = 2.dp

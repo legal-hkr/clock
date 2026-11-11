@@ -59,6 +59,10 @@ import sh.hnet.clock.ClockApplication
 import sh.hnet.clock.R
 import sh.hnet.clock.about.WhatsNew
 import sh.hnet.clock.ui.alarms.AlarmsScreen
+import sh.hnet.clock.ui.alarms.AlarmScreen
+import sh.hnet.clock.ui.settings.AlarmSettingsScreen
+import sh.hnet.clock.ui.settings.AlarmSoundScreen
+import sh.hnet.clock.ui.settings.NewAlarmSoundScreen
 import sh.hnet.clock.ui.clock.AddCityScreen
 import sh.hnet.clock.ui.clock.ClockScreen
 import sh.hnet.clock.ui.clock.ClockViewModel
@@ -118,6 +122,7 @@ fun ClockApp(startTab: Tab, restored: Boolean = false, request: DestinationReque
     }
     val stopwatch by app.stopwatch.state.collectAsStateWithLifecycle()
     val timers by app.timers.timers.collectAsStateWithLifecycle()
+    val alarms by app.alarms.alarms.collectAsStateWithLifecycle()
     val timersRevision by app.timers.revision.collectAsStateWithLifecycle()
 
     val snackbars = remember { SnackbarHostState() }
@@ -192,8 +197,8 @@ fun ClockApp(startTab: Tab, restored: Boolean = false, request: DestinationReque
                                 label = "destination",
                             ) { current ->
                                 when (current) {
-                                    Tab.ALARMS -> AlarmsScreen(openSettings)
-                                    Tab.CLOCK -> ClockScreen(clock, openSettings, onAddCity = { open(Screen.AddCity()) }, snackbars = snackbars, messageScope = scope)
+                                    Tab.ALARMS -> AlarmsScreen(openSettings, onOpenAlarm = { open(Screen.Alarm(it)) }, snackbars = snackbars, messageScope = scope)
+                                    Tab.CLOCK -> ClockScreen(clock, openSettings, onAddCity = { open(Screen.AddCity()) }, onOpenAlarms = { select(Tab.ALARMS) }, snackbars = snackbars, messageScope = scope)
                                     Tab.TIMER -> TimerScreen(openSettings, onEditPresets = { open(Screen.TimerPresets) }, snackbars = snackbars, messageScope = scope)
                                     Tab.STOPWATCH -> StopwatchScreen(openSettings, snackbars = snackbars, messageScope = scope)
                                 }
@@ -206,8 +211,8 @@ fun ClockApp(startTab: Tab, restored: Boolean = false, request: DestinationReque
                                         selected = selected,
                                         onClick = { select(item) },
                                         icon = {
-                                            // A dot while the stopwatch runs and another destination shows (§3.1.5)
-                                            val dot = item == Tab.STOPWATCH && stopwatch.running && !selected
+                                            // A dot while the stopwatch runs, or after a missed alarm, and another destination shows (§3.1.5)
+                                            val dot = !selected && (item == Tab.STOPWATCH && stopwatch.running || item == Tab.ALARMS && alarms.any { it.missed != null })
                                             // The number of timers counting down (§3.1.5); counted anew with every change and every end
                                             val counting = if (item == Tab.TIMER) remember(timers, timersRevision) { TimerCounts.of(timers, app.timers.now()).running } else 0
                                             BadgedBox(badge = { if (counting > 0) Badge { Text(counting.toString()) } else if (dot) Badge() }) {
@@ -227,6 +232,7 @@ fun ClockApp(startTab: Tab, restored: Boolean = false, request: DestinationReque
                             clock = clock,
                             onBack = back,
                             onOpenClock = { open(Screen.SettingsClock) },
+                            onOpenAlarms = { open(Screen.SettingsAlarms) },
                             onOpenTimers = { open(Screen.SettingsTimers) },
                             onOpenLanguage = { open(Screen.SettingsLanguage) },
                             onOpenBackup = { open(Screen.SettingsBackup) },
@@ -234,6 +240,12 @@ fun ClockApp(startTab: Tab, restored: Boolean = false, request: DestinationReque
                             onOpenAbout = { open(Screen.SettingsAbout) },
                         )
                     }
+                    entry<Screen.Alarm> { key ->
+                        AlarmScreen(key.id, onBack = back, onOpenSound = { open(Screen.AlarmSound(key.id)) }, snackbars = snackbars, messageScope = scope)
+                    }
+                    entry<Screen.AlarmSound> { key -> AlarmSoundScreen(key.id, onBack = back) }
+                    entry<Screen.SettingsAlarms> { AlarmSettingsScreen(onBack = back, onOpenSound = { open(Screen.SettingsNewAlarmSound) }) }
+                    entry<Screen.SettingsNewAlarmSound> { NewAlarmSoundScreen(onBack = back) }
                     entry<Screen.SettingsTimers> {
                         TimerSettingsScreen(onBack = back, onOpenSound = { open(Screen.SettingsTimerSound) }, onOpenPresets = { open(Screen.TimerPresets) })
                     }

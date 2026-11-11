@@ -24,6 +24,12 @@ object Notifications {
     /** A timer that has ended and rings (high, with the full-screen page). */
     const val CHANNEL_RINGING_TIMERS = "ringing_timers"
     const val ID_RINGING = 2
+
+    /** An alarm ringing (high, with the full-screen page); a while before one (low); while snoozed (low); after one nobody answered (default). */
+    const val CHANNEL_RINGING_ALARMS = "ringing_alarms"
+    const val CHANNEL_UPCOMING_ALARMS = "upcoming_alarms"
+    const val CHANNEL_SNOOZED_ALARMS = "snoozed_alarms"
+    const val CHANNEL_MISSED_ALARMS = "missed_alarms"
     const val ID_TIMER_BASE = 1_000
 
     /** The destination a tapped notification (or widget) opens, as a [Tab] name. */
@@ -44,6 +50,10 @@ object Notifications {
                 NotificationChannel(CHANNEL_TIMERS, context.getString(R.string.label_channel_timers), NotificationManager.IMPORTANCE_LOW).apply {
                     setShowBadge(false)
                 },
+                quiet(CHANNEL_UPCOMING_ALARMS, context.getString(R.string.label_channel_upcoming_alarms), NotificationManager.IMPORTANCE_LOW),
+                quiet(CHANNEL_SNOOZED_ALARMS, context.getString(R.string.label_channel_snoozed_alarms), NotificationManager.IMPORTANCE_LOW),
+                quiet(CHANNEL_MISSED_ALARMS, context.getString(R.string.label_channel_missed_alarms), NotificationManager.IMPORTANCE_DEFAULT),
+                ringing(CHANNEL_RINGING_ALARMS, context.getString(R.string.label_channel_ringing_alarms)),
                 NotificationChannel(CHANNEL_RINGING_TIMERS, context.getString(R.string.label_channel_ringing_timers), NotificationManager.IMPORTANCE_HIGH).apply {
                     setShowBadge(false)
                     // The app plays the sound itself, on the alarm stream
@@ -54,6 +64,18 @@ object Notifications {
                 },
             ),
         )
+    }
+
+    private fun quiet(id: String, name: String, importance: Int) = NotificationChannel(id, name, importance).apply {
+        setShowBadge(false)
+        setSound(null, null)
+        enableVibration(false)
+    }
+
+    /** High importance for the full-screen page; silent, as the app plays the sound itself on the alarm stream. */
+    private fun ringing(id: String, name: String) = quiet(id, name, NotificationManager.IMPORTANCE_HIGH).apply {
+        setBypassDnd(true)
+        lockscreenVisibility = android.app.Notification.VISIBILITY_PUBLIC
     }
 
     /** Opens the app on [tab]. */

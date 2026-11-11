@@ -86,6 +86,9 @@ class TimeFormats(private val locale: Locale, is24Hour: Boolean) {
     private val time = DateTimeFormatter.ofPattern(DateFormat.getBestDateTimePattern(locale, if (is24Hour) "Hm" else "hm"), locale)
     private val date = DateTimeFormatter.ofPattern(DateFormat.getBestDateTimePattern(locale, "EEEEdMMMM"), locale)
     private val weekday = DateTimeFormatter.ofPattern("EEEE", locale)
+    private val weekdayShort = DateTimeFormatter.ofPattern("EEE", locale)
+    private val shortDate = DateTimeFormatter.ofPattern(DateFormat.getBestDateTimePattern(locale, "EEEdMMM"), locale)
+    private val shortDateYear = DateTimeFormatter.ofPattern(DateFormat.getBestDateTimePattern(locale, "EEEdMMMy"), locale)
 
     fun parts(at: Instant, zone: ZoneId): Parts {
         val local = at.atZone(zone)
@@ -100,6 +103,38 @@ class TimeFormats(private val locale: Locale, is24Hour: Boolean) {
 
     /** "Friday", for a date further away than tomorrow or yesterday. */
     fun weekday(at: Instant, zone: ZoneId): String = weekday.format(at.atZone(zone)).replaceFirstChar { it.titlecase(locale) }
+
+    /** "Thu", standing alone. */
+    fun weekdayShort(at: Instant, zone: ZoneId): String = weekdayShort.format(at.atZone(zone)).replaceFirstChar { it.titlecase(locale) }
+
+    /** "Fri 20 Nov", with the year when it isn't [now]'s ("Fri 20 Nov 2027"). */
+    fun shortDate(at: Instant, zone: ZoneId, now: Instant): String {
+        val local = at.atZone(zone)
+        val text = (if (local.year == now.atZone(zone).year) shortDate else shortDateYear).format(local)
+        return text.replaceFirstChar { it.titlecase(locale) }
+    }
+
+    /** The days of the week by their shortest and short names, standing alone ("M", "Mon"). */
+    fun dayNarrow(day: java.time.DayOfWeek): String = day.getDisplayName(java.time.format.TextStyle.NARROW_STANDALONE, locale)
+    fun dayShort(day: java.time.DayOfWeek): String = day.getDisplayName(java.time.format.TextStyle.SHORT_STANDALONE, locale).replaceFirstChar { it.titlecase(locale) }
+    fun dayFull(day: java.time.DayOfWeek): String = day.getDisplayName(java.time.format.TextStyle.FULL_STANDALONE, locale).replaceFirstChar { it.titlecase(locale) }
+
+    /** The week as the system's regional settings have it: its first day and its weekend, as ISO day numbers. */
+    val firstDay: java.time.DayOfWeek = when (androidx.core.text.util.LocalePreferences.getFirstDayOfWeek(locale)) {
+        androidx.core.text.util.LocalePreferences.FirstDayOfWeek.SUNDAY -> java.time.DayOfWeek.SUNDAY
+        androidx.core.text.util.LocalePreferences.FirstDayOfWeek.SATURDAY -> java.time.DayOfWeek.SATURDAY
+        androidx.core.text.util.LocalePreferences.FirstDayOfWeek.FRIDAY -> java.time.DayOfWeek.FRIDAY
+        androidx.core.text.util.LocalePreferences.FirstDayOfWeek.THURSDAY -> java.time.DayOfWeek.THURSDAY
+        androidx.core.text.util.LocalePreferences.FirstDayOfWeek.WEDNESDAY -> java.time.DayOfWeek.WEDNESDAY
+        androidx.core.text.util.LocalePreferences.FirstDayOfWeek.TUESDAY -> java.time.DayOfWeek.TUESDAY
+        else -> java.time.DayOfWeek.MONDAY
+    }
+    val weekend: Set<Int> = run {
+        val data = android.icu.util.Calendar.getInstance(android.icu.util.ULocale.forLocale(locale)).weekData
+        // ICU counts Sunday as 1; ISO counts Monday as 1
+        fun iso(day: Int) = (day + 5) % 7 + 1
+        generateSequence(iso(data.weekendOnset)) { it % 7 + 1 }.takeWhile { it != iso(data.weekendCease) }.toSet() + iso(data.weekendCease)
+    }
 
     private companion object {
         /** The period marker with the (possibly non-breaking or narrow) spaces around it. */

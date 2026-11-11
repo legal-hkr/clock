@@ -18,7 +18,7 @@ import sh.hnet.clock.ui.components.SettingsPage
 
 /**
  * The Settings root (SPEC §3.9), a page over the destinations with Back and no navigation bar.
- * Alarms and timers first (alarms come with their stage), then Clock; then, grouped as Music's, App (language), Data (backup, reset) and About on its own.
+ * Alarms and timers first, then Clock; then, grouped as Music's, App (language), Data (backup, reset) and About on its own.
  * The group for alarms and timers comes before them with its stages.
  */
 @Composable
@@ -26,6 +26,7 @@ fun SettingsRootScreen(
     clock: ClockViewModel,
     onBack: () -> Unit,
     onOpenClock: () -> Unit,
+    onOpenAlarms: () -> Unit,
     onOpenTimers: () -> Unit,
     onOpenLanguage: () -> Unit,
     onOpenBackup: () -> Unit,
@@ -45,6 +46,10 @@ fun SettingsRootScreen(
     val homeName = remember(homeZoneId, zones) { homeZoneId?.let { zones.city(it).name } }
     SettingsPage(title = stringResource(R.string.title_settings), onBack = onBack) {
         SettingsGroup(stringResource(R.string.title_settings_group_alarms_timers)) {
+            row { shapes ->
+                val alarmSettings by app.alarms.settings.collectAsStateWithLifecycle()
+                SettingsNavigationRow(shapes, R.drawable.ic_alarm, stringResource(R.string.label_nav_alarms), alarmsSummary(alarmSettings), onClick = onOpenAlarms)
+            }
             row { shapes ->
                 val timerSound by app.preferences.timerSound.collectAsStateWithLifecycle(SoundChoice.Default)
                 val summary = stringResource(R.string.label_sound_value, soundName(timerSound))

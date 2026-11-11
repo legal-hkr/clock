@@ -25,6 +25,54 @@
 
     <!-- Alarms -->
     <string name="msg_empty_alarms">Tutaj pojawią się alarmy</string>
+    <string name="button_add_alarm">Dodaj alarm</string>
+    <string name="title_alarm">Alarm</string>
+    <string name="label_rings_in">Zadzwoni za %s</string>
+    <string name="label_rings_in_less_than_minute">Zadzwoni za niecałą minutę</string>
+    <plurals name="label_duration_days">
+        <item quantity="one">%d dzień</item>
+        <item quantity="few">%d dni</item>
+        <item quantity="many">%d dni</item>
+        <item quantity="other">%d dnia</item>
+    </plurals>
+    <string name="label_no_alarms_on">Żaden alarm nie jest włączony</string>
+    <string name="label_every_day">Codziennie</string>
+    <string name="label_weekdays">Dni robocze</string>
+    <string name="label_weekends">Weekendy</string>
+    <string name="label_once">Jednorazowo</string>
+    <string name="label_today">Dzisiaj</string>
+    <string name="label_state_on">Włączony</string>
+    <string name="label_state_off">Wyłączony</string>
+    <string name="msg_snoozed_until">Drzemka do %s</string>
+    <string name="msg_missed">Przegapiony: %s</string>
+    <string name="msg_skipping">Pomijany: %s</string>
+    <string name="button_dismiss">Odrzuć</string>
+    <string name="msg_alarm_deleted"><![CDATA[Usunięto alarm <b>%s</b>]]></string>
+    <string name="title_select_time">Wybierz godzinę</string>
+    <string name="label_repeat">Powtarzanie</string>
+    <string name="label_repeat_on">Dni powtarzania</string>
+    <string name="label_date">Data</string>
+    <string name="label_none">Brak</string>
+    <string name="label_skip_next">Pomiń najbliższy</string>
+    <string name="button_delete_alarm">Usuń alarm</string>
+    <string name="content_description_next_alarm">Najbliższy alarm</string>
+
+    <!-- Ringing -->
+    <string name="button_snooze">Drzemka</string>
+    <plurals name="label_minutes_count">
+        <item quantity="one">%d minuta</item>
+        <item quantity="few">%d minuty</item>
+        <item quantity="many">%d minut</item>
+        <item quantity="other">%d minuty</item>
+    </plurals>
+    <string name="label_slide_to_stop">Przesuń, aby zatrzymać</string>
+    <string name="content_description_stop_alarm">Zatrzymaj alarm</string>
+    <string name="title_alarm_at">Alarm o %s</string>
+    <string name="title_missed_alarm">Przegapiony alarm</string>
+    <string name="label_channel_ringing_alarms">Dzwoniące alarmy</string>
+    <string name="label_channel_upcoming_alarms">Nadchodzące alarmy</string>
+    <string name="label_channel_snoozed_alarms">Alarmy w drzemce</string>
+    <string name="label_channel_missed_alarms">Przegapione alarmy</string>
 
     <!-- Clock -->
     <string name="button_add_city">Dodaj miasto</string>
@@ -167,6 +215,22 @@
     <string name="title_settings_group_app">Aplikacja</string>
     <string name="title_settings_group_data">Dane</string>
 
+    <!-- Settings: alarms -->
+    <string name="label_alarms_summary">Drzemka: %1$s, wyciszenie po: %2$s</string>
+    <string name="label_value_never">nigdy</string>
+    <string name="title_ringing">Dzwonienie</string>
+    <string name="label_snooze_length">Długość drzemki</string>
+    <string name="label_silence_after">Wycisz po</string>
+    <string name="label_never">Nigdy</string>
+    <string name="label_volume_buttons">Przyciski głośności podczas dzwonienia</string>
+    <string name="label_nothing">Nic</string>
+    <string name="title_new_alarms">Nowe alarmy</string>
+    <string name="title_before_alarm">Przed alarmem</string>
+    <string name="label_upcoming_notification">Powiadomienie o nadchodzącym alarmie</string>
+    <string name="label_before">%s wcześniej</string>
+    <string name="title_alarm_sound">Dźwięk alarmu</string>
+    <string name="title_new_alarm_sound">Dźwięk nowych alarmów</string>
+
     <!-- Settings: timers -->
     <string name="title_settings_group_alarms_timers">Alarmy i minutniki</string>
     <string name="title_settings_timers">Minutniki</string>
@@ -223,13 +287,14 @@
     <string name="desc_restore_backup">Zastępuje alarmy, miasta, szablony minutnika i ustawienia</string>
     <string name="msg_backup_saved"><![CDATA[Zapisano kopię jako <b>%s</b>]]></string>
     <string name="error_backup_write"><![CDATA[Nie udało się zapisać pliku <b>%s</b>.]]></string>
-    <string name="title_restore_confirm">Zastąpić miasta, szablony i ustawienia?</string>
+    <string name="title_restore_confirm">Zastąpić alarmy, miasta i ustawienia?</string>
     <string name="msg_restore_from"><![CDATA[<b>%1$s</b> – kopia z %2$s, wersja %3$s. Zawiera:]]></string>
     <string name="msg_restore_settings">ustawienia</string>
+    <string name="msg_restore_alarms">alarmy: %d</string>
     <string name="msg_restore_cities">miasta: %d</string>
     <string name="msg_restore_presets">szablony minutnika: %d</string>
-    <string name="msg_restore_replaces">Obecne miasta, szablony minutnika i ustawienia zostaną zastąpione. Działające minutniki i stoper liczą dalej.</string>
-    <string name="msg_restored">Przywrócono miasta, szablony minutnika i ustawienia</string>
+    <string name="msg_restore_replaces">Obecne alarmy, miasta, szablony minutnika i ustawienia zostaną zastąpione. Działające minutniki i stoper liczą dalej.</string>
+    <string name="msg_restored">Przywrócono alarmy, miasta, szablony minutnika i ustawienia</string>
     <string name="error_backup_not_ours"><![CDATA[Plik <b>%s</b> nie jest kopią zapasową tej aplikacji.]]></string>
     <string name="error_backup_newer">Tę kopię utworzyła nowsza wersja Zegara. Zaktualizuj aplikację, żeby ją przywrócić.</string>
     <string name="error_backup_unreadable"><![CDATA[Nie udało się odczytać pliku <b>%s</b>.]]></string>
@@ -243,6 +308,7 @@
     <string name="label_welcome_restore">Przywróć kopię zapasową</string>
     <string name="desc_welcome_restore">Odzyskaj alarmy, miasta, szablony minutnika i ustawienia</string>
     <string name="label_backup_brings_back">Wybierz plik kopii zapasowej utworzonej w Zegarze. Przywrócone zostaną:</string>
+    <string name="desc_backup_item_alarms">Z dniami, etykietami i dźwiękami</string>
     <string name="label_backup_item_cities">Miasta</string>
     <string name="desc_backup_item_cities">W ustalonej kolejności</string>
     <string name="label_backup_item_presets">Szablony minutnika</string>
@@ -250,7 +316,7 @@
     <string name="label_backup_item_settings">Ustawienia</string>
     <string name="desc_backup_item_settings">Wszystko, co ustawia się w Ustawieniach, oprócz języka</string>
     <string name="label_backup_unnamed_file">bez nazwy</string>
-    <string name="label_backup_file_summary">Miasta: %1$d, szablony: %2$d (%3$s)</string>
+    <string name="label_backup_file_summary">Alarmy: %1$d, miasta: %2$d (%3$s)</string>
     <string name="button_backup_choose_file">Wybierz plik kopii</string>
     <string name="button_backup_choose_another">Wybierz inny plik</string>
     <string name="button_backup_change">Zmień</string>

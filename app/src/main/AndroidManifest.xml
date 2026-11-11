@@ -44,10 +44,29 @@
             </intent-filter>
         </activity>
 
+        <!-- The platform's alarm-clock intents (SPEC §3.8.4): other apps ask Clock to set an alarm or a
+             timer, or to show the alarms. No screen of its own. Callers need the system's SET_ALARM
+             permission, which the system checks. -->
+        <activity
+            android:name=".alarm.AlarmIntentActivity"
+            android:excludeFromRecents="true"
+            android:exported="true"
+            android:permission="com.android.alarm.permission.SET_ALARM"
+            android:taskAffinity=""
+            android:theme="@android:style/Theme.NoDisplay">
+            <intent-filter>
+                <action android:name="android.intent.action.SET_ALARM" />
+                <action android:name="android.intent.action.SET_TIMER" />
+                <action android:name="android.intent.action.SHOW_ALARMS" />
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+        </activity>
+
         <!-- The ringing page (SPEC §3.4): over the lock screen, screen on, in its own task so it
              never drags the app's pages onto the lock screen; follows the phone's orientation. -->
         <activity
             android:name=".ring.RingActivity"
+            android:directBootAware="true"
             android:exported="false"
             android:excludeFromRecents="true"
             android:launchMode="singleInstance"
@@ -58,8 +77,16 @@
 
         <service
             android:name=".ring.RingService"
+            android:directBootAware="true"
             android:exported="false"
             android:foregroundServiceType="systemExempted" />
+
+        <!-- The moments scheduled for alarms and the alarm notifications' buttons. Aware of direct
+             boot, as everything an alarm needs to ring before the phone is first unlocked (SPEC §5.8). -->
+        <receiver
+            android:name=".alarm.AlarmReceiver"
+            android:directBootAware="true"
+            android:exported="false" />
 
         <!-- The scheduled end of a timer and the timer notifications' buttons. -->
         <receiver
@@ -71,12 +98,18 @@
             android:name=".stopwatch.StopwatchReceiver"
             android:exported="false" />
 
+        <!-- After a restart (already before the first unlock), an update of the app, or a change of
+             the clock or time zone: everything scheduled is worked out anew. -->
         <receiver
             android:name=".notify.BootReceiver"
+            android:directBootAware="true"
             android:exported="false">
             <intent-filter>
+                <action android:name="android.intent.action.LOCKED_BOOT_COMPLETED" />
                 <action android:name="android.intent.action.BOOT_COMPLETED" />
                 <action android:name="android.intent.action.MY_PACKAGE_REPLACED" />
+                <action android:name="android.intent.action.TIME_SET" />
+                <action android:name="android.intent.action.TIMEZONE_CHANGED" />
             </intent-filter>
         </receiver>
     </application>
