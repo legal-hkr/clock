@@ -10,8 +10,8 @@ import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.jsonPrimitive
 
 /**
- * Clock's backup file (SPEC §3.9.5), in the same shape as Music's: the settings and the cities;
- * alarms and timer presets join it with their stages, as optional fields of format version 1. Never in it: running timers, the stopwatch, skip and snooze state, the app language
+ * Clock's backup file (SPEC §3.9.5), in the same shape as Music's: the settings, the cities and
+ * the timer presets; alarms join it with their stage, as optional fields of format version 1. Never in it: running timers, the stopwatch, skip and snooze state, the app language
  * and the last used destination. Pure Kotlin, so the format is unit-tested.
  */
 @Serializable
@@ -25,6 +25,8 @@ data class BackupFile(
     val settings: BackupSettings = BackupSettings(),
     /** Zone ids of the Clock destination's cities, in the user's order; absent in backups from before cities, which then stay as they are. */
     val cities: List<String>? = null,
+    /** The timer presets in the user's order; absent in backups from before timers, which then stay as they are. */
+    val timerPresets: List<BackupPreset>? = null,
 ) {
     companion object {
         const val FORMAT = "sh.hnet.clock.backup"
@@ -37,16 +39,29 @@ data class BackupFile(
  * or a name from a later version, falls back to the default on restore.
  */
 @Serializable
-data class BackupSettings(val clock: Clock? = null) {
+data class BackupSettings(val clock: Clock? = null, val timers: Timers? = null) {
     /** Settings › Clock. */
     @Serializable
     data class Clock(val showSeconds: Boolean? = null, val homeClock: Boolean? = null, val homeZone: String? = null)
+
+    /**
+     * Settings › Timers. [sound] is "default", "silent" or a sound's address on the phone it was
+     * chosen on, with its [soundTitle]: on a phone without that sound the timer rings with the
+     * phone's default (§3.9.5).
+     */
+    @Serializable
+    data class Timers(val sound: String? = null, val soundTitle: String? = null, val vibration: Boolean? = null, val gradualSeconds: Int? = null)
 }
+
+/** A timer preset: its name and its duration in seconds. */
+@Serializable
+data class BackupPreset(val name: String, val seconds: Long)
 
 /** What a picked file turned out to be, before anything changes. */
 sealed interface BackupCheck {
     data class Valid(val backup: BackupFile) : BackupCheck {
         val cities: Int get() = backup.cities.orEmpty().size
+        val presets: Int get() = backup.timerPresets.orEmpty().size
     }
 
     /** Not JSON, or JSON of something else. */

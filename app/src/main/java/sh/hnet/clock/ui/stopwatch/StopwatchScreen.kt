@@ -2,11 +2,7 @@
 
 package sh.hnet.clock.ui.stopwatch
 
-import android.Manifest
-import android.content.Context
 import android.content.Intent
-import androidx.activity.compose.rememberLauncherForActivityResult
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -50,7 +46,6 @@ import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
-import androidx.core.content.edit
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -59,7 +54,6 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import sh.hnet.clock.ClockApplication
 import sh.hnet.clock.R
-import sh.hnet.clock.notify.Notifications
 import sh.hnet.clock.stopwatch.LapMark
 import sh.hnet.clock.stopwatch.LapRow
 import sh.hnet.clock.stopwatch.Stopwatch
@@ -67,6 +61,7 @@ import sh.hnet.clock.stopwatch.StopwatchController
 import sh.hnet.clock.stopwatch.StopwatchFormat
 import sh.hnet.clock.ui.components.DestinationScaffold
 import sh.hnet.clock.ui.components.TooltipIconButton
+import sh.hnet.clock.ui.components.rememberNotificationAsk
 import sh.hnet.clock.ui.components.tabular
 
 /**
@@ -83,10 +78,10 @@ fun StopwatchScreen(onOpenSettings: () -> Unit, snackbars: SnackbarHostState, me
     val rows = stopwatch.rows(elapsed)
 
     // The notification is the only thing here that needs a permission: asked once, at the first start (§3.11.2)
-    val askNotifications = rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) { controller.sync() }
+    val askNotifications = rememberNotificationAsk { controller.sync() }
     val start = {
         controller.start()
-        if (!Notifications.allowed(context) && takeFirstAsk(context)) askNotifications.launch(Manifest.permission.POST_NOTIFICATIONS)
+        askNotifications(true)
     }
 
     val resetText = stringResource(R.string.msg_stopwatch_reset)
@@ -271,14 +266,5 @@ private fun Controls(stopwatch: Stopwatch, onStart: () -> Unit, onPause: () -> U
     }
 }
 
-/** True the first time only: the notification permission is asked for once from here, never again after a refusal. */
-private fun takeFirstAsk(context: Context): Boolean {
-    val store = context.getSharedPreferences("first_run", Context.MODE_PRIVATE)
-    if (store.getBoolean(ASKED, false)) return false
-    store.edit { putBoolean(ASKED, true) }
-    return true
-}
-
-private const val ASKED = "notifications_asked"
 private val LAP_COLUMN = 96.dp
 private val TOTAL_COLUMN = 88.dp

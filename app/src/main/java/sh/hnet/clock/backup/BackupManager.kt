@@ -13,6 +13,8 @@ import sh.hnet.clock.BuildConfig
 import sh.hnet.clock.ClockApplication
 import java.io.IOException
 import sh.hnet.clock.time.zoneOrNull
+import sh.hnet.clock.timer.Timer
+import sh.hnet.clock.timer.TimerController
 import java.time.Instant
 import java.time.ZoneId
 
@@ -73,6 +75,12 @@ class BackupManager(private val app: ClockApplication, private val stamps: Share
         app.preferences.restoreSettings(backup.settings, ZoneId.systemDefault().id)
         // Cities this phone has no zone for are left out; a backup from before cities says nothing about them
         backup.cities?.let { ids -> app.cities.replaceAll(ids.filter { zoneOrNull(it) != null }) }
+        backup.timerPresets?.let { presets ->
+            val usable = presets.filter { it.name.isNotBlank() && it.seconds in 1..Timer.MAX / 1000 }
+            withContext(Dispatchers.Main) {
+                app.timers.replacePresets(usable.map { it.name.trim().take(TimerController.MAX_PRESET_NAME) to it.seconds * 1000 })
+            }
+        }
     }
 
     private suspend fun snapshot() = BackupFile(
@@ -81,6 +89,7 @@ class BackupManager(private val app: ClockApplication, private val stamps: Share
         createdAt = Instant.now().toString(),
         settings = app.preferences.backupSettings(),
         cities = app.cities.current(),
+        timerPresets = app.timers.presets.value.map { BackupPreset(it.name, it.duration / 1000) },
     )
 
     fun displayName(uri: Uri): String? = try {

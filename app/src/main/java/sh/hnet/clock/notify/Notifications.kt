@@ -18,6 +18,14 @@ object Notifications {
     const val CHANNEL_STOPWATCH = "stopwatch"
     const val ID_STOPWATCH = 1
 
+    /** Running, paused and quietly ended timers (low); one notification each, ids from [ID_TIMER_BASE] up. */
+    const val CHANNEL_TIMERS = "timers"
+
+    /** A timer that has ended and rings (high, with the full-screen page). */
+    const val CHANNEL_RINGING_TIMERS = "ringing_timers"
+    const val ID_RINGING = 2
+    const val ID_TIMER_BASE = 1_000
+
     /** The destination a tapped notification (or widget) opens, as a [Tab] name. */
     const val EXTRA_DESTINATION = "sh.hnet.clock.extra.DESTINATION"
 
@@ -28,10 +36,23 @@ object Notifications {
 
     /** Creates the channels (again after a language change, so their names follow it). */
     fun ensureChannels(context: Context) {
-        manager(context).createNotificationChannel(
-            NotificationChannel(CHANNEL_STOPWATCH, context.getString(R.string.label_nav_stopwatch), NotificationManager.IMPORTANCE_LOW).apply {
-                setShowBadge(false)
-            },
+        manager(context).createNotificationChannels(
+            listOf(
+                NotificationChannel(CHANNEL_STOPWATCH, context.getString(R.string.label_nav_stopwatch), NotificationManager.IMPORTANCE_LOW).apply {
+                    setShowBadge(false)
+                },
+                NotificationChannel(CHANNEL_TIMERS, context.getString(R.string.label_channel_timers), NotificationManager.IMPORTANCE_LOW).apply {
+                    setShowBadge(false)
+                },
+                NotificationChannel(CHANNEL_RINGING_TIMERS, context.getString(R.string.label_channel_ringing_timers), NotificationManager.IMPORTANCE_HIGH).apply {
+                    setShowBadge(false)
+                    // The app plays the sound itself, on the alarm stream
+                    setSound(null, null)
+                    enableVibration(false)
+                    setBypassDnd(true)
+                    lockscreenVisibility = android.app.Notification.VISIBILITY_PUBLIC
+                },
+            ),
         )
     }
 

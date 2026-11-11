@@ -1,14 +1,21 @@
 package sh.hnet.clock.stopwatch
 
 import android.content.Context
-import android.os.SystemClock
-import android.provider.Settings
 import androidx.core.content.edit
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.serialization.SerializationException
 import kotlinx.serialization.json.Json
+
+/** The present [Moment], as the stopwatch and the timers read it. */
+object Moments {
+    fun now(context: Context): Moment = Moment(
+        wall = System.currentTimeMillis(),
+        sinceBoot = android.os.SystemClock.elapsedRealtime(),
+        boot = android.provider.Settings.Global.getInt(context.contentResolver, android.provider.Settings.Global.BOOT_COUNT, 0),
+    )
+}
 
 /**
  * The one stopwatch: its state, kept on every change (so it survives the process and a restart of
@@ -21,11 +28,7 @@ class StopwatchController(private val context: Context) {
     private val _state = MutableStateFlow(read())
     val state: StateFlow<Stopwatch> = _state.asStateFlow()
 
-    fun now(): Moment = Moment(
-        wall = System.currentTimeMillis(),
-        sinceBoot = SystemClock.elapsedRealtime(),
-        boot = Settings.Global.getInt(context.contentResolver, Settings.Global.BOOT_COUNT, 0),
-    )
+    fun now(): Moment = Moments.now(context)
 
     fun elapsed(): Long = _state.value.elapsed(now())
 

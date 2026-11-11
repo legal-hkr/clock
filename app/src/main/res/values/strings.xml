@@ -9,6 +9,7 @@
     <string name="button_next">Next</string>
     <string name="button_replace">Replace</string>
     <string name="button_restore">Restore</string>
+    <string name="button_save">Save</string>
     <string name="button_show">Show</string>
     <string name="button_undo">Undo</string>
     <string name="content_description_back">Back</string>
@@ -80,10 +81,100 @@
     <string name="content_description_share_laps">Share laps</string>
     <string name="msg_stopwatch_reset">Stopwatch reset</string>
 
+    <!-- Timer -->
+    <string name="label_timer_default">Timer</string>
+    <plurals name="label_timers_running">
+        <item quantity="one">%d running</item>
+        <item quantity="other">%d running</item>
+    </plurals>
+    <plurals name="label_timers_paused">
+        <item quantity="one">%d paused</item>
+        <item quantity="other">%d paused</item>
+    </plurals>
+    <plurals name="label_timers_ended">
+        <item quantity="one">%d ended</item>
+        <item quantity="other">%d ended</item>
+    </plurals>
+    <string name="label_timer_ended">Ended</string>
+    <string name="label_ends_at">Ends at %s</string>
+    <string name="label_unit_h" translatable="false">h</string>
+    <string name="label_unit_m" translatable="false">m</string>
+    <string name="label_unit_s" translatable="false">s</string>
+    <string name="label_unit_min" translatable="false">min</string>
+    <string name="label_duration_h">%d h</string>
+    <string name="label_duration_min">%d min</string>
+    <string name="label_duration_s">%d s</string>
+    <string name="content_description_backspace">Delete the last digit</string>
+    <string name="label_clear">Clear</string>
+    <string name="msg_enter_time_first">Enter a time first</string>
+    <string name="button_new_timer">New timer</string>
+    <string name="button_stop">Stop</string>
+    <string name="button_stop_all">Stop all</string>
+    <string name="button_add_minute">Add 1 minute</string>
+    <string name="label_plus_minute" translatable="false">+1:00</string>
+    <string name="button_delete">Delete</string>
+    <string name="label_label">Label</string>
+    <string name="content_description_edit_label">Edit the label</string>
+    <string name="msg_timer_deleted"><![CDATA[Deleted timer <b>%s</b>]]></string>
+    <string name="msg_timer_deleted_unnamed">Timer deleted</string>
+    <plurals name="title_timers_ended">
+        <item quantity="one">%d timer ended</item>
+        <item quantity="other">%d timers ended</item>
+    </plurals>
+    <string name="label_timer_of">%s timer</string>
+    <string name="label_channel_timers">Timers</string>
+    <string name="label_channel_ringing_timers">Ringing timers</string>
+
+    <!-- Timer presets -->
+    <string name="button_add_preset">Add preset</string>
+    <string name="button_edit">Edit</string>
+    <string name="title_timer_presets">Timer presets</string>
+    <string name="title_add_preset">Add a preset</string>
+    <string name="title_edit_preset">Edit a preset</string>
+    <string name="label_name">Name</string>
+    <string name="label_duration">Time</string>
+    <string name="label_hours">Hours</string>
+    <string name="label_minutes">Minutes</string>
+    <string name="label_seconds">Seconds</string>
+    <string name="error_enter_name">Enter a name</string>
+    <string name="error_enter_time">Enter a time</string>
+    <string name="error_up_to_59">Minutes and seconds: up to 59</string>
+    <string name="msg_empty_presets">Presets start a timer with one tap.</string>
+    <string name="msg_preset_removed"><![CDATA[Removed <b>%s</b>]]></string>
+    <string name="content_description_reorder">Reorder %s</string>
+
+    <!-- Sound -->
+    <string name="title_timer_sound">Timer sound</string>
+    <string name="label_alarm_volume">Alarm volume</string>
+    <string name="desc_alarm_volume">The phone’s alarm volume, for all alarms and timers</string>
+    <string name="error_volume_zero">At zero. Alarms and timers would be silent.</string>
+    <string name="label_phone_default">Phone’s default</string>
+    <string name="label_phone_default_named">Phone’s default (%s)</string>
+    <string name="label_silent">Silent</string>
+    <string name="desc_silent">Vibration only</string>
+    <string name="title_sounds_on_phone">Sounds on this phone</string>
+    <string name="label_playing">Playing</string>
+
     <!-- Settings -->
     <string name="title_settings">Settings</string>
     <string name="title_settings_group_app">App</string>
     <string name="title_settings_group_data">Data</string>
+
+    <!-- Settings: timers -->
+    <string name="title_settings_group_alarms_timers">Alarms and timers</string>
+    <string name="title_settings_timers">Timers</string>
+    <string name="label_sound_value">Sound: %s</string>
+    <string name="title_when_timer_ends">When a timer ends</string>
+    <string name="label_sound">Sound</string>
+    <string name="label_vibration">Vibration</string>
+    <string name="desc_vibration_locked">Always on with the Silent sound</string>
+    <string name="label_gradual_volume">Gradually increase volume</string>
+    <string name="label_off">Off</string>
+    <string name="label_presets">Presets</string>
+    <plurals name="label_preset_count">
+        <item quantity="one">%d preset</item>
+        <item quantity="other">%d presets</item>
+    </plurals>
 
     <!-- Settings: clock -->
     <string name="title_settings_group_clock">Clock</string>
@@ -125,12 +216,13 @@
     <string name="desc_restore_backup">Replaces your alarms, cities, timer presets and settings</string>
     <string name="msg_backup_saved"><![CDATA[Backup saved as <b>%s</b>]]></string>
     <string name="error_backup_write"><![CDATA[Clock couldn’t write <b>%s</b>.]]></string>
-    <string name="title_restore_confirm">Replace your cities and settings?</string>
+    <string name="title_restore_confirm">Replace your cities, presets and settings?</string>
     <string name="msg_restore_from"><![CDATA[<b>%1$s</b> – made on %2$s with version %3$s. It contains:]]></string>
     <string name="msg_restore_settings">your settings</string>
     <string name="msg_restore_cities">cities: %d</string>
-    <string name="msg_restore_replaces">Your current cities and settings will be replaced.</string>
-    <string name="msg_restored">Restored your cities and settings</string>
+    <string name="msg_restore_presets">timer presets: %d</string>
+    <string name="msg_restore_replaces">Your current cities, timer presets and settings will be replaced. Running timers and the stopwatch keep going.</string>
+    <string name="msg_restored">Restored your cities, timer presets and settings</string>
     <string name="error_backup_not_ours"><![CDATA[<b>%s</b> isn’t a Clock backup.]]></string>
     <string name="error_backup_newer">This backup was made by a newer version of Clock. Update the app to restore it.</string>
     <string name="error_backup_unreadable"><![CDATA[Clock couldn’t read <b>%s</b>.]]></string>
@@ -146,10 +238,12 @@
     <string name="label_backup_brings_back">Choose a backup made in Clock. It brings back:</string>
     <string name="label_backup_item_cities">Cities</string>
     <string name="desc_backup_item_cities">In your order</string>
+    <string name="label_backup_item_presets">Timer presets</string>
+    <string name="desc_backup_item_presets">In your order</string>
     <string name="label_backup_item_settings">Settings</string>
     <string name="desc_backup_item_settings">Everything set in Settings, except the language</string>
     <string name="label_backup_unnamed_file">unnamed</string>
-    <string name="label_backup_file_summary">Cities: %1$d (%2$s)</string>
+    <string name="label_backup_file_summary">Cities: %1$d, presets: %2$d (%3$s)</string>
     <string name="button_backup_choose_file">Choose backup file</string>
     <string name="button_backup_choose_another">Choose another file</string>
     <string name="button_backup_change">Change</string>

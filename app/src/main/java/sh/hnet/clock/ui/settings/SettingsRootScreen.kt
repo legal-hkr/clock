@@ -5,6 +5,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.LocalConfiguration
 import sh.hnet.clock.ui.clock.ClockViewModel
+import sh.hnet.clock.ring.SoundChoice
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -17,7 +18,7 @@ import sh.hnet.clock.ui.components.SettingsPage
 
 /**
  * The Settings root (SPEC §3.9), a page over the destinations with Back and no navigation bar.
- * Clock first; then, grouped as Music's, App (language), Data (backup, reset) and About on its own.
+ * Alarms and timers first (alarms come with their stage), then Clock; then, grouped as Music's, App (language), Data (backup, reset) and About on its own.
  * The group for alarms and timers comes before them with its stages.
  */
 @Composable
@@ -25,6 +26,7 @@ fun SettingsRootScreen(
     clock: ClockViewModel,
     onBack: () -> Unit,
     onOpenClock: () -> Unit,
+    onOpenTimers: () -> Unit,
     onOpenLanguage: () -> Unit,
     onOpenBackup: () -> Unit,
     onOpenReset: () -> Unit,
@@ -42,6 +44,13 @@ fun SettingsRootScreen(
     val homeZoneId by clock.homeZone.collectAsStateWithLifecycle()
     val homeName = remember(homeZoneId, zones) { homeZoneId?.let { zones.city(it).name } }
     SettingsPage(title = stringResource(R.string.title_settings), onBack = onBack) {
+        SettingsGroup(stringResource(R.string.title_settings_group_alarms_timers)) {
+            row { shapes ->
+                val timerSound by app.preferences.timerSound.collectAsStateWithLifecycle(SoundChoice.Default)
+                val summary = stringResource(R.string.label_sound_value, soundName(timerSound))
+                SettingsNavigationRow(shapes, R.drawable.ic_hourglass_empty, stringResource(R.string.title_settings_timers), summary, onClick = onOpenTimers)
+            }
+        }
         SettingsGroup(stringResource(R.string.title_settings_group_clock)) {
             row { shapes ->
                 val seconds = stringResource(if (showSeconds) R.string.label_value_on else R.string.label_value_off)

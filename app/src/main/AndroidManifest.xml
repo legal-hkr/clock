@@ -1,12 +1,25 @@
 <?xml version="1.0" encoding="utf-8"?>
-<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
 
-    <!-- Privacy: no INTERNET, no storage, media or location permission. Permissions for alarms
-         (exact alarms, full-screen intent) arrive with the stage that needs them. -->
-    <!-- The running stopwatch's notification; asked for in context, and the app works without it. -->
+    <!-- Privacy: no INTERNET, no storage, media or location permission. -->
+    <!-- Notifications of the stopwatch and of timers, and what lets a timer ring; asked for in
+         context. The stopwatch works without it. -->
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
     <!-- Notifications of what is still running are put back after a restart of the phone. -->
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
+    <!-- A timer ends at its exact time, also with the phone asleep. Granted to clock apps at
+         install; nothing the user has to switch on (SPEC §3.2.8). -->
+    <uses-permission android:name="android.permission.USE_EXACT_ALARM" />
+    <!-- The ringing page over the lock screen. -->
+    <uses-permission android:name="android.permission.USE_FULL_SCREEN_INTENT" />
+    <!-- Ringing goes on with the screen off and the app closed. -->
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_SYSTEM_EXEMPTED" />
+    <uses-permission android:name="android.permission.WAKE_LOCK" />
+    <uses-permission android:name="android.permission.VIBRATE" />
+    <!-- Android 16+: the running timer as a live update (SPEC §3.8.2). -->
+    <uses-permission android:name="android.permission.POST_PROMOTED_NOTIFICATIONS" />
 
     <application
         android:name=".ClockApplication"
@@ -21,12 +34,37 @@
         <activity
             android:name=".MainActivity"
             android:exported="true"
-            android:launchMode="singleTop">
+            android:launchMode="singleTop"
+            android:screenOrientation="portrait"
+            tools:ignore="DiscouragedApi,LockedOrientationActivity">
+            <!-- Portrait only, as Music (SPEC §3.1.6); the ringing page alone follows the phone. -->
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
+        <!-- The ringing page (SPEC §3.4): over the lock screen, screen on, in its own task so it
+             never drags the app's pages onto the lock screen; follows the phone's orientation. -->
+        <activity
+            android:name=".ring.RingActivity"
+            android:exported="false"
+            android:excludeFromRecents="true"
+            android:launchMode="singleInstance"
+            android:showWhenLocked="true"
+            android:taskAffinity=""
+            android:theme="@style/Theme.Clock"
+            android:turnScreenOn="true" />
+
+        <service
+            android:name=".ring.RingService"
+            android:exported="false"
+            android:foregroundServiceType="systemExempted" />
+
+        <!-- The scheduled end of a timer and the timer notifications' buttons. -->
+        <receiver
+            android:name=".timer.TimerReceiver"
+            android:exported="false" />
 
         <!-- The stopwatch notification's buttons; reached only by the app's own pending intents. -->
         <receiver

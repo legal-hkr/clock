@@ -22,6 +22,9 @@ sealed interface Screen : NavKey {
     @Serializable data class AddCity(val home: Boolean = false) : Screen
     @Serializable data object Settings : Screen
     @Serializable data object SettingsClock : Screen
+    @Serializable data object SettingsTimers : Screen
+    @Serializable data object SettingsTimerSound : Screen
+    @Serializable data object TimerPresets : Screen
     @Serializable data object SettingsLanguage : Screen
     @Serializable data object SettingsBackup : Screen
     @Serializable data object SettingsReset : Screen

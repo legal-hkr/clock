@@ -7,6 +7,7 @@ import kotlinx.coroutines.launch
 import sh.hnet.clock.backup.BackupManager
 import sh.hnet.clock.data.CityStore
 import sh.hnet.clock.stopwatch.StopwatchController
+import sh.hnet.clock.timer.TimerController
 import sh.hnet.clock.time.ZoneNames
 import java.time.ZoneId
 import java.util.Locale
@@ -22,6 +23,8 @@ class ClockApplication : Application() {
 
     val stopwatch: StopwatchController by lazy { StopwatchController(this) }
 
+    val timers: TimerController by lazy { TimerController(this) }
+
     private val zoneNames = ConcurrentHashMap<String, ZoneNames>()
 
     /** The system's cities and zone names in [locale], kept for the process (the full list is built once per language). */
@@ -33,6 +36,7 @@ class ClockApplication : Application() {
         appScope.launch { preferences.ensureHomeZone(ZoneId.systemDefault().id) }
         // A notification the user dismissed, or lost with the process, comes back with the app
         stopwatch.sync()
+        timers.silenceOverdue()
     }
 
     val backup: BackupManager by lazy { BackupManager(this, getSharedPreferences("backup", MODE_PRIVATE)) }

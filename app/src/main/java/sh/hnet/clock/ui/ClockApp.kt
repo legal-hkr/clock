@@ -76,6 +76,10 @@ import sh.hnet.clock.ui.settings.SettingsRootScreen
 import sh.hnet.clock.ui.settings.WhatsNewScreen
 import sh.hnet.clock.ui.stopwatch.StopwatchScreen
 import sh.hnet.clock.ui.timer.TimerScreen
+import sh.hnet.clock.ui.timer.PresetsScreen
+import sh.hnet.clock.ui.settings.TimerSettingsScreen
+import sh.hnet.clock.ui.settings.TimerSoundScreen
+import sh.hnet.clock.timer.TimerCounts
 
 /** A destination asked for from outside; [serial] tells two requests for the same one apart. */
 data class DestinationRequest(val tab: Tab, val serial: Int)
@@ -113,6 +117,8 @@ fun ClockApp(startTab: Tab, restored: Boolean = false, request: DestinationReque
         select(wanted)
     }
     val stopwatch by app.stopwatch.state.collectAsStateWithLifecycle()
+    val timers by app.timers.timers.collectAsStateWithLifecycle()
+    val timersRevision by app.timers.revision.collectAsStateWithLifecycle()
 
     val snackbars = remember { SnackbarHostState() }
     val restoredText = stringResource(R.string.msg_restored)
@@ -188,7 +194,7 @@ fun ClockApp(startTab: Tab, restored: Boolean = false, request: DestinationReque
                                 when (current) {
                                     Tab.ALARMS -> AlarmsScreen(openSettings)
                                     Tab.CLOCK -> ClockScreen(clock, openSettings, onAddCity = { open(Screen.AddCity()) }, snackbars = snackbars, messageScope = scope)
-                                    Tab.TIMER -> TimerScreen(openSettings)
+                                    Tab.TIMER -> TimerScreen(openSettings, onEditPresets = { open(Screen.TimerPresets) }, snackbars = snackbars, messageScope = scope)
                                     Tab.STOPWATCH -> StopwatchScreen(openSettings, snackbars = snackbars, messageScope = scope)
                                 }
                             }
@@ -202,7 +208,9 @@ fun ClockApp(startTab: Tab, restored: Boolean = false, request: DestinationReque
                                         icon = {
                                             // A dot while the stopwatch runs and another destination shows (§3.1.5)
                                             val dot = item == Tab.STOPWATCH && stopwatch.running && !selected
-                                            BadgedBox(badge = { if (dot) Badge() }) {
+                                            // The number of timers counting down (§3.1.5); counted anew with every change and every end
+                                            val counting = if (item == Tab.TIMER) remember(timers, timersRevision) { TimerCounts.of(timers, app.timers.now()).running } else 0
+                                            BadgedBox(badge = { if (counting > 0) Badge { Text(counting.toString()) } else if (dot) Badge() }) {
                                                 Icon(painterResource(if (selected) item.selectedIcon else item.icon), contentDescription = null)
                                             }
                                         },
@@ -219,12 +227,18 @@ fun ClockApp(startTab: Tab, restored: Boolean = false, request: DestinationReque
                             clock = clock,
                             onBack = back,
                             onOpenClock = { open(Screen.SettingsClock) },
+                            onOpenTimers = { open(Screen.SettingsTimers) },
                             onOpenLanguage = { open(Screen.SettingsLanguage) },
                             onOpenBackup = { open(Screen.SettingsBackup) },
                             onOpenReset = { open(Screen.SettingsReset) },
                             onOpenAbout = { open(Screen.SettingsAbout) },
                         )
                     }
+                    entry<Screen.SettingsTimers> {
+                        TimerSettingsScreen(onBack = back, onOpenSound = { open(Screen.SettingsTimerSound) }, onOpenPresets = { open(Screen.TimerPresets) })
+                    }
+                    entry<Screen.SettingsTimerSound> { TimerSoundScreen(onBack = back) }
+                    entry<Screen.TimerPresets> { PresetsScreen(onBack = back, snackbars = snackbars, messageScope = scope) }
                     entry<Screen.SettingsLanguage> { LanguageScreen(onBack = back) }
                     entry<Screen.SettingsBackup> {
                         BackupScreen(onBack = back, snackbars = snackbars, messageScope = scope, onRestored = {

@@ -3,16 +3,21 @@ package sh.hnet.clock
 import android.content.Context
 import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.edit
+import androidx.datastore.preferences.core.intPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import sh.hnet.clock.backup.BackupSettings
+import sh.hnet.clock.ring.SoundChoice
 import sh.hnet.clock.time.zoneOrNull
 import sh.hnet.clock.ui.Tab
 
 private val Context.settings by preferencesDataStore("settings")
+
+/** Gradually increase volume: Off, 15 s, 30 s, 1 min, 2 min, 5 min (SPEC §3.9.1). */
+val GRADUAL_CHOICES = listOf(0, 15, 30, 60, 120, 300)
 
 /** Choices the user made in the UI that outlive the process (app-private, not backed up by the system). */
 class Preferences(private val context: Context) {
@@ -38,6 +43,31 @@ class Preferences(private val context: Context) {
     val homeClock: Flow<Boolean> = context.settings.data.map { it[homeClockKey] ?: true }
 
     suspend fun setHomeClock(on: Boolean) = context.settings.edit { it[homeClockKey] = on }
+
+    private val timerSoundKey = stringPreferencesKey("timer_sound")
+    private val timerSoundTitleKey = stringPreferencesKey("timer_sound_title")
+
+    /** What an ended timer plays (SPEC §3.9.2); the phone's default alarm sound unless chosen. */
+    val timerSound: Flow<SoundChoice> = context.settings.data.map { SoundChoice.decode(it[timerSoundKey], it[timerSoundTitleKey]) }
+
+    suspend fun setTimerSound(sound: SoundChoice) = context.settings.edit { prefs ->
+        prefs[timerSoundKey] = sound.encode()
+        if (sound is SoundChoice.Sound) prefs[timerSoundTitleKey] = sound.title else prefs.remove(timerSoundTitleKey)
+    }
+
+    private val timerVibrationKey = booleanPreferencesKey("timer_vibration")
+
+    /** Vibration with an ended timer; on by default. A silent timer vibrates whatever this says (§3.3.6). */
+    val timerVibration: Flow<Boolean> = context.settings.data.map { it[timerVibrationKey] ?: true }
+
+    suspend fun setTimerVibration(on: Boolean) = context.settings.edit { it[timerVibrationKey] = on }
+
+    private val timerGradualKey = intPreferencesKey("timer_gradual_seconds")
+
+    /** Seconds over which an ended timer's sound rises; 0 (off) by default. */
+    val timerGradual: Flow<Int> = context.settings.data.map { prefs -> (prefs[timerGradualKey] ?: 0).takeIf { it in GRADUAL_CHOICES } ?: 0 }
+
+    suspend fun setTimerGradual(seconds: Int) = context.settings.edit { it[timerGradualKey] = seconds }
 
     private val homeZoneKey = stringPreferencesKey("home_zone")
 
@@ -74,6 +104,12 @@ class Preferences(private val context: Context) {
                 homeClock = prefs[homeClockKey] ?: true,
                 homeZone = prefs[homeZoneKey],
             ),
+            timers = BackupSettings.Timers(
+                sound = prefs[timerSoundKey],
+                soundTitle = prefs[timerSoundTitleKey],
+                vibration = prefs[timerVibrationKey] ?: true,
+                gradualSeconds = prefs[timerGradualKey] ?: 0,
+            ),
         )
     }
 
@@ -87,6 +123,10 @@ class Preferences(private val context: Context) {
         last?.let { prefs[lastDestinationKey] = it }
         backup.clock?.showSeconds?.let { prefs[showSecondsKey] = it }
         backup.clock?.homeClock?.let { prefs[homeClockKey] = it }
+        backup.timers?.sound?.let { prefs[timerSoundKey] = it }
+        backup.timers?.soundTitle?.let { prefs[timerSoundTitleKey] = it }
+        backup.timers?.vibration?.let { prefs[timerVibrationKey] = it }
+        backup.timers?.gradualSeconds?.takeIf { it in GRADUAL_CHOICES }?.let { prefs[timerGradualKey] = it }
         prefs[homeZoneKey] = backup.clock?.homeZone?.takeIf { zoneOrNull(it) != null } ?: systemZoneId
     }
 }

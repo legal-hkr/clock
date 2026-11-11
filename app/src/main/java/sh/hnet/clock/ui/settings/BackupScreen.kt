@@ -218,6 +218,7 @@ private fun RestoreConfirmDialog(picked: BackupManager.Picked, onDismiss: () -> 
                 stringResource(R.string.msg_restore_settings),
                 // Absent in a backup from before cities, which then stay as they are
                 valid.backup.cities?.let { stringResource(R.string.msg_restore_cities, it.size) },
+                valid.backup.timerPresets?.let { stringResource(R.string.msg_restore_presets, it.size) },
             ).forEach { item ->
                 Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                     Text("–")
