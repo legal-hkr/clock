@@ -1,4 +1,4 @@
-# Clock
+# <img src="metadata/en-US/icon.png" width="42"/> Clock
 
 A private, offline clock for Android: alarms, world clock, timer and stopwatch.
 

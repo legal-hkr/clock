@@ -128,8 +128,8 @@ fun AppLogo(titleInset: Dp, modifier: Modifier = Modifier) {
 
 private val LOGO_SIZE = 144.dp
 
-/** Where the mark starts in ic_launcher_foreground, as a share of its width (x 3 of 24 units, scaled 8/3 from 22 of 108). */
-private const val LOGO_MARK_START = (22f + 3f * 8f / 3f) / 108f
+/** Where the mark starts in ic_launcher_foreground, as a share of its width: the ring's outer edge (center 384, radius 178, half its 45 stroke) in the 768 viewport. */
+private const val LOGO_MARK_START = (384f - 178f - 22.5f) / 768f
 
-/** The empty band below the mark, as a share of the height (the mark ends at y 21 of 24 units). */
-private const val LOGO_EMPTY_BELOW = (108f - 22f - 21f * 8f / 3f) / 108f
+/** The empty band below the mark, as a share of the height (the ring ends as far from the bottom as it starts from the side). */
+private const val LOGO_EMPTY_BELOW = (768f - 384f - 178f - 22.5f) / 768f

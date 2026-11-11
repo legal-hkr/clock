@@ -57,7 +57,7 @@ fun AboutScreen(onBack: () -> Unit, onOpenWhatsNew: () -> Unit, onOpenLicense: (
     val noBrowser = stringResource(R.string.msg_no_browser)
     SettingsPage(title = stringResource(R.string.title_settings_about), onBack = onBack) {
         Column(Modifier.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally) {
-            // The launcher icon's artwork (a placeholder until the final icon)
+            // The launcher icon's artwork
             Image(painterResource(R.drawable.ic_launcher_foreground), contentDescription = stringResource(R.string.app_name), modifier = Modifier.size(240.dp))
             Text(stringResource(R.string.app_name), style = MaterialTheme.typography.headlineLarge)
             Text(stringResource(R.string.label_version_value, version), style = MaterialTheme.typography.bodyLarge, color = MaterialTheme.colorScheme.onSurfaceVariant)
