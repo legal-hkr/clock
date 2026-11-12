@@ -78,6 +78,9 @@ object Widgets {
     private const val REQUEST_LIST = 101
     private const val REQUEST_LIST_TIMERS = 102
 
+    /** The hour's letters in a time pattern. */
+    private val HOUR = Regex("[HhKk]+")
+
     /** The period marker of a time pattern with the (possibly non-breaking or narrow) spaces around it. */
     private val PERIOD = Regex("[\\s\\u00A0\\u202F]*a+[\\s\\u00A0\\u202F]*")
 
@@ -135,7 +138,8 @@ object Widgets {
     /** The hours of the locale's time pattern up to the minutes ("HH:", "h:", "H."): the widgets' clocks show hours and minutes apart and never the period. */
     private fun hourPatterns(locale: Locale, separator: Boolean): Pair<String, String> {
         val (twelve, twentyFour) = timePatterns(locale, period = false)
-        fun hours(pattern: String) = pattern.substringBefore('m').let { if (separator) it else it.filter { letter -> letter.isLetter() } }
+        // Without the separator only the hour's own letters count: a pattern may carry quoted words ("HH 'h' mm")
+        fun hours(pattern: String) = if (separator) pattern.substringBefore('m') else HOUR.find(pattern)?.value ?: "H"
         return hours(twelve) to hours(twentyFour)
     }
 
