@@ -1,0 +1,26 @@
+Clock is an alarm clock, world clock, timer and stopwatch with home-screen widgets. It has no internet permission, doesn’t ask for your location, storage or media, and keeps nothing about you: alarms and settings stay on your phone.
+
+Alarms:
+- Every day, weekdays, weekends or the days you pick, or once on a date, each with its own label and sound
+- Skipping the next occurrence of a repeating alarm without switching it off
+- A full-screen alarm with slide to stop, snooze of the length you set, automatic silencing and gradually increasing volume
+- A notification ahead of an upcoming alarm, and one for an alarm you missed
+- A warning when notifications, full-screen alarms, Do Not Disturb, battery restrictions or a zero alarm volume could keep an alarm from ringing
+
+World clock:
+- Cities from the phone’s list of time zones, in the order you choose, each with its difference from local time
+- A home clock that shows the time at home while you’re in another time zone
+
+Timer and stopwatch:
+- Several timers at once, each with a label, and one more minute when you need it
+- Presets that start a timer with one tap, also from the home screen
+- Laps with the fastest and slowest marked, ready to share
+
+Widgets:
+- Digital clock with the date and the next alarm, analog clock, world clock and timer presets
+
+And also:
+- Backup and restore of alarms, cities, timer presets and settings to a file you choose
+- English and Polish, independent of the system language
+- Time and date formats and the first day of the week taken from the phone’s settings
+- Material 3 Expressive design with your phone’s colors

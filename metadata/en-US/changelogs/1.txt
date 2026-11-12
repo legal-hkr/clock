@@ -1,4 +1,10 @@
 v0.1.0
 
 First version:
-- In development
+- Alarms, repeating or one-time, with snooze, skipping the next one and full-screen ringing
+- Reliability check: a warning when an alarm might not ring
+- World clock with your cities and a home clock for travel
+- Several timers at once, with presets
+- Stopwatch with laps
+- Widgets: digital clock, analog clock, world clock and timer
+- Backup and restore of alarms, cities, timer presets and settings

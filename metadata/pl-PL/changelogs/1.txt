@@ -1,0 +1,10 @@
+v0.1.0
+
+Pierwsza wersja:
+- Alarmy powtarzane lub jednorazowe, z drzemką, pomijaniem najbliższego i dzwonieniem na pełnym ekranie
+- Kontrola niezawodności: ostrzeżenie, gdy alarm może nie zadzwonić
+- Zegar światowy z wybranymi miastami i zegarem domowym na czas podróży
+- Kilka minutników naraz, z szablonami
+- Stoper z okrążeniami
+- Widżety: zegar cyfrowy, zegar analogowy, zegar światowy i minutnik
+- Kopia zapasowa alarmów, miast, szablonów minutnika i ustawień

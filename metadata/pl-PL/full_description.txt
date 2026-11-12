@@ -1,0 +1,26 @@
+Zegar to budzik, zegar światowy, minutnik i stoper z widżetami na ekran główny. Aplikacja nie ma uprawnienia dostępu do internetu, nie prosi o dostęp do położenia, pamięci ani multimediów i nie zbiera żadnych danych: alarmy i ustawienia pozostają w telefonie.
+
+Alarmy:
+- Codziennie, w dni robocze, w weekendy, w wybrane dni albo jednorazowo, w wybranym dniu; każdy z własną etykietą i dźwiękiem
+- Pominięcie najbliższego powtórzenia alarmu bez jego wyłączania
+- Alarm na pełnym ekranie, zatrzymywany przesunięciem, z drzemką o wybranej długości, automatycznym wyciszeniem i stopniowym zwiększaniem głośności
+- Powiadomienie przed nadchodzącym alarmem i po przegapionym
+- Ostrzeżenie, gdy alarm może nie zadzwonić: wyłączone powiadomienia lub alarmy na pełnym ekranie, tryb „Nie przeszkadzać”, ograniczone użycie baterii albo głośność alarmów na zerze
+
+Zegar światowy:
+- Miasta z listy stref czasowych telefonu, w wybranej kolejności, każde z różnicą względem czasu lokalnego
+- Zegar domowy, który w innej strefie czasowej pokazuje godzinę w domu
+
+Minutnik i stoper:
+- Kilka minutników naraz, każdy z etykietą i możliwością dodania minuty
+- Szablony uruchamiające minutnik jednym dotknięciem, także z ekranu głównego
+- Okrążenia z oznaczonym najszybszym i najwolniejszym, gotowe do udostępnienia
+
+Widżety:
+- Zegar cyfrowy z datą i najbliższym alarmem, zegar analogowy, zegar światowy i szablony minutnika
+
+A także:
+- Kopia zapasowa alarmów, miast, szablonów minutnika i ustawień w wybranym pliku
+- Język polski lub angielski, niezależnie od języka systemu
+- Formaty godziny i daty oraz pierwszy dzień tygodnia zgodne z ustawieniami telefonu
+- Wygląd Material 3 Expressive w kolorach systemu
