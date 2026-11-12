@@ -17,7 +17,7 @@ Minutnik i stoper:
 - Okrążenia z oznaczonym najszybszym i najwolniejszym, gotowe do udostępnienia
 
 Widżety:
-- Zegar cyfrowy z datą i najbliższym alarmem, zegar analogowy, zegar światowy i szablony minutnika
+- Zegar cyfrowy z datą i najbliższym alarmem, okrągły zegar cyfrowy, zegar analogowy, zegar światowy oraz minutnik z szablonami i działającymi minutnikami
 
 A także:
 - Kopia zapasowa alarmów, miast, szablonów minutnika i ustawień w wybranym pliku

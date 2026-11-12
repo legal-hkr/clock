@@ -17,7 +17,7 @@ Timer and stopwatch:
 - Laps with the fastest and slowest marked, ready to share
 
 Widgets:
-- Digital clock with the date and the next alarm, analog clock, world clock and timer presets
+- Digital clock with the date and the next alarm, round digital clock, analog clock, world clock and timer with your presets and the running timers
 
 And also:
 - Backup and restore of alarms, cities, timer presets and settings to a file you choose

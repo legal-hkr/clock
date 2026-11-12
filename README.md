@@ -40,7 +40,7 @@ Clock is an alarm clock, world clock, timer and stopwatch with home-screen widge
 
 ### Widgets
 
-- **Digital clock** with the date and the next alarm, **analog clock**, **world clock** and **timer presets**
+- **Digital clock** with the date and the next alarm, **round digital clock**, **analog clock**, **world clock** and **timer** with your presets and the running timers
 
 ### Settings
 

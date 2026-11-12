@@ -1,0 +1,12 @@
+v0.2.0
+
+New:
+- Round digital clock widget: the time in digits inside the analog clock’s shape
+- Timer widget shows timers and presets together; a paused timer can be deleted from it
+- Presets are edited with the timer’s keypad and no longer need a name
+
+Changes:
+- Digital clock widget redesigned, now 4 × 2 only
+- A single timer fills the page as a large card
+- Timers without a label are named after their duration
+- New app icon

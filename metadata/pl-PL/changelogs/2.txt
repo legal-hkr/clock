@@ -1,0 +1,12 @@
+v0.2.0
+
+Nowości:
+- Widżet „Okrągły zegar cyfrowy”: godzina cyframi w kształcie zegara analogowego
+- Widżet minutnika pokazuje minutniki razem z szablonami; wstrzymany można z niego usunąć
+- Edycja szablonów klawiaturą minutnika; nazwa nie jest już wymagana
+
+Zmiany:
+- Nowy wygląd widżetu zegara cyfrowego, teraz tylko 4 × 2
+- Pojedynczy minutnik wypełnia stronę jako duża karta
+- Minutniki bez etykiety otrzymują nazwę od ustawionego czasu
+- Nowa ikona aplikacji
