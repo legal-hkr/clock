@@ -1,21 +1,43 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- The owner's mark: a graphite ring (#9A9DAA to #3E4150) with hands in blue to violet (#2F6BF0 to #8B45E8), within the 66 dp safe zone. Also the in-app logo. -->
+<!-- Clock launcher icon, foreground layer. 108 dp canvas, viewport 768; the art stays inside the central 470 units. -->
 <vector xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:aapt="http://schemas.android.com/aapt"
     android:width="108dp"
     android:height="108dp"
     android:viewportWidth="768"
     android:viewportHeight="768">
-    <path
-        android:pathData="M206,384 a178,178 0 1,0 356,0 a178,178 0 1,0 -356,0 Z"
-        android:strokeWidth="45">
-        <aapt:attr name="android:strokeColor"><gradient android:type="linear" android:startX="208" android:startY="208" android:endX="560" android:endY="560" android:startColor="#FF9A9DAA" android:endColor="#FF3E4150"/></aapt:attr>
+    <!-- Face -->
+    <path android:pathData="M172,384 a212,212 0 1 0 424,0 a212,212 0 1 0 -424,0 Z">
+        <aapt:attr name="android:fillColor">
+            <gradient
+                android:type="linear"
+                android:startX="234"
+                android:startY="234"
+                android:endX="534"
+                android:endY="534"
+                android:startColor="#FFC3C6D0"
+                android:endColor="#FF6E7182" />
+        </aapt:attr>
     </path>
+    <!-- Dot at twelve -->
     <path
-        android:pathData="M384,295 L384,384 L445.4,445.4"
-        android:strokeWidth="44"
-        android:strokeLineCap="round"
-        android:strokeLineJoin="round">
-        <aapt:attr name="android:strokeColor"><gradient android:type="linear" android:startX="384" android:startY="268" android:endX="468" android:endY="468" android:startColor="#FF2F6BF0" android:endColor="#FF8B45E8"/></aapt:attr>
+        android:fillColor="#FFFFFFFF"
+        android:pathData="M367,214 a17,17 0 1 0 34,0 a17,17 0 1 0 -34,0 Z" />
+    <!-- Hour hand with its round hub at the centre (one shape) -->
+    <path
+        android:fillColor="#FFFFFFFF"
+        android:pathData="M342.1,381.8 L277.7,337.4 A22,22 0 0 1 302.7,301.2 L367,345.6 A42,42 0 1 1 342.1,381.8 Z" />
+    <!-- Minute hand with its smaller hub (one shape), on top -->
+    <path android:pathData="M393.8,354.6 L506.1,273 A18,18 0 0 1 527.3,302.2 L415,383.7 A31,31 0 1 1 393.8,354.6 Z">
+        <aapt:attr name="android:fillColor">
+            <gradient
+                android:type="linear"
+                android:startX="384"
+                android:startY="384"
+                android:endX="516.7"
+                android:endY="287.6"
+                android:startColor="#FF2F6BF0"
+                android:endColor="#FF8B45E8" />
+        </aapt:attr>
     </path>
 </vector>

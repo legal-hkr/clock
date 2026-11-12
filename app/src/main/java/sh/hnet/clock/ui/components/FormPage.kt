@@ -4,7 +4,9 @@ package sh.hnet.clock.ui.components
 
 import androidx.annotation.DrawableRes
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Row
@@ -14,11 +16,13 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.requiredSize
 import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -32,7 +36,8 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.layout.layout
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.heading
@@ -41,7 +46,6 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import sh.hnet.clock.R
-import kotlin.math.roundToInt
 
 /**
  * A full page with one task, as ComfyChair's and Music's FormPage: a top bar (Back and title; none when
@@ -104,32 +108,22 @@ fun FormPage(
     }
 }
 
-/**
- * The app's mark at 144 dp, as ComfyChair's AppLogo: placed so the mark's left edge lines up with
- * text inset by [titleInset], with the empty band under the mark cut off.
- */
+/** The app's mark at 144 dp on Welcome, its left edge in line with text inset by [titleInset]. */
 @Composable
 fun AppLogo(titleInset: Dp, modifier: Modifier = Modifier) {
-    Image(
-        painter = painterResource(R.drawable.ic_launcher_foreground),
-        contentDescription = null,
-        modifier = modifier
-            .size(LOGO_SIZE)
-            .layout { measurable, constraints ->
-                val placeable = measurable.measure(constraints)
-                val markStart = (placeable.width * LOGO_MARK_START).roundToInt()
-                val emptyBelow = (placeable.height * LOGO_EMPTY_BELOW).roundToInt()
-                layout(placeable.width, placeable.height - emptyBelow) {
-                    placeable.place(titleInset.roundToPx() - markStart, 0)
-                }
-            },
-    )
+    AppMark(LOGO_SIZE, modifier.padding(start = titleInset, bottom = 16.dp))
+}
+
+/**
+ * The app's mark as a launcher shows it (icon handoff of 12 Nov 2026, §5): the icon's foreground
+ * layer at one and a half times [size], of which the round mask shows the middle, on the icon's own
+ * white background layer. That white is the icon's, not a color of the UI.
+ */
+@Composable
+fun AppMark(size: Dp, modifier: Modifier = Modifier) {
+    Box(modifier.size(size).clip(CircleShape).background(Color.White), contentAlignment = Alignment.Center) {
+        Image(painterResource(R.drawable.ic_launcher_foreground), contentDescription = null, modifier = Modifier.requiredSize(size * 1.5f))
+    }
 }
 
 private val LOGO_SIZE = 144.dp
-
-/** Where the mark starts in ic_launcher_foreground, as a share of its width: the ring's outer edge (center 384, radius 178, half its 45 stroke) in the 768 viewport. */
-private const val LOGO_MARK_START = (384f - 178f - 22.5f) / 768f
-
-/** The empty band below the mark, as a share of the height (the ring ends as far from the bottom as it starts from the side). */
-private const val LOGO_EMPTY_BELOW = (768f - 384f - 178f - 22.5f) / 768f

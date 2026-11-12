@@ -1,18 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- The mark in one color, for themed icons and wherever the logo is tinted; laid out as ic_launcher_foreground. -->
+<!-- Clock launcher icon, monochrome layer for themed icons. One path, even-odd fill: the face with the dot, the minute hand with its hub, and the hour hand cut out; the hour hand stops 12 units short of the minute hand's hub. -->
 <vector xmlns:android="http://schemas.android.com/apk/res/android"
     android:width="108dp"
     android:height="108dp"
     android:viewportWidth="768"
     android:viewportHeight="768">
     <path
-        android:pathData="M206,384 a178,178 0 1,0 356,0 a178,178 0 1,0 -356,0 Z"
-        android:strokeWidth="45"
-        android:strokeColor="#FF000000" />
-    <path
-        android:pathData="M384,295 L384,384 L445.4,445.4"
-        android:strokeWidth="44"
-        android:strokeLineCap="round"
-        android:strokeLineJoin="round"
-        android:strokeColor="#FF000000" />
+        android:fillColor="#FF000000"
+        android:fillType="evenOdd"
+        android:pathData="M172,384 a212,212 0 1 0 424,0 a212,212 0 1 0 -424,0 Z M367,214 a17,17 0 1 0 34,0 a17,17 0 1 0 -34,0 Z M341.1,381.1 L277.7,337.4 A22,22 0 0 1 302.7,301.2 L366.1,344.9 A43,43 0 0 0 341.1,381.1 Z M393.8,354.6 L506.1,273 A18,18 0 0 1 527.3,302.2 L415,383.7 A31,31 0 1 1 393.8,354.6 Z" />
 </vector>

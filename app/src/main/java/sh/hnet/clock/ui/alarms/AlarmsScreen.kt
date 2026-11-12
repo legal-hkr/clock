@@ -138,7 +138,8 @@ fun AlarmsScreen(onOpenSettings: () -> Unit, onOpenAlarm: (Long) -> Unit, onOpen
     }
     DestinationScaffold(stringResource(R.string.label_nav_alarms), onOpenSettings, subtitle = subtitle, subtitleColor = if (problem != null) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.onSurfaceVariant) {
         if (shown.isEmpty()) {
-            EmptyState(R.drawable.ic_alarm, stringResource(R.string.msg_empty_alarms), Modifier.padding(bottom = FAB_CLEARANCE))
+            // The app's mark in one color: the launcher icon's monochrome layer, whose face is about 60 dp at this size
+            EmptyState(R.drawable.ic_launcher_monochrome, stringResource(R.string.msg_empty_alarms), Modifier.padding(bottom = FAB_CLEARANCE), iconSize = 108.dp)
         } else {
             LazyColumn(
                 Modifier.fillMaxSize(),

@@ -5,10 +5,9 @@ package sh.hnet.clock.ui.settings
 import android.content.ActivityNotFoundException
 import android.content.Intent
 import android.widget.Toast
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -20,7 +19,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
@@ -29,6 +27,7 @@ import androidx.lifecycle.compose.LifecycleResumeEffect
 import sh.hnet.clock.BuildConfig
 import sh.hnet.clock.R
 import sh.hnet.clock.about.WhatsNew
+import sh.hnet.clock.ui.components.AppMark
 import sh.hnet.clock.ui.components.SettingsGroup
 import sh.hnet.clock.ui.components.SettingsLinkRow
 import sh.hnet.clock.ui.components.SettingsNavigationRow
@@ -57,8 +56,8 @@ fun AboutScreen(onBack: () -> Unit, onOpenWhatsNew: () -> Unit, onOpenLicense: (
     val noBrowser = stringResource(R.string.msg_no_browser)
     SettingsPage(title = stringResource(R.string.title_settings_about), onBack = onBack) {
         Column(Modifier.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally) {
-            // The launcher icon's artwork
-            Image(painterResource(R.drawable.ic_launcher_foreground), contentDescription = stringResource(R.string.app_name), modifier = Modifier.size(240.dp))
+            // The launcher icon as a launcher shows it; the name follows as text
+            AppMark(240.dp, Modifier.padding(top = 8.dp, bottom = 24.dp))
             Text(stringResource(R.string.app_name), style = MaterialTheme.typography.headlineLarge)
             Text(stringResource(R.string.label_version_value, version), style = MaterialTheme.typography.bodyLarge, color = MaterialTheme.colorScheme.onSurfaceVariant)
         }
