@@ -167,7 +167,8 @@
     <string name="button_add_minute">Dodaj 1 minutę</string>
     <string name="button_delete">Usuń</string>
     <string name="label_label">Etykieta</string>
-    <string name="content_description_edit_label">Zmień etykietę</string>
+    <string name="content_description_timer_label">Etykieta: %s. Zmień</string>
+    <string name="button_delete_timer">Usuń minutnik</string>
     <string name="msg_timer_deleted"><![CDATA[Usunięto minutnik <b>%s</b>]]></string>
     <string name="msg_timer_deleted_unnamed">Usunięto minutnik</string>
     <plurals name="title_timers_ended">

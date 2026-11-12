@@ -161,7 +161,8 @@
     <string name="label_plus_minute" translatable="false">+1:00</string>
     <string name="button_delete">Delete</string>
     <string name="label_label">Label</string>
-    <string name="content_description_edit_label">Edit the label</string>
+    <string name="content_description_timer_label">Label: %s. Edit</string>
+    <string name="button_delete_timer">Delete timer</string>
     <string name="msg_timer_deleted"><![CDATA[Deleted timer <b>%s</b>]]></string>
     <string name="msg_timer_deleted_unnamed">Timer deleted</string>
     <plurals name="title_timers_ended">

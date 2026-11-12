@@ -25,8 +25,10 @@ import androidx.compose.material3.SegmentedListItem
 import androidx.compose.material3.Slider
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.rememberSliderState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -207,18 +209,23 @@ private fun AlarmVolume(modifier: Modifier = Modifier) {
                     style = MaterialTheme.typography.bodyMedium,
                     color = if (zero) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.onSurfaceVariant,
                 )
-                if (max > min) Slider(
-                    value = volume.toFloat(),
-                    onValueChange = { value ->
-                        val next = value.roundToInt().coerceIn(min, max)
-                        if (next != volume) {
-                            volume = next
-                            audio.setStreamVolume(AudioManager.STREAM_ALARM, next, 0)
-                        }
-                    },
-                    valueRange = min.toFloat()..max.toFloat(),
-                    steps = (max - min - 1).coerceAtLeast(0),
-                )
+                if (max > min) {
+                    val slider = rememberSliderState(volume.toFloat(), (max - min - 1).coerceAtLeast(0), min.toFloat()..max.toFloat())
+                    // The slider follows the volume wherever it was changed
+                    LaunchedEffect(volume) {
+                        if (slider.value.roundToInt() != volume) slider.value = volume.toFloat()
+                    }
+                    Slider(
+                        state = slider,
+                        onValueChange = { value ->
+                            val next = value.roundToInt().coerceIn(min, max)
+                            if (next != volume) {
+                                volume = next
+                                audio.setStreamVolume(AudioManager.STREAM_ALARM, next, 0)
+                            }
+                        },
+                    )
+                }
             }
         }
     }

@@ -31,6 +31,8 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Badge
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.IconButtonColors
+import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.LargeFlexibleTopAppBar
 import androidx.compose.material3.ListItemColors
 import androidx.compose.material3.ListItemDefaults
@@ -157,13 +159,13 @@ fun SettingsGroupHeader(title: String) {
 
 /** An icon-only button with its label as content description and as a tooltip on long press. */
 @Composable
-fun TooltipIconButton(@DrawableRes icon: Int, label: String, onClick: () -> Unit, enabled: Boolean = true) {
+fun TooltipIconButton(@DrawableRes icon: Int, label: String, onClick: () -> Unit, enabled: Boolean = true, colors: IconButtonColors = IconButtonDefaults.iconButtonColors()) {
     TooltipBox(
         positionProvider = TooltipDefaults.rememberTooltipPositionProvider(TooltipAnchorPosition.Below),
         tooltip = { PlainTooltip { Text(label) } },
         state = rememberTooltipState(),
     ) {
-        IconButton(onClick = onClick, enabled = enabled) {
+        IconButton(onClick = onClick, enabled = enabled, colors = colors) {
             Icon(painterResource(icon), contentDescription = label)
         }
     }
