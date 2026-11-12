@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Timer widget of one line while timers exist (widget handoff of 12 Nov 2026, §3.2, §3.3): the first timer and, four cells wide, "+". -->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:ignore="ContentDescription"
+    android:id="@android:id/background"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/widget_background"
+    android:clipToOutline="true"
+    android:gravity="center_vertical"
+    android:orientation="horizontal">
+
+    <LinearLayout
+        android:id="@+id/rows"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:orientation="vertical" />
+
+    <ImageButton
+        android:id="@+id/add"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:layout_marginEnd="12dp"
+        android:background="@drawable/widget_circle_tonal"
+        android:src="@drawable/ic_add"
+        android:tint="@color/widget_on_secondary_container" />
+</LinearLayout>

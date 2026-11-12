@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Timer widget with nothing running, one row: as many presets as fit, then "+" (SPEC §3.10.4). Without presets, the widget's name. -->
+<!-- Timer widget of one line with no timer: as many presets as fit, then "+" (SPEC §3.10.4). Two cells wide or without presets: its icon and name. -->
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     tools:ignore="ContentDescription"
@@ -13,6 +13,16 @@
     android:paddingStart="12dp"
     android:paddingEnd="12dp">
 
+    <ImageView
+        android:id="@+id/icon"
+        android:layout_width="24dp"
+        android:layout_height="24dp"
+        android:layout_marginStart="4dp"
+        android:importantForAccessibility="no"
+        android:src="@drawable/ic_hourglass_empty"
+        android:tint="@color/widget_on_surface"
+        android:visibility="gone" />
+
     <TextView
         android:id="@+id/title"
         android:layout_width="0dp"
@@ -20,7 +30,7 @@
         android:layout_weight="1"
         android:ellipsize="end"
         android:maxLines="1"
-        android:paddingStart="4dp"
+        android:paddingStart="8dp"
         android:paddingEnd="0dp"
         android:textColor="@color/widget_on_surface"
         android:textSize="16sp"

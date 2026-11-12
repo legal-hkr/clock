@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Timer widget with nothing running, two rows and more: its name with "+", then the first presets as pills. -->
+<!-- Timer widget from two lines up (widget handoff of 12 Nov 2026, §3.1): the timers from the top – a scrolling list when they need more lines than there are –, then the presets. With no timer, its name with "+" stands on the first line. -->
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     tools:ignore="ContentDescription"
@@ -10,10 +10,8 @@
     android:clipToOutline="true"
     android:gravity="center_vertical"
     android:orientation="vertical"
-    android:paddingStart="12dp"
-    android:paddingEnd="0dp"
-    android:paddingTop="8dp"
-    android:paddingBottom="8dp">
+    android:paddingTop="10dp"
+    android:paddingBottom="10dp">
 
     <LinearLayout
         android:id="@+id/header"
@@ -21,8 +19,10 @@
         android:layout_height="wrap_content"
         android:gravity="center_vertical"
         android:orientation="horizontal"
-        android:paddingStart="4dp"
-        android:paddingEnd="12dp">
+        android:paddingStart="16dp"
+        android:paddingTop="2dp"
+        android:paddingEnd="12dp"
+        android:paddingBottom="2dp">
 
         <ImageView
             android:layout_width="24dp"
@@ -51,21 +51,22 @@
             android:tint="@color/widget_on_secondary_container" />
     </LinearLayout>
 
-    <LinearLayout
-        android:id="@+id/pills1"
+    <ListView
+        android:id="@+id/list"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="6dp"
-        android:paddingStart="0dp"
-        android:paddingEnd="4dp"
-        android:orientation="horizontal" />
+        android:layout_height="104dp"
+        android:divider="@null"
+        android:visibility="gone" />
 
     <LinearLayout
-        android:id="@+id/pills2"
+        android:id="@+id/rows"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="6dp"
-        android:paddingStart="0dp"
-        android:paddingEnd="4dp"
-        android:orientation="horizontal" />
+        android:orientation="vertical" />
+
+    <LinearLayout
+        android:id="@+id/presets"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical" />
 </LinearLayout>

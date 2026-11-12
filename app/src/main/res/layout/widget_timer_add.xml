@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- "+" at the end of the timer widget's last line of presets: opens the New timer sheet. -->
+<ImageButton xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:ignore="ContentDescription"
+    android:id="@+id/add"
+    android:layout_width="48dp"
+    android:layout_height="48dp"
+    android:layout_marginEnd="8dp"
+    android:background="@drawable/widget_circle_tonal"
+    android:src="@drawable/ic_add"
+    android:tint="@color/widget_on_secondary_container" />

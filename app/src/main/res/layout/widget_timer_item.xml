@@ -1,15 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- A timer on the widget (SPEC §3.10.4): its label, the time left counted down by the system's chronometer, "+1:00" where there is room, and Pause, Resume or Stop. -->
+<!-- A timer's line on the widget (widget handoff of 12 Nov 2026, §4): its name over the time left, counted by the system's chronometer, then "+1:00" (running, ended) or Delete (paused) where there is room, and Pause, Resume or Stop. -->
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    tools:ignore="SpUsage,ContentDescription"
+    tools:ignore="ContentDescription"
+    android:id="@+id/item"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:gravity="center_vertical"
-    android:minHeight="56dp"
+    android:minHeight="52dp"
     android:orientation="horizontal"
-    android:paddingStart="16dp"
-    android:paddingEnd="12dp">
+    android:paddingStart="20dp"
+    android:paddingTop="2dp"
+    android:paddingEnd="12dp"
+    android:paddingBottom="2dp">
 
     <LinearLayout
         android:id="@+id/open"
@@ -23,6 +26,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:ellipsize="end"
+            android:includeFontPadding="false"
             android:maxLines="1"
             android:textColor="@color/widget_on_surface_variant"
             android:textSize="12sp" />
@@ -34,7 +38,7 @@
             android:includeFontPadding="false"
             android:maxLines="1"
             android:textColor="@color/widget_on_surface"
-            android:textSize="28dp" />
+            android:textSize="22sp" />
 
         <TextView
             android:id="@+id/left_paused"
@@ -43,7 +47,7 @@
             android:includeFontPadding="false"
             android:maxLines="1"
             android:textColor="@color/widget_on_surface_variant"
-            android:textSize="28dp"
+            android:textSize="22sp"
             android:visibility="gone" />
     </LinearLayout>
 
@@ -51,7 +55,7 @@
         android:id="@+id/plus"
         android:layout_width="wrap_content"
         android:layout_height="48dp"
-        android:layout_marginEnd="8dp"
+        android:layout_marginStart="8dp"
         android:background="@drawable/widget_pill"
         android:gravity="center"
         android:paddingHorizontal="16dp"
@@ -59,9 +63,19 @@
         android:textSize="14sp" />
 
     <ImageButton
+        android:id="@+id/delete"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:layout_marginStart="8dp"
+        android:background="@drawable/widget_circle_plain"
+        android:src="@drawable/ic_delete"
+        android:tint="@color/widget_error" />
+
+    <ImageButton
         android:id="@+id/action"
         android:layout_width="48dp"
         android:layout_height="48dp"
+        android:layout_marginStart="8dp"
         android:background="@drawable/widget_circle_primary"
         android:tint="@color/widget_on_primary" />
 </LinearLayout>

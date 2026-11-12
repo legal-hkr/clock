@@ -10,6 +10,7 @@ import android.content.Intent
 import android.os.SystemClock
 import android.text.format.DateFormat
 import android.util.SizeF
+import android.util.TypedValue
 import android.view.View
 import android.widget.RemoteViews
 import kotlinx.coroutines.Dispatchers
@@ -56,8 +57,16 @@ object Widgets {
 
     private const val WIDE = 230f
     private const val NARROW = 50f
+    /** The least widths (dp) at which a timer's line holds two buttons, and at which presets stand two to a line and the one-line widget has "+" too. */
+    private const val MIDDLE = 250f
+    private const val TIMER_WIDE = 310f
+
+    /** A line of the timer widget with the space under it (dp), and the least heights of a widget of one to five lines (12 dp around). */
+    private const val LINE = 52f
+    private val TIMER_HEIGHTS = listOf(40f, 124f, 176f, 228f, 280f)
     private const val REQUEST_NEW_TIMER = 100
     private const val REQUEST_LIST = 101
+    private const val REQUEST_LIST_TIMERS = 102
 
     /** The period marker of a time pattern with the (possibly non-breaking or narrow) spaces around it. */
     private val PERIOD = Regex("[\\s\\u00A0\\u202F]*a+[\\s\\u00A0\\u202F]*")
@@ -275,7 +284,7 @@ object Widgets {
         if (next == null) alarms.cancel(intent) else alarms.set(AlarmManager.RTC, next + 1_000, intent)
     }
 
-    // ---- Timer (§3.10.4) ----
+    // ---- Timer (§3.10.4, widget handoff of 12 Nov 2026) ----
 
     fun timer(context: Context) {
         val app = context.applicationContext as ClockApplication
@@ -285,30 +294,73 @@ object Widgets {
         val timers = app.timers.timers.value.shown(now)
         val presets = app.timers.presets.value
         val open = Notifications.open(context, Tab.TIMER)
-        val views = sized(listOf(NARROW, WIDE), listOf(40f, 120f, 200f)) { width, height ->
-            val wide = width >= WIDE
-            val rows = if (height >= 200f) 3 else if (height >= 120f) 2 else 1
-            if (timers.isNotEmpty()) {
-                // The one that ends first – or ended first –, and from two rows the ones after it
-                RemoteViews(context.packageName, R.layout.widget_timer_running).apply {
-                    removeAllViews(R.id.rows)
-                    timers.take(rows).forEach { addView(R.id.rows, timerRow(context, it, now, wide, open)) }
+        val add = newTimer(context)
+        val title = context.getString(R.string.label_nav_timer)
+        // Where a timer would end silently (notifications off…), a preset opens Timer, with its problem card, instead of starting one
+        val canRing = Reliability.read(context).problems(Ringing.TIMERS, soundWanted = false).isEmpty()
+        // Lines stay 48 dp: at a large font the name gives way to the time
+        val names = context.resources.configuration.fontScale < 1.15f
+        val views = sized(listOf(NARROW, MIDDLE, TIMER_WIDE), TIMER_HEIGHTS) { width, height ->
+            val lines = TIMER_HEIGHTS.indexOf(height) + 1
+            // A timer's line has room for one button two cells wide, for both from three
+            val buttons = if (width >= MIDDLE) 2 else 1
+            val perLine = if (width >= TIMER_WIDE) 2 else 1
+            when {
+                lines == 1 && timers.isEmpty() -> RemoteViews(context.packageName, R.layout.widget_timer_idle_row).apply {
+                    // Two cells wide, or without presets: the widget's icon and name stand where the presets would
+                    val shown = if (width >= MIDDLE) presets.take(perLine) else emptyList()
+                    setTextViewText(R.id.title, title)
+                    removeAllViews(R.id.pills1)
+                    shown.forEach { addView(R.id.pills1, pill(context, it, canRing, open)) }
+                    setViewVisibility(R.id.pills1, if (shown.isEmpty()) View.GONE else View.VISIBLE)
+                    setViewVisibility(R.id.icon, if (shown.isEmpty()) View.VISIBLE else View.GONE)
+                    setViewVisibility(R.id.title, if (shown.isEmpty()) View.VISIBLE else View.GONE)
+                    setContentDescription(R.id.add, context.getString(R.string.button_new_timer))
+                    setOnClickPendingIntent(R.id.add, add)
                     setOnClickPendingIntent(android.R.id.background, open)
                 }
-            } else {
-                val perRow = if (wide) 2 else 1
-                RemoteViews(context.packageName, if (rows > 1) R.layout.widget_timer_idle_large else R.layout.widget_timer_idle_row).apply {
-                    setTextViewText(R.id.title, context.getString(R.string.label_timer_default))
-                    listOf(R.id.pills1, R.id.pills2).forEachIndexed { row, container ->
-                        removeAllViews(container)
-                        val shown = if (rows > 1 || row == 0) presets.drop(row * perRow).take(perRow) else emptyList()
-                        shown.forEach { addView(container, pill(context, it)) }
-                        setViewVisibility(container, if (shown.isEmpty()) View.GONE else View.VISIBLE)
-                    }
-                    // One row without presets: the widget's name stands where they would
-                    if (rows == 1) setViewVisibility(R.id.title, if (presets.isEmpty()) View.VISIBLE else View.GONE)
+                // One line: the first timer and, four cells wide, "+"
+                lines == 1 -> RemoteViews(context.packageName, R.layout.widget_timer_row).apply {
+                    val plus = width >= TIMER_WIDE
+                    removeAllViews(R.id.rows)
+                    addView(R.id.rows, timerLine(context, timers.first(), now, buttons, big = true, names = true, endPadding = if (plus) 8 else 12, open = open))
+                    setViewVisibility(R.id.add, if (plus) View.VISIBLE else View.GONE)
                     setContentDescription(R.id.add, context.getString(R.string.button_new_timer))
-                    setOnClickPendingIntent(R.id.add, newTimer(context))
+                    setOnClickPendingIntent(R.id.add, add)
+                    setOnClickPendingIntent(android.R.id.background, open)
+                }
+                else -> RemoteViews(context.packageName, R.layout.widget_timer_large).apply {
+                    // With no timer the first line is the widget's name with "+"; otherwise the timers take lines from the top, and the presets keep the last line and every line the timers don't need
+                    setViewVisibility(R.id.header, if (timers.isEmpty()) View.VISIBLE else View.GONE)
+                    setTextViewText(R.id.title, title)
+                    setContentDescription(R.id.add, context.getString(R.string.button_new_timer))
+                    setOnClickPendingIntent(R.id.add, add)
+                    val timerLines = timers.size.coerceAtMost(lines - 1)
+                    removeAllViews(R.id.rows)
+                    if (timers.size > timerLines) {
+                        // More timers than lines: they scroll, the presets under them don't
+                        val items = RemoteViews.RemoteCollectionItems.Builder().setHasStableIds(true).setViewTypeCount(1)
+                        timers.forEach { items.addItem(it.id, timerLine(context, it, now, buttons, big = false, names = names, endPadding = 12, open = null)) }
+                        setRemoteAdapter(R.id.list, items.build())
+                        // Rows of a list can't carry intents of their own: one template, and each button fills in its action and timer
+                        setPendingIntentTemplate(
+                            R.id.list,
+                            PendingIntent.getBroadcast(context, REQUEST_LIST_TIMERS, Intent(context, TimerReceiver::class.java), PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_MUTABLE),
+                        )
+                        setViewLayoutHeight(R.id.list, timerLines * LINE, TypedValue.COMPLEX_UNIT_DIP)
+                        setViewVisibility(R.id.list, View.VISIBLE)
+                    } else {
+                        setViewVisibility(R.id.list, View.GONE)
+                        timers.forEach { addView(R.id.rows, timerLine(context, it, now, buttons, big = false, names = names, endPadding = 12, open = open)) }
+                    }
+                    val presetLines = lines - if (timers.isEmpty()) 1 else timerLines
+                    val groups = presets.chunked(perLine).take(presetLines).ifEmpty { if (timers.isEmpty()) emptyList() else listOf(emptyList()) }
+                    removeAllViews(R.id.presets)
+                    groups.forEachIndexed { index, group ->
+                        // While timers stand where the header was, "+" ends the last line of presets
+                        val plus = if (timers.isNotEmpty() && index == groups.lastIndex) add else null
+                        addView(R.id.presets, pills(context, group, perLine, canRing, open, plus))
+                    }
                     setOnClickPendingIntent(android.R.id.background, open)
                 }
             }
@@ -316,16 +368,52 @@ object Widgets {
         show(context, TimerWidget::class.java, views)
     }
 
-    /** A preset as a pill, "Tea (3 min)": a tap starts its timer without opening the app. */
-    private fun pill(context: Context, preset: TimerPreset): RemoteViews = RemoteViews(context.packageName, R.layout.widget_timer_pill).apply {
+    /** A line of presets; one that isn't full keeps the pills' width with empty places. [add], if given, ends the line as "+". */
+    private fun pills(context: Context, presets: List<TimerPreset>, perLine: Int, canRing: Boolean, open: PendingIntent, add: PendingIntent?): RemoteViews =
+        RemoteViews(context.packageName, R.layout.widget_timer_pills).apply {
+            removeAllViews(R.id.pills)
+            presets.forEach { addView(R.id.pills, pill(context, it, canRing, open)) }
+            repeat(perLine - presets.size) {
+                addView(R.id.pills, RemoteViews(context.packageName, R.layout.widget_timer_pill).apply { setViewVisibility(R.id.pill, View.INVISIBLE) })
+            }
+            if (add != null) {
+                addView(R.id.pills, RemoteViews(context.packageName, R.layout.widget_timer_add).apply {
+                    setContentDescription(R.id.add, context.getString(R.string.button_new_timer))
+                    setOnClickPendingIntent(R.id.add, add)
+                })
+            }
+        }
+
+    /** A preset as a pill, "Tea (3 min)": a tap starts one more timer without opening the app. */
+    private fun pill(context: Context, preset: TimerPreset, canRing: Boolean, open: PendingIntent): RemoteViews = RemoteViews(context.packageName, R.layout.widget_timer_pill).apply {
         setTextViewText(R.id.pill, context.getString(R.string.label_days_and_label, preset.name, durationWords(context.resources, preset.duration)))
-        setOnClickPendingIntent(R.id.pill, TimerNotifications.intent(context, TimerReceiver.ACTION_START_PRESET, preset.id))
+        setOnClickPendingIntent(R.id.pill, if (canRing) TimerNotifications.intent(context, TimerReceiver.ACTION_START_PRESET, preset.id) else open)
     }
 
-    private fun timerRow(context: Context, timer: Timer, now: Moment, wide: Boolean, open: PendingIntent): RemoteViews =
+    /**
+     * A timer's line: name over time, then – with room for two [buttons] – "+1:00" while it runs or
+     * has ended, Delete while it is paused, and always Pause, Resume or Stop. Delete exists only on
+     * a paused timer: a home screen has no Undo, so nothing removes a running timer in one tap.
+     *
+     * @param open Opens Timer from the name and time; null in a list, whose rows fill in the list's template instead
+     */
+    private fun timerLine(context: Context, timer: Timer, now: Moment, buttons: Int, big: Boolean, names: Boolean, endPadding: Int, open: PendingIntent?): RemoteViews =
         RemoteViews(context.packageName, R.layout.widget_timer_item).apply {
+            val density = context.resources.displayMetrics.density
+            fun px(dp: Int) = (dp * density).toInt()
+            fun click(view: Int, action: String) {
+                if (open != null) setOnClickPendingIntent(view, TimerNotifications.intent(context, action, timer.id))
+                else setOnClickFillInIntent(view, Intent().setAction(action).putExtra(TimerReceiver.EXTRA_ID, timer.id))
+            }
             val ended = timer.ended(now)
+            val paused = !timer.running
+            setViewPadding(R.id.item, px(20), px(2), px(endPadding), px(2))
             setTextViewText(R.id.label, timer.label.ifEmpty { context.getString(R.string.label_timer_default) })
+            setViewVisibility(R.id.label, if (names) View.VISIBLE else View.GONE)
+            // The widget of one line has the height for a larger time
+            val size = if (big) 28f else 22f
+            setTextViewTextSize(R.id.left, TypedValue.COMPLEX_UNIT_SP, size)
+            setTextViewTextSize(R.id.left_paused, TypedValue.COMPLEX_UNIT_SP, size)
             if (timer.running) {
                 // The system counts by itself from here: down to the end, and up from it once ended ("−0:12")
                 setViewVisibility(R.id.left, View.VISIBLE)
@@ -338,19 +426,24 @@ object Widgets {
                 setViewVisibility(R.id.left_paused, View.VISIBLE)
                 setTextViewText(R.id.left_paused, TimerFormat.left(timer.remaining(now)))
             }
-            setViewVisibility(R.id.plus, if (wide && !ended) View.VISIBLE else View.GONE)
+            setViewVisibility(R.id.plus, if (buttons > 1 && !paused) View.VISIBLE else View.GONE)
             setTextViewText(R.id.plus, context.getString(R.string.label_plus_minute))
             setContentDescription(R.id.plus, context.getString(R.string.button_add_minute))
-            setOnClickPendingIntent(R.id.plus, TimerNotifications.intent(context, TimerReceiver.ACTION_ADD_MINUTE, timer.id))
+            click(R.id.plus, TimerReceiver.ACTION_ADD_MINUTE)
+            setViewVisibility(R.id.delete, if (buttons > 1 && paused) View.VISIBLE else View.GONE)
+            setContentDescription(R.id.delete, context.getString(R.string.button_delete_timer))
+            click(R.id.delete, TimerReceiver.ACTION_STOP)
             val (icon, label, action) = when {
                 ended -> Triple(R.drawable.ic_stop, R.string.button_stop, TimerReceiver.ACTION_STOP)
                 timer.running -> Triple(R.drawable.ic_pause, R.string.button_pause, TimerReceiver.ACTION_PAUSE)
                 else -> Triple(R.drawable.ic_play_arrow, R.string.button_resume, TimerReceiver.ACTION_RESUME)
             }
             setImageViewResource(R.id.action, icon)
+            // Round while it runs, a rounded square to resume, as in the app
+            setInt(R.id.action, "setBackgroundResource", if (paused) R.drawable.widget_square_primary else R.drawable.widget_circle_primary)
             setContentDescription(R.id.action, context.getString(label))
-            setOnClickPendingIntent(R.id.action, TimerNotifications.intent(context, action, timer.id))
-            setOnClickPendingIntent(R.id.open, open)
+            click(R.id.action, action)
+            if (open != null) setOnClickPendingIntent(R.id.open, open)
         }
 
     private fun newTimer(context: Context): PendingIntent = PendingIntent.getActivity(
