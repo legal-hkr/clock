@@ -1,4 +1,4 @@
-# Clock's R8 rules. The libraries (Room, kotlinx.serialization, Navigation 3) bring their own.
+# Clock's R8 rules. The libraries (kotlinx.serialization, Navigation 3) bring their own.
 
 # Enum values are stored by name (DataStore settings, backups): keep the names as
 # written, whatever R8 makes of the classes around them.

@@ -228,4 +228,26 @@ class AlarmsTest {
         assertEquals(listOf(DayOfWeek.SUNDAY, DayOfWeek.MONDAY), Days.week(DayOfWeek.SUNDAY).take(2))
         assertEquals(DayOfWeek.SUNDAY, Days.week(DayOfWeek.MONDAY).last())
     }
+
+    @Test
+    fun `a clock set back does not pass over the next ringing`() {
+        // Set while the clock ran two hours ahead, then corrected: today's 06:30 still lies ahead
+        val set = work.copy(since = at("2026-11-12T07:00"))
+        val now = at("2026-11-12T05:00")
+        val advanced = set.advance(now, warsaw, tenMinutes, tenMinutes)
+        assertEquals(now, advanced.since)
+        assertEquals(at("2026-11-12T06:30"), advanced.next(warsaw))
+    }
+
+    @Test
+    fun `a clock set back does not stretch a snooze or a ringing`() {
+        val now = at("2026-11-12T05:00")
+        val snoozed = work.copy(snoozedUntil = at("2026-11-12T06:40")).advance(now, warsaw, tenMinutes, tenMinutes)
+        assertEquals(now + 30 * minute, snoozed.snoozedUntil)
+        // A snooze within reach stays as it is
+        val near = work.copy(snoozedUntil = now + 5 * minute).advance(now, warsaw, tenMinutes, tenMinutes)
+        assertEquals(now + 5 * minute, near.snoozedUntil)
+        val ringing = work.copy(ringing = at("2026-11-12T06:30")).advance(now, warsaw, tenMinutes, tenMinutes)
+        assertEquals(now, ringing.ringing)
+    }
 }

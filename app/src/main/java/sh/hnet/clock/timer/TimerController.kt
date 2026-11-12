@@ -154,7 +154,7 @@ class TimerController(private val context: Context) {
     }
 
     /**
-     * One exact alarm for the timer ending next; it wakes the phone and comes even in battery saving.
+     * One exact alarm for what comes next – a timer's end, or a ringing timer going quiet; it wakes the phone and comes even in battery saving.
      * The app holds USE_EXACT_ALARM (a clock's permission, granted at install), which lint doesn't count.
      */
     @android.annotation.SuppressLint("MissingPermission")
@@ -164,7 +164,10 @@ class TimerController(private val context: Context) {
             Intent(context, TimerReceiver::class.java).setAction(TimerReceiver.ACTION_FIRE),
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE,
         )
-        val next = list.filter { it.running && !it.ended(now) }.minOfOrNull { it.remaining(now) }
+        val end = list.filter { it.running && !it.ended(now) }.minOfOrNull { it.remaining(now) }
+        // Also the moment a ringing timer goes quiet: a silent one (vibration only) holds no wake lock that would keep the ringing service's own clock running
+        val silence = nextSilence(now)?.let { (it - now.sinceBoot).coerceAtLeast(0) }
+        val next = listOfNotNull(end, silence).minOrNull()
         if (next == null) {
             alarms.cancel(intent)
             return

@@ -121,9 +121,16 @@ data class Alarm(
      *   behind (the phone was off, or the clock was set forward a long way): then it was missed.
      *   A moment only just jumped over rings at once (§5.5).
      * A missed one-off alarm switches off; a repeating one stays on.
+     *
+     * A clock set back (by hand, or corrected by the network) leaves the alarm's marks ahead of the
+     * present; they are brought back to it first. Otherwise an alarm set while the clock ran ahead
+     * would pass over its next ringing, and a snooze or a ringing could last as long as the jump.
      */
     fun advance(now: Long, zone: ZoneId, silenceAfter: Long, grace: Long): Alarm {
         var alarm = this
+        if (alarm.since > now) alarm = alarm.copy(since = now)
+        alarm.ringing?.let { started -> if (started > now) alarm = alarm.copy(ringing = now) }
+        alarm.snoozedUntil?.let { until -> if (until - now > MAX_SNOOZE) alarm = alarm.copy(snoozedUntil = now + MAX_SNOOZE) }
         alarm.skipped?.let { skip -> if (skip <= now) alarm = alarm.copy(since = maxOf(alarm.since, skip), skipped = null) }
         alarm.ringing?.let { started ->
             if (silenceAfter > 0 && now - started >= silenceAfter) alarm = alarm.missedAt(started) else return alarm
@@ -146,6 +153,9 @@ data class Alarm(
     companion object {
         private const val MAX_CATCH_UP = 16
         const val MAX_LABEL = 60
+
+        /** The longest a snooze can be set to (the last of [AlarmSettings.SNOOZE_CHOICES]). */
+        private const val MAX_SNOOZE = 30 * 60_000L
     }
 }
 

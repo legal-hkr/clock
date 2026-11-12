@@ -93,7 +93,8 @@ class TimerReceiver : BroadcastReceiver() {
         val timers = (context.applicationContext as ClockApplication).timers
         val id = intent.getLongExtra(EXTRA_ID, 0)
         when (intent.action) {
-            ACTION_FIRE -> timers.refresh()
+            // A timer ended, or one that rang unanswered is due to go quiet
+            ACTION_FIRE -> timers.silenceOverdue()
             ACTION_PAUSE -> timers.pause(id)
             ACTION_RESUME -> timers.resume(id)
             ACTION_ADD_MINUTE -> timers.addMinute(id)

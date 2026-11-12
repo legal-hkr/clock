@@ -7,6 +7,7 @@ import android.content.Context
 import android.content.Intent
 import android.graphics.drawable.Icon
 import android.text.format.DateFormat
+import androidx.core.content.edit
 import sh.hnet.clock.ClockApplication
 import sh.hnet.clock.R
 import sh.hnet.clock.notify.Notifications
@@ -63,14 +64,20 @@ class AlarmNotifications(private val context: Context) {
         (active - wanted.keys).forEach(manager::cancel)
         if (!allowed || wanted.isEmpty()) return
         Notifications.ensureChannels(context)
+        val shown = store.getStringSet(KEY_MISSED, emptySet()).orEmpty()
+        val missedNow = wanted.filterKeys { it in MISSED until END }.map { (id, notification) -> "$id:${notification.`when`}" }.toSet()
         wanted.forEach { (id, notification) ->
             val missed = id in MISSED until END
-            if (!missed || id !in active && shownMissed.add(id to notification.`when`)) manager.notify(id, notification)
+            if (!missed || id !in active && "$id:${notification.`when`}" !in shown) manager.notify(id, notification)
         }
+        if (missedNow != shown) store.edit { putStringSet(KEY_MISSED, missedNow) }
     }
 
-    /** Missed notifications already posted in this process, by id and moment: one swiped away stays away. */
-    private val shownMissed = HashSet<Pair<Int, Long>>()
+    /**
+     * The missed notifications already posted, by id and moment, kept beside the alarms (readable
+     * before the first unlock): one the user swiped away stays away, also after the process is gone.
+     */
+    private val store = context.createDeviceProtectedStorageContext().getSharedPreferences("alarm_notifications", Context.MODE_PRIVATE)
 
     private fun base(channel: String, icon: Int): Notification.Builder = Notification.Builder(context, channel)
         .setSmallIcon(icon)
@@ -91,6 +98,7 @@ class AlarmNotifications(private val context: Context) {
         private const val SNOOZED = 3_000_000
         private const val MISSED = 4_000_000
         private const val END = 5_000_000
+        private const val KEY_MISSED = "missed_shown"
 
         private fun slot(alarmId: Long): Int = (alarmId % 1_000_000).toInt()
 

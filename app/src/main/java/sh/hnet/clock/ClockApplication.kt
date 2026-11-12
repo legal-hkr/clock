@@ -57,8 +57,8 @@ class ClockApplication : Application() {
         appScope.launch { preferences.ensureHomeZone(ZoneId.systemDefault().id) }
         // A notification the user dismissed, or lost with the process, comes back with the app
         stopwatch.sync()
+        // Also brings the timers' schedule, notifications and ringing up to date
         timers.silenceOverdue()
-        timers.refresh()
         Widgets.all(this)
     }
 

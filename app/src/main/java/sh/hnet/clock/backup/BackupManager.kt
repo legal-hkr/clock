@@ -21,7 +21,9 @@ import sh.hnet.clock.time.zoneOrNull
 import sh.hnet.clock.timer.Timer
 import sh.hnet.clock.timer.TimerController
 import java.time.Instant
+import java.time.LocalDate
 import java.time.ZoneId
+import java.time.format.DateTimeParseException
 
 /**
  * Backup and restore (SPEC §3.9.5, as Music's): writes what a backup holds to a file the user
@@ -101,8 +103,10 @@ class BackupManager(private val app: ClockApplication, private val stamps: Share
             backup.alarms?.let { alarms ->
                 app.alarms.replaceAll(
                     alarms.filter { it.hour in 0..23 && it.minute in 0..59 }.map { stored ->
+                        val days = stored.days.filter { it in 1..7 }.toSet()
                         Alarm(
-                            id = 0, hour = stored.hour, minute = stored.minute, days = stored.days.filter { it in 1..7 }.toSet(), date = stored.date,
+                            // A date belongs to a one-off alarm, and has to be one
+                            id = 0, hour = stored.hour, minute = stored.minute, days = days, date = stored.date?.takeIf { days.isEmpty() && isDate(it) },
                             label = stored.label.trim().take(Alarm.MAX_LABEL), sound = Sounds.here(stored.sound, stored.soundTitle, sounds) ?: "default", soundTitle = stored.soundTitle,
                             vibration = stored.vibration, snooze = stored.snooze, enabled = stored.enabled,
                         )
@@ -141,6 +145,13 @@ class BackupManager(private val app: ClockApplication, private val stamps: Share
         }
     } catch (_: Exception) {
         null
+    }
+
+    private fun isDate(text: String): Boolean = try {
+        LocalDate.parse(text)
+        true
+    } catch (_: DateTimeParseException) {
+        false
     }
 
     private companion object {
