@@ -24,7 +24,7 @@
     <string name="label_nav_stopwatch">Stoper</string>
 
     <!-- Alarms -->
-    <string name="msg_empty_alarms">Tutaj pojawią się alarmy</string>
+    <string name="msg_empty_alarms">Nie ma jeszcze żadnych alarmów</string>
     <string name="button_add_alarm">Dodaj alarm</string>
     <string name="title_alarm">Alarm</string>
     <string name="label_rings_in">Zadzwoni za %s</string>
@@ -71,7 +71,7 @@
     <string name="title_missed_alarm">Przegapiony alarm</string>
     <string name="label_channel_ringing_alarms">Dzwoniące alarmy</string>
     <string name="label_channel_upcoming_alarms">Nadchodzące alarmy</string>
-    <string name="label_channel_snoozed_alarms">Alarmy w drzemce</string>
+    <string name="label_channel_snoozed_alarms">Odłożone alarmy</string>
     <string name="label_channel_missed_alarms">Przegapione alarmy</string>
 
     <!-- Clock -->
@@ -109,10 +109,10 @@
     <string name="content_description_clear_search">Wyczyść wyszukiwanie</string>
     <string name="label_added">Dodano</string>
     <string name="msg_no_city"><![CDATA[Żadne miasto nie pasuje do <b>%s</b>]]></string>
-    <string name="msg_no_city_help">Zegar zna miasta z listy stref czasowych telefonu. Spróbuj wpisać większe miasto z tej samej strefy albo nazwę kraju.</string>
+    <string name="msg_no_city_help">Aplikacja zna miasta z listy stref czasowych telefonu. Spróbuj wpisać większe miasto z tej samej strefy albo nazwę kraju.</string>
 
     <!-- Stopwatch -->
-    <string name="label_running">Działa</string>
+    <string name="label_running">Uruchomiony</string>
     <string name="label_paused">Wstrzymany</string>
     <string name="button_start">Start</string>
     <string name="button_pause">Wstrzymaj</string>
@@ -131,15 +131,15 @@
     <string name="label_fastest">Najszybsze</string>
     <string name="label_slowest">Najwolniejsze</string>
     <string name="content_description_share_laps">Udostępnij okrążenia</string>
-    <string name="msg_stopwatch_reset">Stoper wyzerowany</string>
+    <string name="msg_stopwatch_reset">Wyzerowano stoper</string>
 
     <!-- Timer -->
     <string name="label_timer_default">Minutnik</string>
     <plurals name="label_timers_running">
-        <item quantity="one">działa: %d</item>
-        <item quantity="few">działa: %d</item>
-        <item quantity="many">działa: %d</item>
-        <item quantity="other">działa: %d</item>
+        <item quantity="one">uruchomione: %d</item>
+        <item quantity="few">uruchomione: %d</item>
+        <item quantity="many">uruchomione: %d</item>
+        <item quantity="other">uruchomione: %d</item>
     </plurals>
     <plurals name="label_timers_paused">
         <item quantity="one">wstrzymane: %d</item>
@@ -238,7 +238,7 @@
     <string name="title_when_timer_ends">Po zakończeniu minutnika</string>
     <string name="label_sound">Dźwięk</string>
     <string name="label_vibration">Wibracje</string>
-    <string name="desc_vibration_locked">Zawsze włączone przy ustawieniu Bez dźwięku</string>
+    <string name="desc_vibration_locked">Zawsze włączone przy ustawieniu „Bez dźwięku”</string>
     <string name="label_gradual_volume">Stopniowe zwiększanie głośności</string>
     <string name="label_off">Wyłączone</string>
     <string name="label_presets">Szablony</string>
@@ -293,28 +293,28 @@
     <string name="msg_restore_alarms">alarmy: %d</string>
     <string name="msg_restore_cities">miasta: %d</string>
     <string name="msg_restore_presets">szablony minutnika: %d</string>
-    <string name="msg_restore_replaces">Obecne alarmy, miasta, szablony minutnika i ustawienia zostaną zastąpione. Działające minutniki i stoper liczą dalej.</string>
+    <string name="msg_restore_replaces">Obecne alarmy, miasta, szablony minutnika i ustawienia zostaną zastąpione. Uruchomione minutniki i stoper działają dalej.</string>
     <string name="msg_restored">Przywrócono alarmy, miasta, szablony minutnika i ustawienia</string>
     <string name="error_backup_not_ours"><![CDATA[Plik <b>%s</b> nie jest kopią zapasową tej aplikacji.]]></string>
-    <string name="error_backup_newer">Tę kopię utworzyła nowsza wersja Zegara. Zaktualizuj aplikację, żeby ją przywrócić.</string>
+    <string name="error_backup_newer">Tę kopię utworzyła nowsza wersja aplikacji. Zaktualizuj aplikację, żeby ją przywrócić.</string>
     <string name="error_backup_unreadable"><![CDATA[Nie udało się odczytać pliku <b>%s</b>.]]></string>
 
     <!-- First run -->
     <string name="title_welcome_wizard">Witaj w Zegarze</string>
-    <string name="msg_welcome">Alarmy, zegar światowy, minutnik i stoper. Zegar nigdy nie łączy się z Internetem i nie zna położenia telefonu.</string>
+    <string name="msg_welcome">Alarmy, zegar światowy, minutnik i stoper. Aplikacja nigdy nie łączy się z internetem i nie zna położenia telefonu.</string>
     <string name="label_welcome_question">Co chcesz zrobić?</string>
     <string name="label_welcome_start">Zacznij od zera</string>
     <string name="desc_welcome_start">Ustaw pierwszy alarm</string>
     <string name="label_welcome_restore">Przywróć kopię zapasową</string>
     <string name="desc_welcome_restore">Odzyskaj alarmy, miasta, szablony minutnika i ustawienia</string>
-    <string name="label_backup_brings_back">Wybierz plik kopii zapasowej utworzonej w Zegarze. Przywrócone zostaną:</string>
+    <string name="label_backup_brings_back">Wybierz plik kopii zapasowej utworzonej w tej aplikacji. Przywrócone zostaną:</string>
     <string name="desc_backup_item_alarms">Z dniami, etykietami i dźwiękami</string>
     <string name="label_backup_item_cities">Miasta</string>
     <string name="desc_backup_item_cities">W ustalonej kolejności</string>
     <string name="label_backup_item_presets">Szablony minutnika</string>
     <string name="desc_backup_item_presets">W ustalonej kolejności</string>
     <string name="label_backup_item_settings">Ustawienia</string>
-    <string name="desc_backup_item_settings">Wszystko, co ustawia się w Ustawieniach, oprócz języka</string>
+    <string name="desc_backup_item_settings">Wszystkie opcje z Ustawień, oprócz języka</string>
     <string name="label_backup_unnamed_file">bez nazwy</string>
     <string name="label_backup_file_summary">Alarmy: %1$d, miasta: %2$d (%3$s)</string>
     <string name="button_backup_choose_file">Wybierz plik kopii</string>
@@ -323,9 +323,9 @@
     <string name="error_backup_unreadable_title">Nie można odczytać pliku</string>
     <string name="error_backup_unreadable_body">Nie udało się otworzyć pliku %1$s. Wybierz inny.</string>
     <string name="error_backup_not_ours_title">To nie jest kopia zapasowa tej aplikacji</string>
-    <string name="error_backup_not_ours_body">Plik %1$s nie zawiera niczego z Zegara. Wybierz kopię utworzoną w Ustawieniach.</string>
+    <string name="error_backup_not_ours_body">Plik %1$s nie zawiera danych tej aplikacji. Wybierz kopię utworzoną w Ustawieniach.</string>
     <string name="error_backup_newer_title">Tej kopii nie da się przywrócić</string>
-    <string name="error_backup_newer_body">Plik %1$s pochodzi z nowszej wersji Zegara. Zaktualizuj aplikację albo wybierz inny plik.</string>
+    <string name="error_backup_newer_body">Plik %1$s pochodzi z nowszej wersji aplikacji. Zaktualizuj aplikację albo wybierz inny plik.</string>
 
     <!-- Settings: about -->
     <string name="title_settings_about">O aplikacji</string>
@@ -335,7 +335,7 @@
     <string name="title_about_source">Kod źródłowy</string>
     <string name="label_licenses">Licencje open source</string>
     <string name="desc_licenses">Składniki open source użyte w aplikacji</string>
-    <string name="msg_about_privacy">Aplikacja działa bez dostępu do Internetu, nie zna położenia telefonu i nie widzi plików.</string>
+    <string name="msg_about_privacy">Aplikacja działa bez dostępu do internetu, nie zna położenia telefonu i nie widzi plików.</string>
     <string name="whats_new_title">Co nowego</string>
     <string name="whats_new_badge">Nowe</string>
     <plurals name="whats_new_row_supporting">
@@ -348,32 +348,32 @@
 
     <!-- Reliability -->
     <string name="title_problem_notifications">Powiadomienia są wyłączone</string>
-    <string name="msg_problem_notifications">Bez nich Zegar nie zadzwoni ani nie pokaże alarmu.</string>
-    <string name="msg_problem_notifications_timer">Bez nich Zegar nie da znać, że minutnik się skończył.</string>
+    <string name="msg_problem_notifications">Bez nich alarm nie zadzwoni ani się nie wyświetli.</string>
+    <string name="msg_problem_notifications_timer">Bez nich aplikacja nie powiadomi o zakończeniu minutnika.</string>
     <string name="button_problem_notifications">Zezwól na powiadomienia</string>
     <string name="title_problem_full_screen">Alarmy na pełnym ekranie są wyłączone</string>
     <string name="msg_problem_full_screen">Na zablokowanym telefonie alarm pokaże się tylko jako małe powiadomienie.</string>
     <string name="msg_problem_full_screen_timer">Na zablokowanym telefonie koniec minutnika pokaże się tylko jako małe powiadomienie.</string>
     <string name="button_problem_full_screen">Zezwól na pełny ekran</string>
-    <string name="title_problem_dnd">Tryb Nie przeszkadzać wycisza alarmy</string>
+    <string name="title_problem_dnd">Tryb „Nie przeszkadzać” wycisza alarmy</string>
     <string name="msg_problem_dnd">Włączona jest całkowita cisza, więc alarmy i minutniki nie wydadzą dźwięku.</string>
-    <string name="button_problem_dnd">Otwórz Nie przeszkadzać</string>
+    <string name="button_problem_dnd">Otwórz „Nie przeszkadzać”</string>
     <string name="title_problem_battery">Użycie baterii jest ograniczone</string>
-    <string name="msg_problem_battery">Telefon może zatrzymać Zegar, zanim alarm zadzwoni.</string>
-    <string name="msg_problem_battery_timer">Telefon może zatrzymać Zegar, zanim minutnik się skończy.</string>
+    <string name="msg_problem_battery">Telefon może zatrzymać aplikację, zanim alarm zadzwoni.</string>
+    <string name="msg_problem_battery_timer">Telefon może zatrzymać aplikację, zanim minutnik się skończy.</string>
     <string name="button_problem_battery">Otwórz ustawienia aplikacji</string>
     <string name="title_problem_volume">Głośność alarmów jest na zerze</string>
-    <string name="msg_problem_volume">Alarmy i minutniki zadzwonią bez dźwięku.</string>
-    <string name="button_problem_volume">Podgłośnij</string>
+    <string name="msg_problem_volume">Alarmy i minutniki będą bezgłośne.</string>
+    <string name="button_problem_volume">Zwiększ głośność</string>
     <string name="msg_alarms_cant_ring">Alarmy nie zadzwonią</string>
     <string name="msg_alarms_may_not_ring">Alarmy mogą nie zadzwonić</string>
     <string name="title_reliability">Niezawodność alarmów</string>
     <string name="msg_reliability_ok">Wszystko jest w porządku</string>
     <plurals name="msg_reliability_problems">
-        <item quantity="one">%d rzecz może zatrzymać alarmy</item>
-        <item quantity="few">%d rzeczy mogą zatrzymać alarmy</item>
-        <item quantity="many">%d rzeczy może zatrzymać alarmy</item>
-        <item quantity="other">%d rzeczy może zatrzymać alarmy</item>
+        <item quantity="one">%d problem może zablokować alarmy</item>
+        <item quantity="few">%d problemy mogą zablokować alarmy</item>
+        <item quantity="many">%d problemów może zablokować alarmy</item>
+        <item quantity="other">%d problemu może zablokować alarmy</item>
     </plurals>
     <plurals name="label_problem_count">
         <item quantity="one">%d problem</item>
@@ -391,7 +391,7 @@
     <string name="label_dnd_ok">Przepuszcza alarmy</string>
     <string name="error_check_dnd">Całkowita cisza. Alarmy nie wydają dźwięku.</string>
     <string name="label_battery_ok">Bez ograniczeń</string>
-    <string name="error_check_battery">Ograniczone. Telefon może zatrzymać Zegar.</string>
+    <string name="error_check_battery">Ograniczone. Telefon może zatrzymać aplikację.</string>
     <string name="msg_sound_gone">Dźwięku %1$s nie ma już w telefonie. Zadzwoni domyślny (%2$s).</string>
     <string name="msg_sound_gone_unnamed">Dźwięku %1$s nie ma już w telefonie. Zadzwoni domyślny.</string>
     <string name="msg_sound_gone_card"><![CDATA[Dźwięku <b>%s</b> nie ma już w telefonie. Do czasu wybrania innego dzwoni domyślny dźwięk telefonu.]]></string>
@@ -406,7 +406,7 @@
     <string name="widget_world_description">Godzina w wybranych miastach</string>
     <string name="widget_timer_name">Minutnik</string>
     <string name="widget_timer_description">Szablony uruchamiane z ekranu głównego</string>
-    <string name="widget_world_empty">Dodaj miasta w Zegarze</string>
+    <string name="widget_world_empty">Dodaj miasta w aplikacji</string>
     <string name="widget_alarm_may_not_ring">Alarm może nie zadzwonić</string>
     <string name="widget_preview_city_1">Reykjavík</string>
     <string name="widget_preview_city_2">Nowy Jork</string>

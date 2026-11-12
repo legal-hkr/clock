@@ -24,7 +24,7 @@
     <string name="label_nav_stopwatch">Stopwatch</string>
 
     <!-- Alarms -->
-    <string name="msg_empty_alarms">Your alarms appear here</string>
+    <string name="msg_empty_alarms">No alarms yet</string>
     <string name="button_add_alarm">Add alarm</string>
     <string name="title_alarm">Alarm</string>
     <string name="label_rings_in">Rings in %s</string>
@@ -329,7 +329,7 @@
     <string name="label_licenses">Open-source licenses</string>
     <string name="desc_licenses">Open-source components used by Clock</string>
     <string name="label_apache_license" translatable="false">Apache License 2.0</string>
-    <string name="msg_about_privacy">Clock has no Internet access, doesn’t know where you are and can’t see your files.</string>
+    <string name="msg_about_privacy">Clock has no internet access, doesn’t know where you are and can’t see your files.</string>
     <string name="whats_new_title">What’s new</string>
     <string name="whats_new_badge">New</string>
     <plurals name="whats_new_row_supporting">
@@ -355,15 +355,15 @@
     <string name="msg_problem_battery_timer">The phone may stop Clock before a timer ends.</string>
     <string name="button_problem_battery">Open app settings</string>
     <string name="title_problem_volume">Alarm volume is at zero</string>
-    <string name="msg_problem_volume">Alarms and timers would ring without a sound.</string>
+    <string name="msg_problem_volume">Alarms and timers would be silent.</string>
     <string name="button_problem_volume">Turn up</string>
     <string name="msg_alarms_cant_ring">Alarms can’t ring</string>
     <string name="msg_alarms_may_not_ring">Alarms may not ring</string>
     <string name="title_reliability">Alarm reliability</string>
     <string name="msg_reliability_ok">Everything is in place</string>
     <plurals name="msg_reliability_problems">
-        <item quantity="one">%d thing can stop your alarms</item>
-        <item quantity="other">%d things can stop your alarms</item>
+        <item quantity="one">%d problem can keep your alarms from ringing</item>
+        <item quantity="other">%d problems can keep your alarms from ringing</item>
     </plurals>
     <plurals name="label_problem_count">
         <item quantity="one">%d problem</item>
@@ -381,8 +381,8 @@
     <string name="label_battery_ok">Not restricted</string>
     <string name="error_check_battery">Restricted. The phone may stop Clock.</string>
     <string name="label_percent" translatable="false">%d%%</string>
-    <string name="msg_sound_gone">%1$s is gone. Rings with the phone’s default (%2$s).</string>
-    <string name="msg_sound_gone_unnamed">%1$s is gone. Rings with the phone’s default.</string>
+    <string name="msg_sound_gone">%1$s is no longer on this phone. The phone’s default (%2$s) will ring instead.</string>
+    <string name="msg_sound_gone_unnamed">%1$s is no longer on this phone. The phone’s default will ring instead.</string>
     <string name="msg_sound_gone_card"><![CDATA[<b>%s</b> is no longer on this phone. The phone’s default rings until another sound is chosen.]]></string>
     <string name="button_choose">Choose</string>
 

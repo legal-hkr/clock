@@ -8,7 +8,45 @@ Source code and releases: [git.hnet.sh/hkr/clock](https://git.hnet.sh/hkr/clock)
 
 ## Overview
 
-Clock is an alarm clock, world clock, timer and stopwatch with home screen widgets. It has no internet permission, doesn’t ask for your location, storage or media, and keeps nothing about you: alarms and settings stay on the device.
+Clock is an alarm clock, world clock, timer and stopwatch with home-screen widgets. It has no internet permission, doesn’t ask for your location, storage or media, and keeps nothing about you: alarms and settings stay on the device.
+
+## Screenshots
+
+<img src="metadata/en-US/images/phoneScreenshots/1.png" width="200"/> <img src="metadata/en-US/images/phoneScreenshots/2.png" width="200"/> <img src="metadata/en-US/images/phoneScreenshots/3.png" width="200"/> <img src="metadata/en-US/images/phoneScreenshots/4.png" width="200"/> <img src="metadata/en-US/images/phoneScreenshots/5.png" width="200"/> <img src="metadata/en-US/images/phoneScreenshots/6.png" width="200"/>
+
+## Features
+
+### Alarms
+
+- **Repeating or one-time**: Every day, weekdays, weekends or the days you pick, or once on a date; each alarm has its own label and sound
+- **Skip the next one**: Leave out a single occurrence of a repeating alarm without switching it off
+- **Ringing**: Full-screen alarm with slide to stop, snooze of the length you set, automatic silencing and gradually increasing volume
+- **Before and after**: A notification ahead of an upcoming alarm, and one for an alarm you missed
+- **Reliability check**: Clock warns when notifications, full-screen alarms, Do Not Disturb, battery restrictions or a zero alarm volume could keep an alarm from ringing
+
+### World clock
+
+- **Cities**: From the phone’s list of time zones, in the order you choose, each with its difference from local time
+- **Home clock**: Shows the time at home while you’re in another time zone
+
+### Timer
+
+- **Several timers at once**, each with a label, and one more minute when you need it
+- **Presets**: Start a timer with one tap, also from the home screen
+
+### Stopwatch
+
+- **Laps** with the fastest and slowest marked, ready to share
+
+### Widgets
+
+- **Digital clock** with the date and the next alarm, **analog clock**, **world clock** and **timer presets**
+
+### Settings
+
+- **Backup and restore** of alarms, cities, timer presets and settings to a file you choose, also offered on the first start
+- **Language**: English or Polish, independent of the system language
+- **Formats**: Time and date formats and the first day of the week follow the phone’s settings
 
 ## Requirements
 
