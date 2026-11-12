@@ -70,7 +70,7 @@ data class Timer(
     }
 }
 
-/** A duration the user keeps to start a timer with one tap (§3.6.2). */
+/** A duration the user keeps to start a timer with one tap (§3.6.2). Its name may be empty: it is then shown by its duration alone. */
 @Serializable
 data class TimerPreset(val id: Long, val name: String, val duration: Long)
 
@@ -111,6 +111,14 @@ data class TimerInput(val digits: String = "") {
     fun type(key: String): TimerInput = TimerInput((digits + key).trimStart('0').take(6).let { if (it.length < (digits + key).trimStart('0').length) digits else it })
 
     fun backspace(): TimerInput = TimerInput(digits.dropLast(1))
+
+    companion object {
+        /** The digits that show [duration], for a duration that is edited rather than typed anew. */
+        fun of(duration: Long): TimerInput {
+            val seconds = duration.coerceIn(0, Timer.MAX) / 1000
+            return TimerInput("%02d%02d%02d".format(seconds / 3600, seconds % 3600 / 60, seconds % 60).trimStart('0'))
+        }
+    }
 }
 
 /** Times of timers as text. */

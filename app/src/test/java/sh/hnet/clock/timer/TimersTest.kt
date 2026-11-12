@@ -125,6 +125,16 @@ class TimersTest {
     }
 
     @Test
+    fun `a duration to edit shows as its own digits`() {
+        assertEquals("900", TimerInput.of(9 * 60_000L).digits)
+        assertEquals("13000", TimerInput.of(90 * 60_000L).digits)
+        assertEquals("45", TimerInput.of(45_000L).digits)
+        assertEquals("", TimerInput.of(0).digits)
+        assertEquals(Timer.MAX, TimerInput.of(Timer.MAX).duration)
+        assertEquals(90_000L, TimerInput.of(TimerInput("90").duration).duration)
+    }
+
+    @Test
     fun `seconds and minutes above 59 run as typed, up to the most a timer takes`() {
         assertEquals(90_000, TimerInput("90").duration)
         assertEquals((99 * 60 + 99) * 1000L, TimerInput("9999").duration)

@@ -50,7 +50,7 @@ import sh.hnet.clock.ui.components.tabular
 /**
  * The presets as tonal chips (SPEC §3.6.2): one tap starts that timer with the preset's name. The
  * last chip opens the presets page – "Edit", or "Add preset" while there are none. A long name is
- * cut in the chip, its duration never: "Tea (3 min)".
+ * cut in the chip, its duration never: "Tea (3 min)"; a preset without a name is its duration, "9 min".
  */
 @Composable
 fun PresetChips(presets: List<TimerPreset>, onStart: (TimerPreset) -> Unit, onEdit: () -> Unit, modifier: Modifier = Modifier) {
@@ -60,7 +60,7 @@ fun PresetChips(presets: List<TimerPreset>, onStart: (TimerPreset) -> Unit, onEd
             SuggestionChip(
                 onClick = { onStart(preset) },
                 label = {
-                    Row {
+                    if (preset.name.isEmpty()) Text(duration, maxLines = 1) else Row {
                         Text(preset.name, maxLines = 1, overflow = TextOverflow.Ellipsis, modifier = Modifier.weight(1f, fill = false))
                         Text(" ($duration)", maxLines = 1)
                     }
@@ -93,32 +93,38 @@ fun PresetChips(presets: List<TimerPreset>, onStart: (TimerPreset) -> Unit, onEd
 fun DurationKeypad(input: TimerInput, onInput: (TimerInput) -> Unit, modifier: Modifier = Modifier) {
     Column(modifier, horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(24.dp)) {
         DurationDisplay(input)
-        Column(Modifier.widthIn(max = 320.dp).fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(12.dp)) {
-            listOf(listOf("1", "2", "3"), listOf("4", "5", "6"), listOf("7", "8", "9")).forEach { keys ->
-                Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                    keys.forEach { key -> Key(key, MaterialTheme.colorScheme.surfaceContainerHigh, MaterialTheme.colorScheme.onSurface, Modifier.weight(1f)) { onInput(input.type(key)) } }
-                }
-            }
+        Keypad(onType = { onInput(input.type(it)) }, onBackspace = { onInput(input.backspace()) }, onClear = { onInput(TimerInput()) })
+    }
+}
+
+/** The keypad alone: 1–9, "00", 0 and backspace, which clears everything when held. */
+@Composable
+fun Keypad(onType: (String) -> Unit, onBackspace: () -> Unit, onClear: () -> Unit, modifier: Modifier = Modifier) {
+    Column(modifier.widthIn(max = 320.dp).fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+        listOf(listOf("1", "2", "3"), listOf("4", "5", "6"), listOf("7", "8", "9")).forEach { keys ->
             Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                Key("00", MaterialTheme.colorScheme.secondaryContainer, MaterialTheme.colorScheme.onSecondaryContainer, Modifier.weight(1f)) { onInput(input.type("00")) }
-                Key("0", MaterialTheme.colorScheme.surfaceContainerHigh, MaterialTheme.colorScheme.onSurface, Modifier.weight(1f)) { onInput(input.type("0")) }
-                val backspace = stringResource(R.string.content_description_backspace)
-                Box(
-                    Modifier
-                        .weight(1f)
-                        .height(KEY_HEIGHT)
-                        .clip(CircleShape)
-                        .background(MaterialTheme.colorScheme.secondaryContainer)
-                        .combinedClickable(
-                            onClick = { onInput(input.backspace()) },
-                            onLongClick = { onInput(TimerInput()) },
-                            onLongClickLabel = stringResource(R.string.label_clear),
-                        )
-                        .semantics { role = Role.Button; contentDescription = backspace },
-                    contentAlignment = Alignment.Center,
-                ) {
-                    Icon(painterResource(R.drawable.ic_backspace), contentDescription = null, tint = MaterialTheme.colorScheme.onSecondaryContainer)
-                }
+                keys.forEach { key -> Key(key, MaterialTheme.colorScheme.surfaceContainerHigh, MaterialTheme.colorScheme.onSurface, Modifier.weight(1f)) { onType(key) } }
+            }
+        }
+        Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+            Key("00", MaterialTheme.colorScheme.secondaryContainer, MaterialTheme.colorScheme.onSecondaryContainer, Modifier.weight(1f)) { onType("00") }
+            Key("0", MaterialTheme.colorScheme.surfaceContainerHigh, MaterialTheme.colorScheme.onSurface, Modifier.weight(1f)) { onType("0") }
+            val backspace = stringResource(R.string.content_description_backspace)
+            Box(
+                Modifier
+                    .weight(1f)
+                    .height(KEY_HEIGHT)
+                    .clip(CircleShape)
+                    .background(MaterialTheme.colorScheme.secondaryContainer)
+                    .combinedClickable(
+                        onClick = onBackspace,
+                        onLongClick = onClear,
+                        onLongClickLabel = stringResource(R.string.label_clear),
+                    )
+                    .semantics { role = Role.Button; contentDescription = backspace },
+                contentAlignment = Alignment.Center,
+            ) {
+                Icon(painterResource(R.drawable.ic_backspace), contentDescription = null, tint = MaterialTheme.colorScheme.onSecondaryContainer)
             }
         }
     }
@@ -136,11 +142,11 @@ private fun Key(label: String, container: Color, content: Color, modifier: Modif
 
 /** "00h 05m 30s": digits in display-medium, units in title-large; read as a duration in words. */
 @Composable
-private fun DurationDisplay(input: TimerInput) {
+fun DurationDisplay(input: TimerInput, modifier: Modifier = Modifier) {
     val spoken = durationWords(input.duration)
     val typed = MaterialTheme.colorScheme.onSurface
     val muted = MaterialTheme.colorScheme.onSurfaceVariant
-    Row(Modifier.clearAndSetSemantics { contentDescription = spoken }, horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+    Row(modifier.clearAndSetSemantics { contentDescription = spoken }, horizontalArrangement = Arrangement.spacedBy(10.dp)) {
         listOf(input.hours to R.string.label_unit_h, input.minutes to R.string.label_unit_m, input.seconds to R.string.label_unit_s).forEachIndexed { index, (digits, unit) ->
             Row {
                 Text(

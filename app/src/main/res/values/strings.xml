@@ -147,7 +147,6 @@
     <string name="label_unit_h" translatable="false">h</string>
     <string name="label_unit_m" translatable="false">m</string>
     <string name="label_unit_s" translatable="false">s</string>
-    <string name="label_unit_min" translatable="false">min</string>
     <string name="label_duration_h">%d h</string>
     <string name="label_duration_min">%d min</string>
     <string name="label_duration_s">%d s</string>
@@ -179,14 +178,10 @@
     <string name="title_timer_presets">Timer presets</string>
     <string name="title_add_preset">Add a preset</string>
     <string name="title_edit_preset">Edit a preset</string>
-    <string name="label_name">Name</string>
-    <string name="label_duration">Time</string>
-    <string name="label_hours">Hours</string>
-    <string name="label_minutes">Minutes</string>
-    <string name="label_seconds">Seconds</string>
-    <string name="error_enter_name">Enter a name</string>
-    <string name="error_enter_time">Enter a time</string>
-    <string name="error_up_to_59">Minutes and seconds: up to 59</string>
+    <string name="label_name_optional">Name (optional)</string>
+    <string name="title_discard_changes">Discard changes?</string>
+    <string name="button_keep_editing">Keep editing</string>
+    <string name="button_discard">Discard</string>
     <string name="msg_empty_presets">Presets start a timer with one tap.</string>
     <string name="msg_preset_removed"><![CDATA[Removed <b>%s</b>]]></string>
     <string name="content_description_reorder">Reorder %s</string>

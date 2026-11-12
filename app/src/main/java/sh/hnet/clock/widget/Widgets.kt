@@ -35,7 +35,7 @@ import sh.hnet.clock.timer.TimerReceiver
 import sh.hnet.clock.timer.shown
 import sh.hnet.clock.ui.Tab
 import sh.hnet.clock.ui.components.TimeFormats
-import sh.hnet.clock.ui.components.durationWords
+import sh.hnet.clock.ui.components.presetTitle
 import sh.hnet.clock.ui.components.timerName
 import java.time.Instant
 import java.time.ZoneId
@@ -385,9 +385,9 @@ object Widgets {
             }
         }
 
-    /** A preset as a pill, "Tea (3 min)": a tap starts one more timer without opening the app. */
+    /** A preset as a pill, "Tea (3 min)" or "9 min": a tap starts one more timer without opening the app. */
     private fun pill(context: Context, preset: TimerPreset, canRing: Boolean, open: PendingIntent): RemoteViews = RemoteViews(context.packageName, R.layout.widget_timer_pill).apply {
-        setTextViewText(R.id.pill, context.getString(R.string.label_days_and_label, preset.name, durationWords(context.resources, preset.duration)))
+        setTextViewText(R.id.pill, presetTitle(context.resources, preset))
         setOnClickPendingIntent(R.id.pill, if (canRing) TimerNotifications.intent(context, TimerReceiver.ACTION_START_PRESET, preset.id) else open)
     }
 

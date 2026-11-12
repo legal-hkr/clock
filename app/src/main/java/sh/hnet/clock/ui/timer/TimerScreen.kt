@@ -294,7 +294,7 @@ private fun rememberMoment(controller: TimerController, ticking: Boolean): State
     }
 }
 
-private val InputSaver = androidx.compose.runtime.saveable.Saver<TimerInput, String>(save = { it.digits }, restore = { TimerInput(it) })
+internal val InputSaver = androidx.compose.runtime.saveable.Saver<TimerInput, String>(save = { it.digits }, restore = { TimerInput(it) })
 
 /** Start: filled, full width, in the dock; disabled until a time is typed (§3.6.3). */
 @Composable

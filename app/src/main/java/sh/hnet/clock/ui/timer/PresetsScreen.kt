@@ -1,59 +1,75 @@
-@file:OptIn(ExperimentalMaterial3ExpressiveApi::class)
+@file:OptIn(ExperimentalMaterial3ExpressiveApi::class, ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
 
 package sh.hnet.clock.ui.timer
 
-import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.focusable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.imePadding
+import androidx.compose.foundation.layout.isImeVisible
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Button
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.ListItemDefaults
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.SegmentedListItem
+import androidx.compose.material3.SheetValue
 import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.SnackbarResult
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.compose.material3.rememberBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
+import androidx.compose.ui.platform.LocalResources
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.CustomAccessibilityAction
-import androidx.compose.ui.semantics.LiveRegionMode
-import androidx.compose.ui.semantics.contentDescription
-import androidx.compose.ui.semantics.liveRegion
 import androidx.compose.ui.semantics.customActions
+import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.stateDescription
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.fromHtml
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardCapitalization
-import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.core.text.htmlEncode
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -61,14 +77,13 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import sh.hnet.clock.ClockApplication
 import sh.hnet.clock.R
-import sh.hnet.clock.timer.Timer
 import sh.hnet.clock.timer.TimerController
-import sh.hnet.clock.timer.TimerFormat
+import sh.hnet.clock.timer.TimerInput
 import sh.hnet.clock.timer.TimerPreset
 import sh.hnet.clock.ui.components.LazySettingsPage
-import sh.hnet.clock.ui.components.SwipeToRemove
 import sh.hnet.clock.ui.components.SETTINGS_GROUP_GAP
 import sh.hnet.clock.ui.components.SETTINGS_ROW_GAP
+import sh.hnet.clock.ui.components.SwipeToRemove
 import sh.hnet.clock.ui.components.dragHandle
 import sh.hnet.clock.ui.components.durationWords
 import sh.hnet.clock.ui.components.groupShapes
@@ -78,7 +93,7 @@ import sh.hnet.clock.ui.components.reorderableItem
 import sh.hnet.clock.ui.components.settingsRowColors
 
 /**
- * Timer presets (SPEC §3.6.9): name and duration per row; a tap edits, the handle reorders (saved on
+ * Timer presets (SPEC §3.6.9): name and duration per row (the duration alone without a name); a tap edits, the handle reorders (saved on
  * drop), a swipe removes at once with Undo; Add preset below. Reached from the chips on Timer and
  * from Settings › Timers.
  */
@@ -112,11 +127,12 @@ fun PresetsScreen(onBack: () -> Unit, snackbars: SnackbarHostState, messageScope
 
     val removedText = stringResource(R.string.msg_preset_removed)
     val undo = stringResource(R.string.button_undo)
+    val resources = LocalResources.current
     val remove: (TimerPreset) -> Unit = { preset ->
         val position = controller.removePreset(preset.id)
         if (position >= 0) messageScope.launch {
             snackbars.currentSnackbarData?.dismiss()
-            val text = AnnotatedString.fromHtml(removedText.format(preset.name.htmlEncode())).text
+            val text = AnnotatedString.fromHtml(removedText.format(preset.name.ifEmpty { durationWords(resources, preset.duration) }.htmlEncode())).text
             if (snackbars.showSnackbar(text, actionLabel = undo, duration = SnackbarDuration.Short) == SnackbarResult.ActionPerformed) {
                 controller.insertPreset(preset, position)
             }
@@ -156,15 +172,16 @@ fun PresetsScreen(onBack: () -> Unit, snackbars: SnackbarHostState, messageScope
                         onClick = { editing = preset.id },
                         shapes = shapes,
                         colors = if (dragged) ListItemDefaults.segmentedColors(containerColor = MaterialTheme.colorScheme.surfaceContainerHigh) else settingsRowColors(),
-                        supportingContent = { Text(durationWords(preset.duration)) },
+                        // A preset without a name is its duration, on one line
+                        supportingContent = if (preset.name.isEmpty()) null else ({ Text(durationWords(preset.duration)) }),
                         trailingContent = {
                             Box(Modifier.size(48.dp).dragHandle(reorder, preset.id), contentAlignment = Alignment.Center) {
-                                Icon(painterResource(R.drawable.ic_drag_indicator), contentDescription = stringResource(R.string.content_description_reorder, preset.name))
+                                Icon(painterResource(R.drawable.ic_drag_indicator), contentDescription = stringResource(R.string.content_description_reorder, preset.name.ifEmpty { durationWords(preset.duration) }))
                             }
                         },
                         modifier = Modifier.fillMaxWidth().semantics { customActions = moves + removeAction },
                     ) {
-                        Text(preset.name)
+                        Text(preset.name.ifEmpty { durationWords(preset.duration) })
                     }
                 }
             }
@@ -182,14 +199,14 @@ fun PresetsScreen(onBack: () -> Unit, snackbars: SnackbarHostState, messageScope
     }
 
     if (adding) {
-        PresetDialog(null, onDismiss = { adding = false }) { name, duration ->
+        PresetSheet(null, onDismiss = { adding = false }) { name, duration ->
             controller.addPreset(name, duration)
             adding = false
         }
     }
     editing?.let { id ->
         val preset = presets.firstOrNull { it.id == id }
-        if (preset == null) editing = null else PresetDialog(preset, onDismiss = { editing = null }) { name, duration ->
+        if (preset == null) editing = null else PresetSheet(preset, onDismiss = { editing = null }) { name, duration ->
             controller.updatePreset(id, name, duration)
             editing = null
         }
@@ -197,89 +214,119 @@ fun PresetsScreen(onBack: () -> Unit, snackbars: SnackbarHostState, messageScope
 }
 
 /**
- * "Add a preset" / "Edit a preset": the name, then the time as three number fields in one row,
- * each with its unit as a suffix. What is wrong is said when Save is tapped: a missing name in its
- * field, the time (none at all, minutes or seconds over 59) in one line under the row.
+ * "Add a preset" / "Edit a preset" (handoff of 12 Nov 2026, §4): the New timer sheet with a name on
+ * top and Save in place of Start. The name is optional. The duration is typed on the timer's own
+ * keypad; of a preset being edited, the first digit starts it anew and backspace edits it. While
+ * the name has the focus the system keyboard takes the keypad's place – one keyboard at a time –
+ * and Done, or a tap on the duration, brings the keypad back. Leaving after a change asks first.
  */
 @Composable
-private fun PresetDialog(preset: TimerPreset?, onDismiss: () -> Unit, onSave: (String, Long) -> Unit) {
-    val parts = preset?.let { TimerFormat.parts(it.duration) }
+private fun PresetSheet(preset: TimerPreset?, onDismiss: () -> Unit, onSave: (String, Long) -> Unit) {
+    val initial = remember { preset?.let { TimerInput.of(it.duration) } ?: TimerInput() }
     var name by rememberSaveable { mutableStateOf(preset?.name.orEmpty()) }
-    var hours by rememberSaveable { mutableStateOf(parts?.first?.takeIf { it > 0 }?.toString().orEmpty()) }
-    var minutes by rememberSaveable { mutableStateOf(parts?.second?.takeIf { it > 0 }?.toString().orEmpty()) }
-    var seconds by rememberSaveable { mutableStateOf(parts?.third?.takeIf { it > 0 }?.toString().orEmpty()) }
-    var checked by rememberSaveable { mutableStateOf(false) }
+    var input by rememberSaveable(stateSaver = InputSaver) { mutableStateOf(initial) }
+    // The duration as it came with the preset: the first digit replaces it
+    var untouched by rememberSaveable { mutableStateOf(preset != null) }
+    var asking by rememberSaveable { mutableStateOf(false) }
+    var discarding by remember { mutableStateOf(false) }
+    val changed = { name.trim() != preset?.name.orEmpty() || input.duration != initial.duration }
 
-    val h = hours.toIntOrNull() ?: 0
-    val m = minutes.toIntOrNull() ?: 0
-    val s = seconds.toIntOrNull() ?: 0
-    val nameMissing = name.isBlank()
-    val noTime = h == 0 && m == 0 && s == 0
-    val save = {
-        checked = true
-        if (!nameMissing && !noTime && m <= 59 && s <= 59) onSave(name, ((h * 3600L + m * 60 + s) * 1000).coerceAtMost(Timer.MAX))
+    val scope = rememberCoroutineScope()
+    var nameFocused by remember { mutableStateOf(false) }
+    // Leaving the name moves the focus to the duration: merely clearing it in a sheet's window hands it straight back to the field
+    val duration = remember { FocusRequester() }
+    val keyboardController = LocalSoftwareKeyboardController.current
+    val leaveName = {
+        if (nameFocused) duration.requestFocus()
+        keyboardController?.hide()
     }
-    AlertDialog(
-        onDismissRequest = onDismiss,
-        title = { Text(stringResource(if (preset == null) R.string.title_add_preset else R.string.title_edit_preset)) },
-        text = {
-            Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+    // The keyboard closed by Back leaves the field too: the keypad returns
+    val keyboard = WindowInsets.isImeVisible
+    LaunchedEffect(keyboard) { if (!keyboard && nameFocused) duration.requestFocus() }
+
+    // Back, the scrim and a swipe down all ask the sheet to hide: after a change it stays, and asks
+    val sheet = rememberBottomSheetState(
+        SheetValue.Hidden,
+        enabledValues = setOf(SheetValue.Hidden, SheetValue.Expanded),
+        confirmValueChange = { value ->
+            if (value == SheetValue.Hidden && !discarding && changed()) {
+                asking = true
+                false
+            } else true
+        },
+    )
+    ModalBottomSheet(onDismissRequest = onDismiss, sheetState = sheet) {
+        Column(Modifier.fillMaxWidth().imePadding()) {
+            Column(Modifier.weight(1f, fill = false).verticalScroll(rememberScrollState()), horizontalAlignment = Alignment.CenterHorizontally) {
+                Text(
+                    stringResource(if (preset == null) R.string.title_add_preset else R.string.title_edit_preset),
+                    style = MaterialTheme.typography.titleLarge,
+                    modifier = Modifier.fillMaxWidth().padding(horizontal = 24.dp).semantics { heading() },
+                )
                 OutlinedTextField(
                     value = name,
                     onValueChange = { if (it.length <= TimerController.MAX_PRESET_NAME) name = it },
-                    label = { Text(stringResource(R.string.label_name)) },
+                    label = { Text(stringResource(R.string.label_name_optional)) },
                     singleLine = true,
-                    isError = checked && nameMissing,
-                    supportingText = if (checked && nameMissing) ({ Text(stringResource(R.string.error_enter_name)) }) else null,
-                    keyboardOptions = KeyboardOptions(capitalization = KeyboardCapitalization.Sentences, imeAction = ImeAction.Next),
-                    modifier = Modifier.fillMaxWidth(),
+                    keyboardOptions = KeyboardOptions(capitalization = KeyboardCapitalization.Sentences, imeAction = ImeAction.Done),
+                    keyboardActions = KeyboardActions(onDone = { leaveName() }),
+                    modifier = Modifier.fillMaxWidth().padding(start = 16.dp, end = 16.dp, top = 16.dp).onFocusChanged { nameFocused = it.isFocused },
                 )
-                // One caption for the three fields and one line for what is wrong with them: neither fits inside a field this narrow
-                Text(stringResource(R.string.label_duration), style = MaterialTheme.typography.labelLarge, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                val timeError = when {
-                    !checked -> null
-                    noTime -> R.string.error_enter_time
-                    m > 59 || s > 59 -> R.string.error_up_to_59
-                    else -> null
-                }
-                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                    NumberField(hours, { hours = it }, R.string.label_unit_h, R.string.label_hours, isError = checked && noTime, Modifier.weight(1f))
-                    NumberField(minutes, { minutes = it }, R.string.label_unit_min, R.string.label_minutes, isError = checked && (noTime || m > 59), Modifier.weight(1f))
-                    NumberField(seconds, { seconds = it }, R.string.label_unit_s, R.string.label_seconds, isError = checked && (noTime || s > 59), Modifier.weight(1f))
-                }
-                timeError?.let {
-                    Text(
-                        stringResource(it),
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.error,
-                        modifier = Modifier.semantics { liveRegion = LiveRegionMode.Polite },
+                DurationDisplay(
+                    input,
+                    Modifier
+                        .padding(top = 12.dp, bottom = 16.dp)
+                        .clip(MaterialTheme.shapes.medium)
+                        .focusRequester(duration)
+                        .focusable()
+                        .clickable(enabled = nameFocused) { leaveName() }
+                        .padding(horizontal = 12.dp, vertical = 8.dp),
+                )
+                AnimatedVisibility(visible = !nameFocused) {
+                    Keypad(
+                        // On an untouched duration the first digit stands alone; backspace edits what is there
+                        onType = { key ->
+                            input = (if (untouched) TimerInput() else input).type(key)
+                            untouched = false
+                        },
+                        onBackspace = {
+                            input = input.backspace()
+                            untouched = false
+                        },
+                        onClear = {
+                            input = TimerInput()
+                            untouched = false
+                        },
+                        modifier = Modifier.padding(horizontal = 16.dp),
                     )
                 }
             }
-        },
-        dismissButton = { TextButton(onClick = onDismiss) { Text(stringResource(R.string.button_cancel)) } },
-        confirmButton = { TextButton(onClick = save) { Text(stringResource(R.string.button_save)) } },
-    )
-}
+            val hint = stringResource(R.string.msg_enter_time_first)
+            Button(
+                onClick = { onSave(name.trim(), input.duration) },
+                enabled = !input.isZero,
+                modifier = Modifier.fillMaxWidth().padding(start = 16.dp, end = 16.dp, top = 20.dp, bottom = 16.dp).height(56.dp).semantics { if (input.isZero) stateDescription = hint },
+            ) {
+                Text(stringResource(R.string.button_save))
+            }
+        }
+    }
 
-/**
- * A two-digit number with its unit as the suffix ("3 min") and a muted 0 while empty; the unit's full
- * name is what a screen reader says. The keyboard is the digits-only pad.
- */
-@Composable
-private fun NumberField(value: String, onChange: (String) -> Unit, unit: Int, name: Int, isError: Boolean, modifier: Modifier) {
-    val spoken = stringResource(name)
-    OutlinedTextField(
-        value = value,
-        onValueChange = { text -> if (text.length <= 2 && text.all { it.isDigit() }) onChange(text) },
-        placeholder = { Text("0") },
-        suffix = { Text(stringResource(unit)) },
-        singleLine = true,
-        isError = isError,
-        // NumberPassword is the pad with digits alone (Number adds signs and separators); nothing is masked without a visual transformation
-        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.NumberPassword),
-        modifier = modifier.semantics { contentDescription = spoken },
-    )
+    if (asking) {
+        // Nothing saved is lost, so Discard isn't an error button
+        AlertDialog(
+            onDismissRequest = { asking = false },
+            title = { Text(stringResource(R.string.title_discard_changes)) },
+            dismissButton = { TextButton(onClick = { asking = false }) { Text(stringResource(R.string.button_keep_editing)) } },
+            confirmButton = {
+                TextButton(onClick = {
+                    asking = false
+                    discarding = true
+                    scope.launch { sheet.hide() }.invokeOnCompletion { onDismiss() }
+                }) { Text(stringResource(R.string.button_discard)) }
+            },
+        )
+    }
 }
 
 private val LIFTED = RoundedCornerShape(16.dp)

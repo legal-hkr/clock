@@ -116,7 +116,8 @@ class BackupManager(private val app: ClockApplication, private val stamps: Share
         }
         backup.cities?.let { ids -> app.cities.replaceAll(ids.filter { zoneOrNull(it) != null }) }
         backup.timerPresets?.let { presets ->
-            val usable = presets.filter { it.name.isNotBlank() && it.seconds in 1..Timer.MAX / 1000 }
+            // A preset may have no name
+            val usable = presets.filter { it.seconds in 1..Timer.MAX / 1000 }
             withContext(Dispatchers.Main) {
                 app.timers.replacePresets(usable.map { it.name.trim().take(TimerController.MAX_PRESET_NAME) to it.seconds * 1000 })
             }
