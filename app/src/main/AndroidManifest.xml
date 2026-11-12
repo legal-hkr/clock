@@ -110,7 +110,54 @@
                 <action android:name="android.intent.action.MY_PACKAGE_REPLACED" />
                 <action android:name="android.intent.action.TIME_SET" />
                 <action android:name="android.intent.action.TIMEZONE_CHANGED" />
+                <action android:name="android.intent.action.LOCALE_CHANGED" />
             </intent-filter>
+        </receiver>
+
+        <!-- Home-screen widgets (SPEC §3.10). Exported as the system requires: the launcher's widget service sends their updates. -->
+        <receiver
+            android:name=".widget.DigitalClockWidget"
+            android:exported="true"
+            android:label="@string/widget_digital_name">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/widget_digital" />
+        </receiver>
+        <receiver
+            android:name=".widget.AnalogClockWidget"
+            android:exported="true"
+            android:label="@string/widget_analog_name">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/widget_analog" />
+        </receiver>
+        <receiver
+            android:name=".widget.WorldClockWidget"
+            android:exported="true"
+            android:label="@string/widget_world_name">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/widget_world" />
+        </receiver>
+        <receiver
+            android:name=".widget.TimerWidget"
+            android:exported="true"
+            android:label="@string/widget_timer_name">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/widget_timer" />
         </receiver>
     </application>
 

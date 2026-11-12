@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- A preset on the timer widget: a tonal pill, 48 dp, that starts its timer in place. -->
+<TextView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/pill"
+    android:layout_width="0dp"
+    android:layout_height="48dp"
+    android:layout_marginEnd="8dp"
+    android:layout_weight="1"
+    android:background="@drawable/widget_pill"
+    android:ellipsize="end"
+    android:gravity="center"
+    android:maxLines="1"
+    android:paddingHorizontal="12dp"
+    android:textColor="@color/widget_on_secondary_container"
+    android:textSize="14sp" />

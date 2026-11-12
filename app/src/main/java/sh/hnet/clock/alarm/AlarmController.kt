@@ -11,6 +11,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.serialization.SerializationException
 import kotlinx.serialization.builtins.ListSerializer
 import kotlinx.serialization.json.Json
+import sh.hnet.clock.widget.Widgets
 import sh.hnet.clock.notify.Notifications
 import sh.hnet.clock.ring.RingService
 import sh.hnet.clock.ui.Tab
@@ -125,6 +126,7 @@ class AlarmController(context: Context) {
         schedule(advanced, zone, settings, now)
         notifications.show(advanced, zone, settings, now)
         RingService.sync(context)
+        Widgets.digital(context)
     }
 
     @Synchronized

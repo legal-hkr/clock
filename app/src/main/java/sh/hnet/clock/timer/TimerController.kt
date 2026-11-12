@@ -11,6 +11,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.serialization.SerializationException
 import kotlinx.serialization.builtins.ListSerializer
 import kotlinx.serialization.json.Json
+import sh.hnet.clock.widget.Widgets
 import sh.hnet.clock.ClockApplication
 import sh.hnet.clock.ring.RingService
 import sh.hnet.clock.stopwatch.Moment
@@ -128,6 +129,7 @@ class TimerController(private val context: Context) {
         schedule(list, now)
         notifications.show(list, now)
         ring()
+        Widgets.timer(context)
         _revision.value++
     }
 
@@ -148,6 +150,7 @@ class TimerController(private val context: Context) {
         if (next == _presets.value) return
         store.edit { putString(KEY_PRESETS, json.encodeToString(ListSerializer(TimerPreset.serializer()), next)) }
         _presets.value = next
+        Widgets.timer(context)
     }
 
     /**

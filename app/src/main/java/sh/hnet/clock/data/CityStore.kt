@@ -7,6 +7,7 @@ import androidx.datastore.preferences.preferencesDataStore
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
+import sh.hnet.clock.widget.Widgets
 
 private val Context.cities by preferencesDataStore("cities")
 
@@ -44,6 +45,7 @@ class CityStore(private val context: Context) {
 
     private suspend fun update(change: (List<String>) -> List<String>) {
         context.cities.edit { prefs -> prefs[key] = change(decode(prefs[key])).joinToString("\n") }
+        Widgets.world(context)
     }
 
     private fun decode(stored: String?): List<String> = stored?.split('\n')?.filter { it.isNotBlank() }.orEmpty()

@@ -4,6 +4,7 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import sh.hnet.clock.ClockApplication
+import sh.hnet.clock.widget.Widgets
 
 /**
  * What the system forgets or changes under the app:
@@ -11,13 +12,21 @@ import sh.hnet.clock.ClockApplication
  *   notification is gone – what is still on or running gets both back. Alarms already when the
  *   phone has started but is not yet unlocked; the rest once it is;
  * - when the clock or the time zone is changed, alarms keep their wall-clock time (SPEC §5.5):
- *   their next moments are worked out anew, and one just jumped over rings at once.
+ *   their next moments are worked out anew, and one just jumped over rings at once;
+ * - the widgets are drawn again after each of these, and when the phone's language changes.
  */
 class BootReceiver : BroadcastReceiver() {
     override fun onReceive(context: Context, intent: Intent) {
         val app = context.applicationContext as ClockApplication
         when (intent.action) {
-            Intent.ACTION_LOCKED_BOOT_COMPLETED, Intent.ACTION_TIME_CHANGED, Intent.ACTION_TIMEZONE_CHANGED -> app.alarms.refresh()
+            Intent.ACTION_LOCKED_BOOT_COMPLETED -> app.alarms.refresh()
+            Intent.ACTION_TIME_CHANGED, Intent.ACTION_TIMEZONE_CHANGED -> {
+                app.alarms.refresh()
+                // Days and "Tomorrow" on the widgets follow the new clock
+                Widgets.all(context)
+            }
+            // The widgets' dates and words follow the phone's language
+            Intent.ACTION_LOCALE_CHANGED -> Widgets.all(context)
             Intent.ACTION_BOOT_COMPLETED, Intent.ACTION_MY_PACKAGE_REPLACED -> {
                 app.alarms.refresh()
                 app.afterUnlock()
@@ -25,6 +34,7 @@ class BootReceiver : BroadcastReceiver() {
                     app.stopwatch.sync()
                     app.timers.silenceOverdue()
                 }
+                Widgets.all(context)
             }
         }
     }

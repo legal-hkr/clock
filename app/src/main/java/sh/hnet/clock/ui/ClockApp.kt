@@ -87,7 +87,7 @@ import sh.hnet.clock.ui.settings.TimerSoundScreen
 import sh.hnet.clock.timer.TimerCounts
 
 /** A destination asked for from outside; [serial] tells two requests for the same one apart. */
-data class DestinationRequest(val tab: Tab, val serial: Int)
+data class DestinationRequest(val tab: Tab, val serial: Int, val newTimer: Boolean = false)
 
 /**
  * The app's shell (SPEC §3.1): one back stack whose root holds the four destinations with the
@@ -115,11 +115,14 @@ fun ClockApp(startTab: Tab, restored: Boolean = false, request: DestinationReque
         scope.launch { app.preferences.setLastDestination(next) }
     }
 
+    // The timer widget's "+": the Timer destination opens ready for a new timer, once
+    var newTimerAsked by remember { mutableStateOf(false) }
     // A notification or widget opens its own destination, whatever was used last (§3.1.4)
     LaunchedEffect(request) {
         val wanted = request?.tab ?: return@LaunchedEffect
         while (stack.size > 1) stack.removeAt(stack.lastIndex)
         select(wanted)
+        if (request.newTimer) newTimerAsked = true
     }
     val stopwatch by app.stopwatch.state.collectAsStateWithLifecycle()
     val timers by app.timers.timers.collectAsStateWithLifecycle()
@@ -200,7 +203,7 @@ fun ClockApp(startTab: Tab, restored: Boolean = false, request: DestinationReque
                                 when (current) {
                                     Tab.ALARMS -> AlarmsScreen(openSettings, onOpenAlarm = { open(Screen.Alarm(it)) }, onOpenSound = { open(Screen.AlarmSound(it)) }, snackbars = snackbars, messageScope = scope)
                                     Tab.CLOCK -> ClockScreen(clock, openSettings, onAddCity = { open(Screen.AddCity()) }, onOpenAlarms = { select(Tab.ALARMS) }, snackbars = snackbars, messageScope = scope)
-                                    Tab.TIMER -> TimerScreen(openSettings, onEditPresets = { open(Screen.TimerPresets) }, snackbars = snackbars, messageScope = scope)
+                                    Tab.TIMER -> TimerScreen(openSettings, newTimerAsked = newTimerAsked, onNewTimerShown = { newTimerAsked = false }, onEditPresets = { open(Screen.TimerPresets) }, snackbars = snackbars, messageScope = scope)
                                     Tab.STOPWATCH -> StopwatchScreen(openSettings, snackbars = snackbars, messageScope = scope)
                                 }
                             }

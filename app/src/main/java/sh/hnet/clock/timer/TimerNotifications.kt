@@ -99,6 +99,8 @@ class TimerReceiver : BroadcastReceiver() {
             ACTION_ADD_MINUTE -> timers.addMinute(id)
             ACTION_STOP -> timers.delete(id)
             ACTION_STOP_ALL -> timers.stopRinging()
+            // A preset tapped on the timer widget
+            ACTION_START_PRESET -> timers.presets.value.firstOrNull { it.id == id }?.let { timers.start(it.duration, it.name) }
         }
     }
 
@@ -110,5 +112,6 @@ class TimerReceiver : BroadcastReceiver() {
         const val ACTION_ADD_MINUTE = "sh.hnet.clock.action.TIMER_ADD_MINUTE"
         const val ACTION_STOP = "sh.hnet.clock.action.TIMER_STOP"
         const val ACTION_STOP_ALL = "sh.hnet.clock.action.TIMER_STOP_ALL"
+        const val ACTION_START_PRESET = "sh.hnet.clock.action.TIMER_START_PRESET"
     }
 }

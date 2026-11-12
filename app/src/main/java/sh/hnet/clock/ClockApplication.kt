@@ -5,6 +5,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.SupervisorJob
 import android.os.UserManager
 import kotlinx.coroutines.launch
+import sh.hnet.clock.widget.Widgets
 import sh.hnet.clock.alarm.AlarmController
 import sh.hnet.clock.backup.BackupManager
 import sh.hnet.clock.data.CityStore
@@ -58,6 +59,7 @@ class ClockApplication : Application() {
         stopwatch.sync()
         timers.silenceOverdue()
         timers.refresh()
+        Widgets.all(this)
     }
 
     val backup: BackupManager by lazy { BackupManager(this, getSharedPreferences("backup", MODE_PRIVATE)) }

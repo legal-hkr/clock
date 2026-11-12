@@ -41,6 +41,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.State
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -96,7 +97,7 @@ import sh.hnet.clock.ui.components.tabular
  * a list of cards, the ended first. More timers are set in a sheet with the same input.
  */
 @Composable
-fun TimerScreen(onOpenSettings: () -> Unit, onEditPresets: () -> Unit, snackbars: SnackbarHostState, messageScope: CoroutineScope) {
+fun TimerScreen(onOpenSettings: () -> Unit, newTimerAsked: Boolean = false, onNewTimerShown: () -> Unit = {}, onEditPresets: () -> Unit, snackbars: SnackbarHostState, messageScope: CoroutineScope) {
     val context = LocalContext.current
     val controller = (context.applicationContext as ClockApplication).timers
     val timers by controller.timers.collectAsStateWithLifecycle()
@@ -129,6 +130,13 @@ fun TimerScreen(onOpenSettings: () -> Unit, onEditPresets: () -> Unit, snackbars
     var input by rememberSaveable(stateSaver = InputSaver) { mutableStateOf(TimerInput()) }
     var sheetOpen by rememberSaveable { mutableStateOf(false) }
     var labelFor by rememberSaveable { mutableStateOf<Long?>(null) }
+    // Asked for from the widget's "+": with timers on the page the sheet opens; without, the page is the input already
+    LaunchedEffect(newTimerAsked) {
+        if (newTimerAsked) {
+            if (timers.isNotEmpty() && timers.size < TimerController.MAX_TIMERS) sheetOpen = true
+            onNewTimerShown()
+        }
+    }
 
     val deletedNamed = stringResource(R.string.msg_timer_deleted)
     val deletedPlain = stringResource(R.string.msg_timer_deleted_unnamed)

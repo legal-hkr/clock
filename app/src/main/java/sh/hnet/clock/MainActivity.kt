@@ -24,6 +24,7 @@ import sh.hnet.clock.ui.Tab
 import sh.hnet.clock.ui.theme.ClockTheme
 import sh.hnet.clock.ui.welcome.FirstRun
 import sh.hnet.clock.ui.welcome.WelcomeWizard
+import sh.hnet.clock.widget.Widgets
 
 class MainActivity : ComponentActivity() {
     /** The destination a notification asked for; the shell follows changes. */
@@ -36,7 +37,13 @@ class MainActivity : ComponentActivity() {
 
     private fun handle(intent: Intent?) {
         val tab = intent?.getStringExtra(Notifications.EXTRA_DESTINATION)?.let { name -> Tab.entries.firstOrNull { it.name == name } } ?: return
-        request.value = DestinationRequest(tab, (request.value?.serial ?: 0) + 1)
+        request.value = DestinationRequest(tab, (request.value?.serial ?: 0) + 1, newTimer = intent.getBooleanExtra(Widgets.EXTRA_NEW_TIMER, false))
+    }
+
+    override fun onResume() {
+        super.onResume()
+        // What the user changed in the system's settings meanwhile may decide whether alarms ring: the digital widget says so
+        Widgets.digital(this)
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -48,6 +55,8 @@ class MainActivity : ComponentActivity() {
         }
         // Channel names follow the app's language
         Notifications.ensureChannels(this)
+        // The widgets' words follow it too
+        Widgets.all(this)
         setContent {
             ClockTheme {
                 val app = application as ClockApplication

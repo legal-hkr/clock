@@ -385,4 +385,23 @@
     <string name="msg_sound_gone_unnamed">%1$s is gone. Rings with the phone’s default.</string>
     <string name="msg_sound_gone_card"><![CDATA[<b>%s</b> is no longer on this phone. The phone’s default rings until another sound is chosen.]]></string>
     <string name="button_choose">Choose</string>
+
+    <!-- Widgets -->
+    <string name="widget_digital_name">Digital clock</string>
+    <string name="widget_digital_description">Time, date and your next alarm</string>
+    <string name="widget_analog_name">Analog clock</string>
+    <string name="widget_analog_description">A clock face in your colors</string>
+    <string name="widget_world_name">World clock</string>
+    <string name="widget_world_description">The time in your cities</string>
+    <string name="widget_timer_name">Timer</string>
+    <string name="widget_timer_description">Start your presets from the home screen</string>
+    <string name="widget_world_empty">Add cities in Clock</string>
+    <string name="widget_alarm_may_not_ring">Alarm may not ring</string>
+    <string name="widget_preview_city_1">Reykjavík</string>
+    <string name="widget_preview_city_2">New York</string>
+    <string name="widget_preview_city_3">Tokyo</string>
+    <string name="widget_preview_preset_1">Tea (3 min)</string>
+    <string name="widget_preview_preset_2">Pasta (9 min)</string>
+    <string name="widget_preview_preset_3">Eggs (6 min)</string>
+    <string name="widget_preview_preset_4">Nap (25 min)</string>
 </resources>

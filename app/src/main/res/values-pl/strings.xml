@@ -396,4 +396,23 @@
     <string name="msg_sound_gone_unnamed">Dźwięku %1$s nie ma już w telefonie. Zadzwoni domyślny.</string>
     <string name="msg_sound_gone_card"><![CDATA[Dźwięku <b>%s</b> nie ma już w telefonie. Do czasu wybrania innego dzwoni domyślny dźwięk telefonu.]]></string>
     <string name="button_choose">Wybierz</string>
+
+    <!-- Widgets -->
+    <string name="widget_digital_name">Zegar cyfrowy</string>
+    <string name="widget_digital_description">Godzina, data i najbliższy alarm</string>
+    <string name="widget_analog_name">Zegar analogowy</string>
+    <string name="widget_analog_description">Tarcza zegara w kolorach systemu</string>
+    <string name="widget_world_name">Zegar światowy</string>
+    <string name="widget_world_description">Godzina w wybranych miastach</string>
+    <string name="widget_timer_name">Minutnik</string>
+    <string name="widget_timer_description">Szablony uruchamiane z ekranu głównego</string>
+    <string name="widget_world_empty">Dodaj miasta w Zegarze</string>
+    <string name="widget_alarm_may_not_ring">Alarm może nie zadzwonić</string>
+    <string name="widget_preview_city_1">Reykjavík</string>
+    <string name="widget_preview_city_2">Nowy Jork</string>
+    <string name="widget_preview_city_3">Tokio</string>
+    <string name="widget_preview_preset_1">Herbata (3 min)</string>
+    <string name="widget_preview_preset_2">Makaron (9 min)</string>
+    <string name="widget_preview_preset_3">Jajka (6 min)</string>
+    <string name="widget_preview_preset_4">Drzemka (25 min)</string>
 </resources>

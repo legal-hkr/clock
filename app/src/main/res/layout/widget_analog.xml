@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Analogue clock (SPEC §3.10.2): no container – the face is the widget. The system's clock view moves the hands by itself. -->
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@android:id/background"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <AnalogClock
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_gravity="center"
+        android:dial="@drawable/widget_clock_dial"
+        android:hand_hour="@drawable/widget_clock_hour"
+        android:hand_minute="@drawable/widget_clock_minute" />
+</FrameLayout>
