@@ -127,6 +127,7 @@ class AlarmController(context: Context) {
         notifications.show(advanced, zone, settings, now)
         RingService.sync(context)
         Widgets.digital(context)
+        Widgets.round(context)
     }
 
     @Synchronized

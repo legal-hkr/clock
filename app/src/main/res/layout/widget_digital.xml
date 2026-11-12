@@ -1,0 +1,166 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Digital clock (digital widgets handoff of 12 Nov 2026, §3): a card with one group in its middle – the date in the cookie, read like a calendar leaf, and the time with the minutes in primary over the next alarm as a pill. Sizes are in dp, text too: the shapes can't grow with the font, so the text doesn't either. The group is a layout of its own so that it stays centered in a larger card, and the pill sits in a taller one for its touch target. Also the picker's preview. -->
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:ignore="SpUsage,ContentDescription,UseCompoundDrawables,UselessParent"
+    android:id="@android:id/background"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/widget_background"
+    android:clipToOutline="true">
+
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:baselineAligned="false"
+        android:gravity="center_vertical"
+        android:orientation="horizontal">
+
+        <FrameLayout
+            android:id="@+id/cookie"
+            android:layout_width="128dp"
+            android:layout_height="128dp">
+
+            <ImageView
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:importantForAccessibility="no"
+                android:src="@drawable/widget_cookie" />
+
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:gravity="center_horizontal"
+                android:orientation="vertical">
+
+                <TextClock
+                    android:id="@+id/weekday"
+                    android:layout_width="wrap_content"
+                    android:layout_height="20dp"
+                    android:fontFamily="sans-serif-medium"
+                    android:format12Hour="EEE"
+                    android:format24Hour="EEE"
+                    android:gravity="center"
+                    android:includeFontPadding="false"
+                    android:maxLines="1"
+                    android:textColor="@color/widget_on_primary_container"
+                    android:textSize="14dp" />
+
+                <!-- The margins take the digits' line down to their size, as the type scale has it -->
+                <TextClock
+                    android:id="@+id/day"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="-4dp"
+                    android:layout_marginBottom="-5dp"
+                    android:fontFamily="sans-serif-medium"
+                    android:fontFeatureSettings="tnum"
+                    android:format12Hour="d"
+                    android:format24Hour="d"
+                    android:includeFontPadding="false"
+                    android:maxLines="1"
+                    android:textColor="@color/widget_on_primary_container"
+                    android:textSize="52dp" />
+
+                <TextClock
+                    android:id="@+id/month"
+                    android:layout_width="wrap_content"
+                    android:layout_height="20dp"
+                    android:fontFamily="sans-serif-medium"
+                    android:format12Hour="MMM"
+                    android:format24Hour="MMM"
+                    android:gravity="center"
+                    android:includeFontPadding="false"
+                    android:maxLines="1"
+                    android:textColor="@color/widget_on_primary_container"
+                    android:textSize="14dp" />
+            </LinearLayout>
+        </FrameLayout>
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="16dp"
+            android:orientation="vertical">
+
+            <!-- Hours with the separator, then the minutes in their own color -->
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="-4dp"
+                android:layout_marginBottom="-5dp"
+                android:layoutDirection="ltr"
+                android:orientation="horizontal">
+
+                <TextClock
+                    android:id="@+id/hours"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:fontFeatureSettings="tnum"
+                    android:format12Hour="h:"
+                    android:format24Hour="HH:"
+                    android:includeFontPadding="false"
+                    android:letterSpacing="-0.018"
+                    android:maxLines="1"
+                    android:textColor="@color/widget_on_surface"
+                    android:textSize="56dp" />
+
+                <TextClock
+                    android:id="@+id/minutes"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:fontFeatureSettings="tnum"
+                    android:format12Hour="mm"
+                    android:format24Hour="mm"
+                    android:includeFontPadding="false"
+                    android:letterSpacing="-0.018"
+                    android:maxLines="1"
+                    android:textColor="@color/widget_primary"
+                    android:textSize="56dp" />
+            </LinearLayout>
+
+            <!-- The pill is 32 dp in a target of 48: 10 dp under the time, and nothing added under itself -->
+            <FrameLayout
+                android:id="@+id/alarm"
+                android:layout_width="wrap_content"
+                android:layout_height="48dp"
+                android:layout_marginTop="2dp"
+                android:layout_marginBottom="-8dp"
+                android:visibility="gone">
+
+                <LinearLayout
+                    android:id="@+id/alarm_pill"
+                    android:layout_width="wrap_content"
+                    android:layout_height="32dp"
+                    android:layout_gravity="center_vertical"
+                    android:background="@drawable/widget_pill"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal"
+                    android:paddingStart="8dp"
+                    android:paddingEnd="12dp">
+
+                    <ImageView
+                        android:id="@+id/alarm_icon"
+                        android:layout_width="18dp"
+                        android:layout_height="18dp"
+                        android:importantForAccessibility="no"
+                        android:src="@drawable/ic_alarm"
+                        android:tint="@color/widget_on_secondary_container" />
+
+                    <TextView
+                        android:id="@+id/alarm_text"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="4dp"
+                        android:fontFamily="sans-serif-medium"
+                        android:includeFontPadding="false"
+                        android:maxLines="1"
+                        android:textColor="@color/widget_on_secondary_container"
+                        android:textSize="14dp" />
+                </LinearLayout>
+            </FrameLayout>
+        </LinearLayout>
+    </LinearLayout>
+</FrameLayout>

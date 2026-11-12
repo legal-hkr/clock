@@ -65,6 +65,15 @@ object Widgets {
     /** A line of the timer widget with the space under it (dp), and the least heights of a widget of one to five lines (12 dp around). */
     private const val LINE = 52f
     private val TIMER_HEIGHTS = listOf(40f, 124f, 176f, 228f, 280f)
+    /** The least width (dp) at which the digital clock's group has its full size. */
+    private const val DIGITAL_FULL = 320f
+
+    /** The sides (dp) the round clock is laid out for; a widget may carry at most 16 layouts. */
+    private val ROUND_SIDES = listOf(110f, 125f, 140f, 155f, 170f, 185f, 200f, 220f, 240f, 260f, 285f, 310f, 340f, 370f, 400f, 440f)
+
+    /** The round clock's digits and its date and alarm text, as shares of the cookie's side: 48 dp and 12 dp on a cookie of about 155 dp. */
+    private const val ROUND_DIGITS = 0.31f
+    private const val ROUND_TEXT = 0.075f
     private const val REQUEST_NEW_TIMER = 100
     private const val REQUEST_LIST = 101
     private const val REQUEST_LIST_TIMERS = 102
@@ -75,6 +84,7 @@ object Widgets {
     /** Everything again: after a restart, an unlock, a change of language, clock or time zone. */
     fun all(context: Context) {
         digital(context)
+        round(context)
         analog(context)
         world(context)
         timer(context)
@@ -107,46 +117,55 @@ object Widgets {
         setCharSequence(view, "setFormat24Hour", twentyFour)
     }
 
-    // ---- Digital clock (§3.10.1) ----
+    // ---- Digital clock and Round digital clock (§3.10.1, digital widgets handoff of 12 Nov 2026) ----
 
-    /** The alarm line: when the next alarm rings, or that it may not. */
-    private class AlarmLine(val text: String, val problem: Boolean)
+    /** The next alarm as the widgets show it, and whether alarms may not ring (§3.2.8): the text stays the alarm's time either way. */
+    private class AlarmLine(val text: String, val problem: Boolean) {
+        fun description(context: Context): String = if (problem) context.getString(R.string.widget_alarm_may_not_ring, text) else text
+    }
 
+    private fun alarmLine(context: Context, locale: Locale): AlarmLine? {
+        val alarms = (context.applicationContext as ClockApplication).alarms.alarms.value
+        val zone = ZoneId.systemDefault()
+        val next = alarms.nextPending(zone) ?: return null
+        val problem = Reliability.read(context).problems(Ringing.ALARMS, alarms.any { it.enabled && SoundChoice.decode(it.sound, it.soundTitle) != SoundChoice.Silent }).isNotEmpty()
+        return AlarmLine(alarmText(context, locale, next.second, zone), problem)
+    }
+
+    /** The hours of the locale's time pattern up to the minutes ("HH:", "h:", "H."): the widgets' clocks show hours and minutes apart and never the period. */
+    private fun hourPatterns(locale: Locale, separator: Boolean): Pair<String, String> {
+        val (twelve, twentyFour) = timePatterns(locale, period = false)
+        fun hours(pattern: String) = pattern.substringBefore('m').let { if (separator) it else it.filter { letter -> letter.isLetter() } }
+        return hours(twelve) to hours(twentyFour)
+    }
+
+    /** A card with the date in the cookie, the time with the minutes in primary, and the next alarm as a pill. One size, 4 × 2; in narrow cells the group steps down once. */
     fun digital(context: Context) {
         if (ids(context, DigitalClockWidget::class.java).isEmpty()) return
-        val app = context.applicationContext as ClockApplication
         val locale = locale(context)
-        val zone = ZoneId.systemDefault()
-        val alarms = app.alarms.alarms.value
-        val next = alarms.nextPending(zone)
-        val line = when {
-            next == null -> null
-            // An alarm that may not ring is the one thing worth more room than its time (§3.2.8)
-            Reliability.read(context).problems(Ringing.ALARMS, alarms.any { it.enabled && SoundChoice.decode(it.sound, it.soundTitle) != SoundChoice.Silent }).isNotEmpty() ->
-                AlarmLine(context.getString(R.string.widget_alarm_may_not_ring), problem = true)
-            else -> AlarmLine(alarmText(context, locale, next.second, zone), problem = false)
-        }
-        val shortDate = DateFormat.getBestDateTimePattern(locale, "EEEdMMM")
-        val fullDate = DateFormat.getBestDateTimePattern(locale, "EEEEdMMMM")
-        val views = sized(listOf(NARROW, WIDE), listOf(40f, 70f, 120f)) { width, height ->
-            val wide = width >= WIDE
-            val layout = when {
-                height >= 120f -> if (wide) R.layout.widget_digital_large else R.layout.widget_digital_medium
-                wide -> R.layout.widget_digital_wide
-                height >= 70f -> R.layout.widget_digital_small
-                else -> R.layout.widget_digital_tiny
-            }
-            RemoteViews(context.packageName, layout).apply {
-                val (twelve, twentyFour) = timePatterns(locale, period = wide)
-                clockFormat(R.id.time, twelve, twentyFour)
-                clockFormat(R.id.date, if (layout == R.layout.widget_digital_large) fullDate else shortDate)
-                // Lines drop out when room runs short, the alarm first: one low row holds the time and the date
-                if (line != null && (height >= 70f || !wide)) {
+        val line = alarmLine(context, locale)
+        val (twelve, twentyFour) = hourPatterns(locale, separator = true)
+        val views = sized(listOf(250f, DIGITAL_FULL), listOf(110f)) { width, _ ->
+            RemoteViews(context.packageName, R.layout.widget_digital).apply {
+                clockFormat(R.id.hours, twelve, twentyFour)
+                clockFormat(R.id.weekday, DateFormat.getBestDateTimePattern(locale, "EEE"))
+                clockFormat(R.id.day, DateFormat.getBestDateTimePattern(locale, "d"))
+                clockFormat(R.id.month, DateFormat.getBestDateTimePattern(locale, "MMM"))
+                if (width < DIGITAL_FULL) {
+                    setViewLayoutWidth(R.id.cookie, 104f, TypedValue.COMPLEX_UNIT_DIP)
+                    setViewLayoutHeight(R.id.cookie, 104f, TypedValue.COMPLEX_UNIT_DIP)
+                    setTextViewTextSize(R.id.day, TypedValue.COMPLEX_UNIT_DIP, 44f)
+                    setTextViewTextSize(R.id.hours, TypedValue.COMPLEX_UNIT_DIP, 48f)
+                    setTextViewTextSize(R.id.minutes, TypedValue.COMPLEX_UNIT_DIP, 48f)
+                }
+                if (line != null) {
                     setViewVisibility(R.id.alarm, View.VISIBLE)
                     setTextViewText(R.id.alarm_text, line.text)
+                    setContentDescription(R.id.alarm, line.description(context))
                     setImageViewResource(R.id.alarm_icon, if (line.problem) R.drawable.ic_error else R.drawable.ic_alarm)
-                    val color = if (line.problem) R.color.widget_error else R.color.widget_on_surface_variant
-                    setColorStateList(R.id.alarm_icon, "setImageTintList", color)
+                    setInt(R.id.alarm_pill, "setBackgroundResource", if (line.problem) R.drawable.widget_pill_error else R.drawable.widget_pill)
+                    val color = if (line.problem) R.color.widget_on_error_container else R.color.widget_on_secondary_container
+                    setColorStateList(R.id.alarm_icon, "setImageTintList", if (line.problem) R.color.widget_error else color)
                     setColorStateList(R.id.alarm_text, "setTextColor", color)
                     setOnClickPendingIntent(R.id.alarm, Notifications.open(context, Tab.ALARMS))
                 } else {
@@ -156,6 +175,53 @@ object Widgets {
             }
         }
         show(context, DigitalClockWidget::class.java, views)
+    }
+
+    /**
+     * The cookie with the hours over the minutes, the short date above and the next alarm below.
+     * Everything in it follows the cookie's size: a widget can't scale its text by itself, so there
+     * is one layout for each of [ROUND_SIDES] and the launcher shows the largest that fits.
+     */
+    fun round(context: Context) {
+        if (ids(context, RoundClockWidget::class.java).isEmpty()) return
+        val locale = locale(context)
+        val line = alarmLine(context, locale)
+        val (twelve, twentyFour) = hourPatterns(locale, separator = false)
+        val dip = TypedValue.COMPLEX_UNIT_DIP
+        // Square sizes only: the cookie is as large as the smaller side
+        val views = RemoteViews(ROUND_SIDES.associate { side ->
+            SizeF(side, side) to RemoteViews(context.packageName, R.layout.widget_digital_round).apply {
+                clockFormat(R.id.hours, twelve, twentyFour)
+                clockFormat(R.id.date, DateFormat.getBestDateTimePattern(locale, "EEEdMMM"))
+                val digits = side * ROUND_DIGITS
+                // The date and the alarm grow with the cookie but never go under label-medium
+                val text = (side * ROUND_TEXT).coerceAtLeast(12f)
+                for (view in intArrayOf(R.id.hours, R.id.minutes)) {
+                    setTextViewTextSize(view, dip, digits)
+                    // A line keeps empty room above and below its digits: without it hours and minutes nearly touch
+                    setViewLayoutMargin(view, RemoteViews.MARGIN_TOP, -0.19f * digits, dip)
+                    setViewLayoutMargin(view, RemoteViews.MARGIN_BOTTOM, -0.23f * digits, dip)
+                }
+                setTextViewTextSize(R.id.date, dip, text)
+                setTextViewTextSize(R.id.alarm_text, dip, text)
+                setViewLayoutWidth(R.id.alarm_icon, text * 1.5f, dip)
+                setViewLayoutHeight(R.id.alarm_icon, text * 1.5f, dip)
+                if (line != null) {
+                    setViewVisibility(R.id.alarm, View.VISIBLE)
+                    setTextViewText(R.id.alarm_text, line.text)
+                    setContentDescription(R.id.alarm, line.description(context))
+                    setImageViewResource(R.id.alarm_icon, if (line.problem) R.drawable.ic_error else R.drawable.ic_alarm)
+                    val color = if (line.problem) R.color.widget_error else R.color.widget_on_primary_container
+                    setColorStateList(R.id.alarm_icon, "setImageTintList", color)
+                    setColorStateList(R.id.alarm_text, "setTextColor", color)
+                } else {
+                    setViewVisibility(R.id.alarm, View.GONE)
+                }
+                // While alarms may not ring, a tap leads to where that is said and fixed
+                setOnClickPendingIntent(android.R.id.background, Notifications.open(context, if (line?.problem == true) Tab.ALARMS else Tab.CLOCK))
+            }
+        })
+        show(context, RoundClockWidget::class.java, views)
     }
 
     /** "Thu, 06:30" within a week, else the date. No "today" or "tomorrow": the line must stay true past midnight without a redraw. */
@@ -462,6 +528,10 @@ class DigitalClockWidget : AppWidgetProvider() {
 }
 
 /** Analogue clock: the face alone. */
+class RoundClockWidget : AppWidgetProvider() {
+    override fun onUpdate(context: Context, manager: AppWidgetManager, ids: IntArray) = Widgets.round(context)
+}
+
 class AnalogClockWidget : AppWidgetProvider() {
     override fun onUpdate(context: Context, manager: AppWidgetManager, ids: IntArray) = Widgets.analog(context)
 }

@@ -44,6 +44,7 @@ class MainActivity : ComponentActivity() {
         super.onResume()
         // What the user changed in the system's settings meanwhile may decide whether alarms ring: the digital widget says so
         Widgets.digital(this)
+        Widgets.round(this)
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {

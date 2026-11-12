@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Round digital clock (digital widgets handoff of 12 Nov 2026, §4): the analog clock's cookie with the time in digits – the short date, the hours over the minutes, the next alarm. No container: the cookie is the widget, square in whatever room it gets. Sizes are in dp, text too. Also the picker's preview. -->
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:ignore="SpUsage,ContentDescription,UseCompoundDrawables"
+    android:id="@android:id/background"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <ImageView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:importantForAccessibility="no"
+        android:scaleType="fitCenter"
+        android:src="@drawable/widget_cookie" />
+
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:gravity="center_horizontal"
+        android:orientation="vertical">
+
+        <TextClock
+            android:id="@+id/date"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="2dp"
+            android:fontFamily="sans-serif-medium"
+            android:format12Hour="EEE d MMM"
+            android:format24Hour="EEE d MMM"
+            android:includeFontPadding="false"
+            android:maxLines="1"
+            android:textColor="@color/widget_on_primary_container"
+            android:textSize="12dp" />
+
+        <!-- The margins take away the empty room a line keeps above and below its digits, so that hours and minutes nearly touch and the column stays well inside the cookie -->
+        <TextClock
+            android:id="@+id/hours"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="-9dp"
+            android:layout_marginBottom="-11dp"
+            android:fontFamily="sans-serif-medium"
+            android:fontFeatureSettings="tnum"
+            android:format12Hour="h"
+            android:format24Hour="HH"
+            android:includeFontPadding="false"
+            android:letterSpacing="-0.02"
+            android:maxLines="1"
+            android:textColor="@color/widget_on_primary_container"
+            android:textSize="48dp" />
+
+        <TextClock
+            android:id="@+id/minutes"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="-9dp"
+            android:layout_marginBottom="-11dp"
+            android:fontFamily="sans-serif-medium"
+            android:fontFeatureSettings="tnum"
+            android:format12Hour="mm"
+            android:format24Hour="mm"
+            android:includeFontPadding="false"
+            android:letterSpacing="-0.02"
+            android:maxLines="1"
+            android:textColor="@color/widget_primary"
+            android:textSize="48dp" />
+
+        <LinearLayout
+            android:id="@+id/alarm"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="2dp"
+            android:gravity="center_vertical"
+            android:orientation="horizontal"
+            android:visibility="gone">
+
+            <ImageView
+                android:id="@+id/alarm_icon"
+                android:layout_width="18dp"
+                android:layout_height="18dp"
+                android:importantForAccessibility="no"
+                android:src="@drawable/ic_alarm"
+                android:tint="@color/widget_on_primary_container" />
+
+            <TextView
+                android:id="@+id/alarm_text"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="3dp"
+                android:fontFamily="sans-serif-medium"
+                android:includeFontPadding="false"
+                android:maxLines="1"
+                android:textColor="@color/widget_on_primary_container"
+                android:textSize="12dp" />
+        </LinearLayout>
+    </LinearLayout>
+</FrameLayout>
