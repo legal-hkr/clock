@@ -129,7 +129,7 @@
     <string name="msg_stopwatch_reset">Stopwatch reset</string>
 
     <!-- Timer -->
-    <string name="label_timer_default">Timer</string>
+    <string name="label_timer_unnamed">Timer (%s)</string>
     <plurals name="label_timers_running">
         <item quantity="one">%d running</item>
         <item quantity="other">%d running</item>
@@ -164,7 +164,7 @@
     <string name="content_description_timer_label">Label: %s. Edit</string>
     <string name="button_delete_timer">Delete timer</string>
     <string name="msg_timer_deleted"><![CDATA[Deleted timer <b>%s</b>]]></string>
-    <string name="msg_timer_deleted_unnamed">Timer deleted</string>
+    <string name="msg_timer_deleted_unnamed">Deleted timer (%s)</string>
     <plurals name="title_timers_ended">
         <item quantity="one">%d timer ended</item>
         <item quantity="other">%d timers ended</item>

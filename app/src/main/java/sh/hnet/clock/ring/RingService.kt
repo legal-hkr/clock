@@ -28,6 +28,7 @@ import sh.hnet.clock.timer.TimerNotifications
 import sh.hnet.clock.timer.TimerReceiver
 import sh.hnet.clock.ui.Tab
 import sh.hnet.clock.ui.components.durationWords
+import sh.hnet.clock.ui.components.timerName
 import java.time.ZoneId
 
 /**
@@ -138,18 +139,19 @@ class RingService : Service() {
      */
     private fun timerNotification(ringing: List<Timer>, quiet: Boolean): Notification {
         val builder = base(if (quiet) Notifications.CHANNEL_TIMERS else Notifications.CHANNEL_RINGING_TIMERS, R.drawable.ic_hourglass_empty, Tab.TIMER, page = !quiet)
-        if (ringing.isEmpty()) return builder.setContentTitle(getString(R.string.label_timer_default)).build()
+        if (ringing.isEmpty()) return builder.setContentTitle(getString(R.string.label_nav_timer)).build()
         val now = (application as ClockApplication).timers.now()
         val single = ringing.singleOrNull()
         if (single != null) {
-            builder.setContentTitle(single.label.ifEmpty { getString(R.string.label_timer_default) })
-                .setContentText(getString(R.string.label_timer_of, durationWords(resources, single.original)))
+            builder.setContentTitle(timerName(resources, single))
                 .setUsesChronometer(true).setWhen(single.endsAt(now)).setShowWhen(true)
                 .addAction(action(R.drawable.ic_stop, R.string.button_stop, TimerNotifications.intent(this, TimerReceiver.ACTION_STOP, single.id)))
                 .addAction(action(R.drawable.ic_add, R.string.button_add_minute, TimerNotifications.intent(this, TimerReceiver.ACTION_ADD_MINUTE, single.id)))
+            // What it was set to; a timer without a label says that in its name already
+            if (single.label.isNotEmpty()) builder.setContentText(getString(R.string.label_timer_of, durationWords(resources, single.original)))
         } else {
             builder.setContentTitle(resources.getQuantityString(R.plurals.title_timers_ended, ringing.size, ringing.size))
-                .setContentText(ringing.joinToString { it.label.ifEmpty { getString(R.string.label_timer_default) } + " (" + TimerFormat.left(it.remaining(now)) + ")" })
+                .setContentText(ringing.joinToString { timerName(resources, it) + " (" + TimerFormat.left(it.remaining(now)) + ")" })
                 .setShowWhen(false)
                 .addAction(action(R.drawable.ic_stop, R.string.button_stop_all, TimerNotifications.intent(this, TimerReceiver.ACTION_STOP_ALL)))
         }

@@ -4,6 +4,7 @@ import android.content.res.Resources
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.platform.LocalResources
 import sh.hnet.clock.R
+import sh.hnet.clock.timer.Timer
 import sh.hnet.clock.timer.TimerFormat
 
 /** A duration in short words: "3 min", "1 h 30 min", "45 s", "1 min 30 s". */
@@ -15,6 +16,16 @@ fun durationWords(resources: Resources, duration: Long): String {
         if (s > 0 || (h == 0 && m == 0)) resources.getString(R.string.label_duration_s, s) else null,
     ).joinToString(" ")
 }
+
+/**
+ * What a timer is called: its label, or – without one – the duration it was set to, "Timer (15 min)"
+ * (handoff of 12 Nov 2026, §3.7). Adding a minute or resetting doesn't change that name.
+ */
+fun timerName(resources: Resources, timer: Timer): String =
+    timer.label.ifEmpty { resources.getString(R.string.label_timer_unnamed, durationWords(resources, timer.original)) }
+
+@Composable
+fun timerName(timer: Timer): String = timerName(LocalResources.current, timer)
 
 @Composable
 fun durationWords(duration: Long): String = durationWords(LocalResources.current, duration)

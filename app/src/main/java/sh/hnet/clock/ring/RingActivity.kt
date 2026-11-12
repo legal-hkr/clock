@@ -81,6 +81,7 @@ import sh.hnet.clock.timer.TimerController
 import sh.hnet.clock.timer.TimerFormat
 import sh.hnet.clock.timer.shown
 import sh.hnet.clock.ui.components.durationWords
+import sh.hnet.clock.ui.components.timerName
 import sh.hnet.clock.ui.components.groupShapes
 import sh.hnet.clock.ui.components.tabular
 import sh.hnet.clock.ui.theme.ClockTheme
@@ -210,15 +211,16 @@ private fun AlarmPage(alarm: Alarm, snoozeMinutes: Int, onSnooze: () -> Unit, on
 @Composable
 private fun OneTimer(timer: Timer, now: Moment, onStop: () -> Unit, onAddMinute: () -> Unit) {
     val title: @Composable () -> Unit = {
-        if (timer.label.isNotEmpty()) {
-            Text(timer.label, style = MaterialTheme.typography.headlineSmall, maxLines = 1, overflow = TextOverflow.Ellipsis, modifier = Modifier.semantics { heading() })
-        }
+        Text(timerName(timer), style = MaterialTheme.typography.headlineSmall, maxLines = 1, overflow = TextOverflow.Ellipsis, modifier = Modifier.semantics { heading() })
         Text(TimerFormat.left(timer.remaining(now)), style = MaterialTheme.typography.displayLarge.tabular, maxLines = 1)
-        Text(
-            stringResource(R.string.label_timer_of, durationWords(timer.original)),
-            style = MaterialTheme.typography.bodyLarge,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-        )
+        // What it was set to; a timer without a label says that in its name already
+        if (timer.label.isNotEmpty()) {
+            Text(
+                stringResource(R.string.label_timer_of, durationWords(timer.original)),
+                style = MaterialTheme.typography.bodyLarge,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+        }
     }
     val addMinute: @Composable (Modifier) -> Unit = { modifier ->
         FilledTonalButton(onClick = onAddMinute, modifier = modifier.fillMaxWidth().height(72.dp)) {
@@ -266,7 +268,7 @@ private fun SeveralTimers(ringing: List<Timer>, now: Moment, timers: TimerContro
                 Surface(shape = groupShapes(position, ringing.size).shape, color = MaterialTheme.colorScheme.surfaceContainer, modifier = Modifier.fillMaxWidth()) {
                     Row(Modifier.padding(horizontal = 16.dp, vertical = 12.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                         Column(Modifier.weight(1f)) {
-                            Text(timer.label.ifEmpty { stringResource(R.string.label_timer_default) }, style = MaterialTheme.typography.bodyLarge, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                            Text(timerName(timer), style = MaterialTheme.typography.bodyLarge, maxLines = 1, overflow = TextOverflow.Ellipsis)
                             Text(TimerFormat.left(timer.remaining(now)), style = MaterialTheme.typography.headlineMedium.tabular, maxLines = 1)
                         }
                         FilledTonalButton(onClick = { timers.addMinute(timer.id) }) { Text(stringResource(R.string.label_plus_minute)) }

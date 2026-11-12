@@ -64,6 +64,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.Layout
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalResources
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
@@ -105,8 +106,10 @@ import sh.hnet.clock.ui.components.rememberReliability
 import sh.hnet.clock.ui.components.TextDialog
 import sh.hnet.clock.ui.components.TooltipIconButton
 import sh.hnet.clock.ui.components.rememberNotificationAsk
+import sh.hnet.clock.ui.components.durationWords
 import sh.hnet.clock.ui.components.rememberTimeFormats
 import sh.hnet.clock.ui.components.tabular
+import sh.hnet.clock.ui.components.timerName
 
 /**
  * Timer (SPEC §3.6). With no timers the input is the page (presets, the duration, the keypad and
@@ -158,12 +161,14 @@ fun TimerScreen(onOpenSettings: () -> Unit, newTimerAsked: Boolean = false, onNe
     val deletedNamed = stringResource(R.string.msg_timer_deleted)
     val deletedPlain = stringResource(R.string.msg_timer_deleted_unnamed)
     val undo = stringResource(R.string.button_undo)
+    val resources = LocalResources.current
     val delete: (Timer) -> Unit = { timer ->
         controller.delete(timer.id)?.let { removed ->
             // In the app's scope: the snackbar and its Undo outlive this page
             messageScope.launch {
                 snackbars.currentSnackbarData?.dismiss()
-                val text = if (removed.label.isEmpty()) deletedPlain else AnnotatedString.fromHtml(deletedNamed.format(removed.label.htmlEncode())).text
+                // A timer without a label is told by what it was set to: "Deleted timer (15 min)"
+                val text = if (removed.label.isEmpty()) deletedPlain.format(durationWords(resources, removed.original)) else AnnotatedString.fromHtml(deletedNamed.format(removed.label.htmlEncode())).text
                 if (snackbars.showSnackbar(text, actionLabel = undo, duration = SnackbarDuration.Short) == SnackbarResult.ActionPerformed) {
                     controller.restore(removed)
                 }
@@ -359,7 +364,7 @@ private fun OneTimer(timer: Timer, now: Moment, controller: TimerController, onL
                 modifier = Modifier.verticalScroll(rememberScrollState()),
                 content = {
                     Row(Modifier.fillMaxWidth().heightIn(min = 48.dp).padding(start = 4.dp), verticalAlignment = Alignment.CenterVertically) {
-                        val name = timer.label.ifEmpty { stringResource(R.string.label_timer_default) }
+                        val name = timerName(timer)
                         val description = stringResource(R.string.content_description_timer_label, name)
                         // The name takes the row's free width, which keeps Delete at the card's end
                         Box(Modifier.weight(1f)) {
@@ -478,7 +483,7 @@ private fun TimerCard(timer: Timer, now: Moment, controller: TimerController, on
                 Box(Modifier.weight(1f)) {
                     TextButton(onClick = onLabel, contentPadding = PaddingValues(horizontal = 4.dp)) {
                         Text(
-                            timer.label.ifEmpty { stringResource(R.string.label_timer_default) },
+                            timerName(timer),
                             style = MaterialTheme.typography.titleMedium,
                             color = if (ended) MaterialTheme.colorScheme.onPrimaryContainer else MaterialTheme.colorScheme.onSurface,
                             maxLines = 1,

@@ -12,6 +12,7 @@ import sh.hnet.clock.R
 import sh.hnet.clock.notify.Notifications
 import sh.hnet.clock.stopwatch.Moment
 import sh.hnet.clock.ui.Tab
+import sh.hnet.clock.ui.components.timerName
 
 /**
  * One notification per timer (SPEC §3.8.1), grouped by the system: running, the system counts down
@@ -36,7 +37,7 @@ class TimerNotifications(private val context: Context) {
     private fun build(timer: Timer, now: Moment, promoted: Boolean): Notification {
         val builder = Notification.Builder(context, Notifications.CHANNEL_TIMERS)
             .setSmallIcon(R.drawable.ic_hourglass_empty)
-            .setContentTitle(timer.label.ifEmpty { context.getString(R.string.label_timer_default) })
+            .setContentTitle(timerName(context.resources, timer))
             .setContentIntent(Notifications.open(context, Tab.TIMER))
             .setCategory(Notification.CATEGORY_ALARM)
             .setGroup(GROUP)

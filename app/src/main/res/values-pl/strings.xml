@@ -134,7 +134,7 @@
     <string name="msg_stopwatch_reset">Wyzerowano stoper</string>
 
     <!-- Timer -->
-    <string name="label_timer_default">Minutnik</string>
+    <string name="label_timer_unnamed">Minutnik (%s)</string>
     <plurals name="label_timers_running">
         <item quantity="one">uruchomione: %d</item>
         <item quantity="few">uruchomione: %d</item>
@@ -170,7 +170,7 @@
     <string name="content_description_timer_label">Etykieta: %s. Zmień</string>
     <string name="button_delete_timer">Usuń minutnik</string>
     <string name="msg_timer_deleted"><![CDATA[Usunięto minutnik <b>%s</b>]]></string>
-    <string name="msg_timer_deleted_unnamed">Usunięto minutnik</string>
+    <string name="msg_timer_deleted_unnamed">Usunięto minutnik (%s)</string>
     <plurals name="title_timers_ended">
         <item quantity="one">Zakończył się %d minutnik</item>
         <item quantity="few">Zakończyły się %d minutniki</item>

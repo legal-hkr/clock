@@ -36,6 +36,7 @@ import sh.hnet.clock.timer.shown
 import sh.hnet.clock.ui.Tab
 import sh.hnet.clock.ui.components.TimeFormats
 import sh.hnet.clock.ui.components.durationWords
+import sh.hnet.clock.ui.components.timerName
 import java.time.Instant
 import java.time.ZoneId
 import java.time.temporal.ChronoUnit
@@ -408,7 +409,7 @@ object Widgets {
             val ended = timer.ended(now)
             val paused = !timer.running
             setViewPadding(R.id.item, px(20), px(2), px(endPadding), px(2))
-            setTextViewText(R.id.label, timer.label.ifEmpty { context.getString(R.string.label_timer_default) })
+            setTextViewText(R.id.label, timerName(context.resources, timer))
             setViewVisibility(R.id.label, if (names) View.VISIBLE else View.GONE)
             // The widget of one line has the height for a larger time
             val size = if (big) 28f else 22f
