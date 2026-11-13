@@ -74,6 +74,28 @@ data class Timer(
 @Serializable
 data class TimerPreset(val id: Long, val name: String, val duration: Long)
 
+/**
+ * How many pills of the given [widths], taken in order, stand in each of at most [rows] rows of
+ * [room]: a row takes pills until the next one wouldn't fit, and what doesn't fit the last row is
+ * left out. A row always takes its first pill, however wide. With [rows] of one or more there is
+ * always a first row, empty when there are no pills (the timer widget's "+" stands in it).
+ */
+fun pillRows(widths: List<Float>, room: Float, rows: Int): List<Int> {
+    if (rows < 1) return emptyList()
+    val counts = mutableListOf(0)
+    var used = 0f
+    for (width in widths) {
+        if (counts.last() > 0 && used + width > room) {
+            if (counts.size == rows) break
+            counts += 0
+            used = 0f
+        }
+        counts[counts.lastIndex]++
+        used += width
+    }
+    return counts
+}
+
 /** The order timers are shown in (§3.6.5): the ended ones first, the one that ended first on top; then by time left. */
 fun List<Timer>.shown(now: Moment): List<Timer> = sortedWith(compareBy({ !it.ended(now) }, { it.remaining(now) }, { it.id }))
 

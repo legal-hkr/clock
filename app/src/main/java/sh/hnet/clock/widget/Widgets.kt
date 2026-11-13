@@ -33,6 +33,7 @@ import sh.hnet.clock.timer.Timer
 import sh.hnet.clock.timer.TimerNotifications
 import sh.hnet.clock.timer.TimerPreset
 import sh.hnet.clock.timer.TimerReceiver
+import sh.hnet.clock.timer.pillRows
 import sh.hnet.clock.timer.shown
 import sh.hnet.clock.ui.Tab
 import sh.hnet.clock.ui.components.TimeFormats
@@ -570,21 +571,10 @@ object Widgets {
      * at least one: "+" needs a row even without presets.
      */
     private fun presetLines(context: Context, presets: List<TimerPreset>, width: Float, rows: Int): List<List<TimerPreset>> {
-        if (rows < 1) return emptyList()
-        val lines = mutableListOf(mutableListOf<TimerPreset>())
-        var used = 0f
-        for (preset in presets) {
-            // 14 dp medium text is about 8 dp a letter; 24 dp of padding, 6 dp to the next pill; a pill is 160 dp of text at most
-            val pill = (presetName(context, preset).length * 8f).coerceAtMost(160f) + 30f
-            if (used + pill > width - ADD_WIDTH) {
-                if (lines.size == rows) break
-                lines += mutableListOf<TimerPreset>()
-                used = 0f
-            }
-            lines.last() += preset
-            used += pill
-        }
-        return lines
+        // 14 dp medium text is about 8 dp a letter; 24 dp of padding, 6 dp to the next pill; a pill is 160 dp of text at most
+        val pills = presets.map { (presetName(context, it).length * 8f).coerceAtMost(160f) + 30f }
+        var from = 0
+        return pillRows(pills, width - ADD_WIDTH, rows).map { count -> presets.subList(from, from + count).also { from += count } }
     }
 
     /**
@@ -644,17 +634,19 @@ class DigitalClockWidget : AppWidgetProvider() {
     override fun onUpdate(context: Context, manager: AppWidgetManager, ids: IntArray) = Widgets.digital(context)
 }
 
-/** Analogue clock: the face alone. */
+/** Round digital clock: the cookie with the hours over the minutes; its cookie can be see-through. */
 class RoundClockWidget : AppWidgetProvider() {
     override fun onUpdate(context: Context, manager: AppWidgetManager, ids: IntArray) = Widgets.round(context)
     override fun onDeleted(context: Context, ids: IntArray) = WidgetSettings.forget(context, ids)
 }
 
+/** Analog clock: the face alone; its cookie can be see-through. */
 class AnalogClockWidget : AppWidgetProvider() {
     override fun onUpdate(context: Context, manager: AppWidgetManager, ids: IntArray) = Widgets.analog(context)
     override fun onDeleted(context: Context, ids: IntArray) = WidgetSettings.forget(context, ids)
 }
 
+/** The clocks without a background: digital, small digital and analog. */
 class BareDigitalWidget : AppWidgetProvider() {
     override fun onUpdate(context: Context, manager: AppWidgetManager, ids: IntArray) = Widgets.bareDigital(context)
 }
@@ -685,7 +677,7 @@ object WidgetSettings {
     private const val SEE_THROUGH = "see_through_"
 }
 
-/** World clock: the user's cities. */
+/** World clock: the user's cities as pills. It also receives the day's change for both world clock widgets. */
 class WorldClockWidget : AppWidgetProvider() {
     override fun onReceive(context: Context, intent: Intent) {
         if (intent.action == ACTION_DAY_CHANGE) redraw(context) else super.onReceive(context, intent)
@@ -704,7 +696,7 @@ class WorldClockWidget : AppWidgetProvider() {
     }
 }
 
-/** Timer: presets to start with a tap; running timers with their controls. */
+/** World clock without a background: the same cities, drawn together with [WorldClockWidget]'s. */
 class BareWorldWidget : AppWidgetProvider() {
     override fun onUpdate(context: Context, manager: AppWidgetManager, ids: IntArray) {
         // The cities come from storage: the broadcast is held until the widget is drawn
@@ -713,6 +705,7 @@ class BareWorldWidget : AppWidgetProvider() {
     }
 }
 
+/** Timer: the first timer with its controls, and presets to start with a tap. */
 class TimerWidget : AppWidgetProvider() {
     override fun onUpdate(context: Context, manager: AppWidgetManager, ids: IntArray) = Widgets.timer(context)
 }

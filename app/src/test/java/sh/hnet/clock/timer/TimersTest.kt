@@ -158,4 +158,19 @@ class TimersTest {
         assertEquals(Triple(1, 30, 0), TimerFormat.parts(5_400_000))
         assertEquals(Triple(0, 0, 45), TimerFormat.parts(45_000))
     }
+
+    @Test
+    fun `pills fill rows in order and what doesn't fit the last row is left out`() {
+        assertEquals(listOf(3), pillRows(listOf(60f, 60f, 60f), 200f, rows = 1))
+        assertEquals(listOf(3), pillRows(listOf(60f, 60f, 60f, 60f), 200f, rows = 1))
+        assertEquals(listOf(3, 1), pillRows(listOf(60f, 60f, 60f, 60f), 200f, rows = 2))
+        assertEquals(listOf(3, 3), pillRows(List(8) { 60f }, 200f, rows = 2))
+    }
+
+    @Test
+    fun `a row takes its first pill however wide, and there is a row even without pills`() {
+        assertEquals(listOf(1, 1), pillRows(listOf(300f, 60f), 200f, rows = 2))
+        assertEquals(listOf(0), pillRows(emptyList(), 200f, rows = 2))
+        assertEquals(emptyList<Int>(), pillRows(listOf(60f), 200f, rows = 0))
+    }
 }
