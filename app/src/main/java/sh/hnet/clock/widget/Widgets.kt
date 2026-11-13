@@ -9,6 +9,7 @@ import android.content.Context
 import android.content.Intent
 import android.os.SystemClock
 import android.text.format.DateFormat
+import android.text.format.DateUtils
 import android.util.SizeF
 import android.util.TypedValue
 import android.view.View
@@ -29,14 +30,13 @@ import sh.hnet.clock.stopwatch.Moment
 import sh.hnet.clock.time.TimeDifference
 import sh.hnet.clock.time.zoneOrNull
 import sh.hnet.clock.timer.Timer
-import sh.hnet.clock.timer.TimerFormat
 import sh.hnet.clock.timer.TimerNotifications
 import sh.hnet.clock.timer.TimerPreset
 import sh.hnet.clock.timer.TimerReceiver
 import sh.hnet.clock.timer.shown
 import sh.hnet.clock.ui.Tab
 import sh.hnet.clock.ui.components.TimeFormats
-import sh.hnet.clock.ui.components.presetTitle
+import sh.hnet.clock.ui.components.durationWords
 import sh.hnet.clock.ui.components.timerName
 import java.time.Instant
 import java.time.ZoneId
@@ -59,13 +59,13 @@ object Widgets {
 
     private const val WIDE = 230f
     private const val NARROW = 50f
-    /** The least widths (dp) at which a timer's line holds two buttons, and at which presets stand two to a line and the one-line widget has "+" too. */
-    private const val MIDDLE = 250f
-    private const val TIMER_WIDE = 310f
+    /** The widths (dp) the timer widget is laid out for – the presets that fit are reckoned for each –, the least height that holds a timer's name, time and presets, and the room "+" takes. */
+    private val TIMER_WIDTHS = listOf(250f, 290f, 330f, 370f, 410f)
+    private const val TIMER_TALL = 130f
+    private const val ADD_WIDTH = 36f
 
-    /** A line of the timer widget with the space under it (dp), and the least heights of a widget of one to five lines (12 dp around). */
-    private const val LINE = 52f
-    private val TIMER_HEIGHTS = listOf(40f, 124f, 176f, 228f, 280f)
+    /** The least width (dp) at which the world clock without a background shows two cities side by side. */
+    private const val BARE_WORLD_TWO = 300f
 
     /** The sides (dp) the round clock is laid out for; a widget may carry at most 16 layouts. */
     private val ROUND_SIDES = listOf(110f, 125f, 140f, 155f, 170f, 185f, 200f, 220f, 240f, 260f, 285f, 310f, 340f, 370f, 400f, 440f)
@@ -75,7 +75,6 @@ object Widgets {
     private const val ROUND_TEXT = 0.075f
     private const val REQUEST_NEW_TIMER = 100
     private const val REQUEST_LIST = 101
-    private const val REQUEST_LIST_TIMERS = 102
 
     /** The hour's letters in a time pattern. */
     private val HOUR = Regex("[HhKk]+")
@@ -305,18 +304,20 @@ object Widgets {
         return context.getString(R.string.label_day_and_time, day, formats.time(at, zone))
     }
 
-    // ---- World clock (§3.10.3) ----
+    // ---- World clock (§3.10.3, further widgets handoff of 13 Nov 2026): as floating pills, and without a background ----
 
     private class Place(val zoneId: String, val name: String, val dayShift: Int)
 
     /**
-     * The user's cities in the app's order. Read from storage off the main thread; [done] runs
-     * when the widget is drawn (a broadcast receiver waits for it).
+     * The user's cities in the app's order, on both world clock widgets. Read from storage off the
+     * main thread; [done] runs when the widgets are drawn (a broadcast receiver waits for it).
      */
     fun world(context: Context, done: (() -> Unit)? = null) {
         val app = context.applicationContext as ClockApplication
+        val pills = ids(context, WorldClockWidget::class.java).isNotEmpty()
+        val bare = ids(context, BareWorldWidget::class.java).isNotEmpty()
         // The cities are locked until the phone is first unlocked after a restart
-        if (ids(context, WorldClockWidget::class.java).isEmpty() || !app.unlocked) {
+        if ((!pills && !bare) || !app.unlocked) {
             done?.invoke()
             return
         }
@@ -329,7 +330,8 @@ object Widgets {
                 val zones = app.cities.current().mapNotNull { id -> zoneOrNull(id)?.let { id to it } }
                 val places = zones.map { (id, zone) -> Place(id, names.city(id, now).name, TimeDifference.between(local, zone, now).dayShift) }
                 withContext(Dispatchers.Main) {
-                    show(context, WorldClockWidget::class.java, worldViews(context, locale, places))
+                    if (pills) show(context, WorldClockWidget::class.java, worldViews(context, locale, places))
+                    if (bare) show(context, BareWorldWidget::class.java, bareWorldViews(context, locale, places))
                     scheduleDayChange(context, zones.map { it.second } + local, now)
                 }
             } finally {
@@ -338,12 +340,52 @@ object Widgets {
         }
     }
 
+    /** A list's rows share one intent the system fills in for each: it has to be changeable. Here it opens Clock. */
+    private fun RemoteViews.rowsOpenClock(context: Context) = setPendingIntentTemplate(
+        R.id.list,
+        PendingIntent.getActivity(
+            context, REQUEST_LIST,
+            Intent(context, MainActivity::class.java).setAction(Intent.ACTION_MAIN).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_SINGLE_TOP)
+                .putExtra(Notifications.EXTRA_DESTINATION, Tab.CLOCK.name),
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_MUTABLE,
+        ),
+    )
+
+    /**
+     * A city's pill. [tight] in the one-row sizes: less padding, a smaller time and the day as
+     * "+1" or "−1" instead of the word.
+     */
+    private fun worldPill(context: Context, place: Place, twelve: String, twentyFour: String, tight: Boolean): RemoteViews =
+        RemoteViews(context.packageName, R.layout.widget_world_item).apply {
+            setTextViewText(R.id.city, place.name)
+            setString(R.id.time, "setTimeZone", place.zoneId)
+            clockFormat(R.id.time, twelve, twentyFour)
+            val day = when {
+                place.dayShift > 0 -> if (tight) R.string.widget_world_day_ahead else R.string.label_tomorrow
+                place.dayShift < 0 -> if (tight) R.string.widget_world_day_behind else R.string.label_yesterday
+                else -> null
+            }
+            setViewVisibility(R.id.day, if (day != null) View.VISIBLE else View.GONE)
+            day?.let { setTextViewText(R.id.day, context.getString(it)) }
+            if (tight) {
+                val side = (16 * context.resources.displayMetrics.density).toInt()
+                setViewPadding(R.id.pill, side, 0, side, 0)
+                setTextViewTextSize(R.id.time, TypedValue.COMPLEX_UNIT_DIP, 16f)
+            }
+        }
+
     private fun worldViews(context: Context, locale: Locale, places: List<Place>): RemoteViews {
         val open = Notifications.open(context, Tab.CLOCK)
         if (places.isEmpty()) {
-            return RemoteViews(context.packageName, R.layout.widget_empty).apply {
-                setImageViewResource(R.id.empty_icon, R.drawable.ic_schedule)
-                setTextViewText(R.id.empty_text, context.getString(R.string.widget_world_empty))
+            // One pill that says where cities come from
+            return RemoteViews(context.packageName, R.layout.widget_world_row).apply {
+                removeAllViews(R.id.place1)
+                addView(R.id.place1, RemoteViews(context.packageName, R.layout.widget_world_item).apply {
+                    setTextViewText(R.id.city, context.getString(R.string.widget_world_empty))
+                    setColorStateList(R.id.city, "setTextColor", R.color.widget_on_surface_variant)
+                    setViewVisibility(R.id.time, View.GONE)
+                })
+                setViewVisibility(R.id.place2, View.GONE)
                 setOnClickPendingIntent(android.R.id.background, open)
             }
         }
@@ -353,13 +395,11 @@ object Widgets {
                 // One row: the first city, the second beside it where there is room
                 RemoteViews(context.packageName, R.layout.widget_world_row).apply {
                     val (twelve, twentyFour) = timePatterns(locale, period = false)
-                    listOf(Triple(R.id.place1, R.id.city1, R.id.time1), Triple(R.id.place2, R.id.city2, R.id.time2)).forEachIndexed { index, (place, city, time) ->
+                    listOf(R.id.place1, R.id.place2).forEachIndexed { index, slot ->
                         val shown = places.getOrNull(index)?.takeIf { index == 0 || wide }
-                        setViewVisibility(place, if (shown != null) View.VISIBLE else View.GONE)
-                        shown ?: return@forEachIndexed
-                        setTextViewText(city, shown.name)
-                        setString(time, "setTimeZone", shown.zoneId)
-                        clockFormat(time, twelve, twentyFour)
+                        removeAllViews(slot)
+                        setViewVisibility(slot, if (shown != null) View.VISIBLE else View.GONE)
+                        if (shown != null) addView(slot, worldPill(context, shown, twelve, twentyFour, tight = true))
                     }
                     setOnClickPendingIntent(android.R.id.background, open)
                 }
@@ -368,7 +408,55 @@ object Widgets {
                     val (twelve, twentyFour) = timePatterns(locale, period = true)
                     val items = RemoteViews.RemoteCollectionItems.Builder().setHasStableIds(true).setViewTypeCount(1)
                     places.forEachIndexed { index, place ->
-                        items.addItem(index.toLong(), RemoteViews(context.packageName, R.layout.widget_world_item).apply {
+                        items.addItem(index.toLong(), worldPill(context, place, twelve, twentyFour, tight = false).apply { setOnClickFillInIntent(R.id.row, Intent()) })
+                    }
+                    setRemoteAdapter(R.id.list, items.build())
+                    rowsOpenClock(context)
+                    setOnClickPendingIntent(android.R.id.background, open)
+                }
+            }
+        }
+    }
+
+    /** The world clock without a background: white with a soft shadow, the times in a light weight. */
+    private fun bareWorldViews(context: Context, locale: Locale, places: List<Place>): RemoteViews {
+        val open = Notifications.open(context, Tab.CLOCK)
+        if (places.isEmpty()) {
+            return RemoteViews(context.packageName, R.layout.widget_bare_world_row).apply {
+                setViewVisibility(R.id.places, View.GONE)
+                setViewVisibility(R.id.empty_text, View.VISIBLE)
+                setTextViewText(R.id.empty_text, context.getString(R.string.widget_world_empty))
+                setOnClickPendingIntent(android.R.id.background, open)
+            }
+        }
+        return sized(listOf(NARROW, WIDE), listOf(40f, 120f)) { width, height ->
+            if (height < 120f) {
+                // One row: cities side by side, as many as fit at their fixed width
+                RemoteViews(context.packageName, R.layout.widget_bare_world_row).apply {
+                    val (twelve, twentyFour) = timePatterns(locale, period = false)
+                    setViewVisibility(R.id.places, View.VISIBLE)
+                    setViewVisibility(R.id.empty_text, View.GONE)
+                    removeAllViews(R.id.places)
+                    places.take(if (width >= BARE_WORLD_TWO) 2 else 1).forEach { place ->
+                        addView(R.id.places, RemoteViews(context.packageName, R.layout.widget_bare_world_place).apply {
+                            // The day's word follows the name here: there is no line of its own for it
+                            setTextViewText(R.id.city, when {
+                                place.dayShift > 0 -> context.getString(R.string.widget_world_tomorrow, place.name)
+                                place.dayShift < 0 -> context.getString(R.string.widget_world_yesterday, place.name)
+                                else -> place.name
+                            })
+                            setString(R.id.time, "setTimeZone", place.zoneId)
+                            clockFormat(R.id.time, twelve, twentyFour)
+                        })
+                    }
+                    setOnClickPendingIntent(android.R.id.background, open)
+                }
+            } else {
+                RemoteViews(context.packageName, R.layout.widget_bare_world_list).apply {
+                    val (twelve, twentyFour) = timePatterns(locale, period = false)
+                    val items = RemoteViews.RemoteCollectionItems.Builder().setHasStableIds(true).setViewTypeCount(1)
+                    places.forEachIndexed { index, place ->
+                        items.addItem(index.toLong(), RemoteViews(context.packageName, R.layout.widget_bare_world_item).apply {
                             setTextViewText(R.id.city, place.name)
                             setString(R.id.time, "setTimeZone", place.zoneId)
                             clockFormat(R.id.time, twelve, twentyFour)
@@ -383,16 +471,7 @@ object Widgets {
                         })
                     }
                     setRemoteAdapter(R.id.list, items.build())
-                    // A list's rows share one intent the system fills in for each: it has to be changeable
-                    setPendingIntentTemplate(
-                        R.id.list,
-                        PendingIntent.getActivity(
-                            context, REQUEST_LIST,
-                            Intent(context, MainActivity::class.java).setAction(Intent.ACTION_MAIN).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_SINGLE_TOP)
-                                .putExtra(Notifications.EXTRA_DESTINATION, Tab.CLOCK.name),
-                            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_MUTABLE,
-                        ),
-                    )
+                    rowsOpenClock(context)
                     setOnClickPendingIntent(android.R.id.background, open)
                 }
             }
@@ -413,8 +492,14 @@ object Widgets {
         if (next == null) alarms.cancel(intent) else alarms.set(AlarmManager.RTC, next + 1_000, intent)
     }
 
-    // ---- Timer (§3.10.4, widget handoff of 12 Nov 2026) ----
+    // ---- Timer (§3.10.4; behavior: widget handoff of 12 Nov 2026, layout: further widgets handoff of 13 Nov 2026 §5) ----
 
+    /**
+     * No card and no lines: one timer – the first in the app's order – on the wallpaper in white,
+     * with the two buttons of its state and one row of presets; the other timers are only counted.
+     * With no timer, the widget's name and up to two rows of presets. One row high: the time and
+     * buttons alone, or the presets alone.
+     */
     fun timer(context: Context) {
         val app = context.applicationContext as ClockApplication
         // Timers are locked until the phone is first unlocked after a restart
@@ -424,156 +509,126 @@ object Widgets {
         val presets = app.timers.presets.value
         val open = Notifications.open(context, Tab.TIMER)
         val add = newTimer(context)
-        val title = context.getString(R.string.label_nav_timer)
         // Where a timer would end silently (notifications off…), a preset opens Timer, with its problem card, instead of starting one
         val canRing = Reliability.read(context).problems(Ringing.TIMERS, soundWanted = false).isEmpty()
-        // Lines stay 48 dp: at a large font the name gives way to the time
-        val names = context.resources.configuration.fontScale < 1.15f
-        val views = sized(listOf(NARROW, MIDDLE, TIMER_WIDE), TIMER_HEIGHTS) { width, height ->
-            val lines = TIMER_HEIGHTS.indexOf(height) + 1
-            // A timer's line has room for one button two cells wide, for both from three
-            val buttons = if (width >= MIDDLE) 2 else 1
-            val perLine = if (width >= TIMER_WIDE) 2 else 1
-            when {
-                lines == 1 && timers.isEmpty() -> RemoteViews(context.packageName, R.layout.widget_timer_idle_row).apply {
-                    // Two cells wide, or without presets: the widget's icon and name stand where the presets would
-                    val shown = if (width >= MIDDLE) presets.take(perLine) else emptyList()
-                    setTextViewText(R.id.title, title)
-                    removeAllViews(R.id.pills1)
-                    shown.forEach { addView(R.id.pills1, pill(context, it, canRing, open)) }
-                    setViewVisibility(R.id.pills1, if (shown.isEmpty()) View.GONE else View.VISIBLE)
-                    setViewVisibility(R.id.icon, if (shown.isEmpty()) View.VISIBLE else View.GONE)
-                    setViewVisibility(R.id.title, if (shown.isEmpty()) View.VISIBLE else View.GONE)
-                    setContentDescription(R.id.add, context.getString(R.string.button_new_timer))
-                    setOnClickPendingIntent(R.id.add, add)
-                    setOnClickPendingIntent(android.R.id.background, open)
+        val timer = timers.firstOrNull()
+        val views = sized(TIMER_WIDTHS, listOf(40f, TIMER_TALL)) { width, height ->
+            val tall = height >= TIMER_TALL
+            RemoteViews(context.packageName, R.layout.widget_timer).apply {
+                setViewVisibility(R.id.header, if (timer == null && tall) View.VISIBLE else View.GONE)
+                setTextViewText(R.id.title, context.getString(R.string.label_nav_timer))
+                setViewVisibility(R.id.name_row, if (timer != null && tall) View.VISIBLE else View.GONE)
+                setViewVisibility(R.id.time_row, if (timer != null) View.VISIBLE else View.GONE)
+                if (timer != null) {
+                    setTextViewText(R.id.label, timerName(context.resources, timer))
+                    val others = timers.size - 1
+                    setViewVisibility(R.id.more, if (others > 0) View.VISIBLE else View.GONE)
+                    setTextViewText(R.id.more, context.getString(R.string.widget_timer_more, others))
+                    timerRow(context, timer, now, large = tall)
+                    setOnClickPendingIntent(R.id.name_row, open)
+                    setOnClickPendingIntent(R.id.open, open)
                 }
-                // One line: the first timer and, four cells wide, "+"
-                lines == 1 -> RemoteViews(context.packageName, R.layout.widget_timer_row).apply {
-                    val plus = width >= TIMER_WIDE
-                    removeAllViews(R.id.rows)
-                    addView(R.id.rows, timerLine(context, timers.first(), now, buttons, big = true, names = true, endPadding = if (plus) 8 else 12, open = open))
-                    setViewVisibility(R.id.add, if (plus) View.VISIBLE else View.GONE)
-                    setContentDescription(R.id.add, context.getString(R.string.button_new_timer))
-                    setOnClickPendingIntent(R.id.add, add)
-                    setOnClickPendingIntent(android.R.id.background, open)
+                // Presets: one row under a timer, up to two without one, none beside a timer in the one-row widget
+                val rows = when {
+                    timer == null && tall -> 2
+                    timer == null || tall -> 1
+                    else -> 0
                 }
-                else -> RemoteViews(context.packageName, R.layout.widget_timer_large).apply {
-                    // With no timer the first line is the widget's name with "+"; otherwise the timers take lines from the top, and the presets keep the last line and every line the timers don't need
-                    setViewVisibility(R.id.header, if (timers.isEmpty()) View.VISIBLE else View.GONE)
-                    setTextViewText(R.id.title, title)
-                    setContentDescription(R.id.add, context.getString(R.string.button_new_timer))
-                    setOnClickPendingIntent(R.id.add, add)
-                    val timerLines = timers.size.coerceAtMost(lines - 1)
-                    removeAllViews(R.id.rows)
-                    if (timers.size > timerLines) {
-                        // More timers than lines: they scroll, the presets under them don't
-                        val items = RemoteViews.RemoteCollectionItems.Builder().setHasStableIds(true).setViewTypeCount(1)
-                        timers.forEach { items.addItem(it.id, timerLine(context, it, now, buttons, big = false, names = names, endPadding = 12, open = null)) }
-                        setRemoteAdapter(R.id.list, items.build())
-                        // Rows of a list can't carry intents of their own: one template, and each button fills in its action and timer
-                        setPendingIntentTemplate(
-                            R.id.list,
-                            PendingIntent.getBroadcast(context, REQUEST_LIST_TIMERS, Intent(context, TimerReceiver::class.java), PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_MUTABLE),
-                        )
-                        setViewLayoutHeight(R.id.list, timerLines * LINE, TypedValue.COMPLEX_UNIT_DIP)
-                        setViewVisibility(R.id.list, View.VISIBLE)
-                    } else {
-                        setViewVisibility(R.id.list, View.GONE)
-                        timers.forEach { addView(R.id.rows, timerLine(context, it, now, buttons, big = false, names = names, endPadding = 12, open = open)) }
+                val lines = presetLines(context, presets, width - 16f, rows)
+                listOf(R.id.presets1, R.id.presets2).forEachIndexed { index, container ->
+                    removeAllViews(container)
+                    val line = lines.getOrNull(index)
+                    setViewVisibility(container, if (line != null) View.VISIBLE else View.GONE)
+                    line ?: return@forEachIndexed
+                    line.forEach { preset ->
+                        addView(container, RemoteViews(context.packageName, R.layout.widget_timer_pill).apply {
+                            // A named preset shows its name only; one without a name, its duration
+                            setTextViewText(R.id.pill_text, presetName(context, preset))
+                            setOnClickPendingIntent(R.id.pill, if (canRing) TimerNotifications.intent(context, TimerReceiver.ACTION_START_PRESET, preset.id) else open)
+                        })
                     }
-                    val presetLines = lines - if (timers.isEmpty()) 1 else timerLines
-                    val groups = presets.chunked(perLine).take(presetLines).ifEmpty { if (timers.isEmpty()) emptyList() else listOf(emptyList()) }
-                    removeAllViews(R.id.presets)
-                    groups.forEachIndexed { index, group ->
-                        // While timers stand where the header was, "+" ends the last line of presets
-                        val plus = if (timers.isNotEmpty() && index == groups.lastIndex) add else null
-                        addView(R.id.presets, pills(context, group, perLine, canRing, open, plus))
+                    // "+" ends the last row
+                    if (index == lines.lastIndex) {
+                        addView(container, RemoteViews(context.packageName, R.layout.widget_timer_add).apply {
+                            setContentDescription(R.id.add, context.getString(R.string.button_new_timer))
+                            setOnClickPendingIntent(R.id.add, add)
+                        })
                     }
-                    setOnClickPendingIntent(android.R.id.background, open)
                 }
+                setOnClickPendingIntent(android.R.id.background, open)
             }
         }
         show(context, TimerWidget::class.java, views)
     }
 
-    /** A line of presets; one that isn't full keeps the pills' width with empty places. [add], if given, ends the line as "+". */
-    private fun pills(context: Context, presets: List<TimerPreset>, perLine: Int, canRing: Boolean, open: PendingIntent, add: PendingIntent?): RemoteViews =
-        RemoteViews(context.packageName, R.layout.widget_timer_pills).apply {
-            removeAllViews(R.id.pills)
-            presets.forEach { addView(R.id.pills, pill(context, it, canRing, open)) }
-            repeat(perLine - presets.size) {
-                addView(R.id.pills, RemoteViews(context.packageName, R.layout.widget_timer_pill).apply { setViewVisibility(R.id.pill, View.INVISIBLE) })
-            }
-            if (add != null) {
-                addView(R.id.pills, RemoteViews(context.packageName, R.layout.widget_timer_add).apply {
-                    setContentDescription(R.id.add, context.getString(R.string.button_new_timer))
-                    setOnClickPendingIntent(R.id.add, add)
-                })
-            }
-        }
+    private fun presetName(context: Context, preset: TimerPreset): String = preset.name.ifEmpty { durationWords(context.resources, preset.duration) }
 
-    /** A preset as a pill, "Tea (3 min)" or "9 min": a tap starts one more timer without opening the app. */
-    private fun pill(context: Context, preset: TimerPreset, canRing: Boolean, open: PendingIntent): RemoteViews = RemoteViews(context.packageName, R.layout.widget_timer_pill).apply {
-        setTextViewText(R.id.pill, presetTitle(context.resources, preset))
-        setOnClickPendingIntent(R.id.pill, if (canRing) TimerNotifications.intent(context, TimerReceiver.ACTION_START_PRESET, preset.id) else open)
+    /**
+     * The presets that fit [rows] rows of [width] dp, in their order, with room left for "+" at the
+     * end of the last one. A widget can't measure its text, so a pill's width is reckoned from the
+     * length of its name; rather a preset too few than one cut off. Never empty while [rows] is
+     * at least one: "+" needs a row even without presets.
+     */
+    private fun presetLines(context: Context, presets: List<TimerPreset>, width: Float, rows: Int): List<List<TimerPreset>> {
+        if (rows < 1) return emptyList()
+        val lines = mutableListOf(mutableListOf<TimerPreset>())
+        var used = 0f
+        for (preset in presets) {
+            // 14 dp medium text is about 8 dp a letter; 24 dp of padding, 6 dp to the next pill; a pill is 160 dp of text at most
+            val pill = (presetName(context, preset).length * 8f).coerceAtMost(160f) + 30f
+            if (used + pill > width - ADD_WIDTH) {
+                if (lines.size == rows) break
+                lines += mutableListOf<TimerPreset>()
+                used = 0f
+            }
+            lines.last() += preset
+            used += pill
+        }
+        return lines
     }
 
     /**
-     * A timer's line: name over time, then – with room for two [buttons] – "+1:00" while it runs or
-     * has ended, Delete while it is paused, and always Pause, Resume or Stop. Delete exists only on
-     * a paused timer: a home screen has no Undo, so nothing removes a running timer in one tap.
-     *
-     * @param open Opens Timer from the name and time; null in a list, whose rows fill in the list's template instead
+     * The shown timer's time and its two buttons, by its state: "+1:00" and Pause while it runs,
+     * Delete and Resume while it is paused, "+1:00" and Stop once it has ended. Delete exists only
+     * on a paused timer: a home screen has no Undo, so nothing removes a running timer in one tap.
      */
-    private fun timerLine(context: Context, timer: Timer, now: Moment, buttons: Int, big: Boolean, names: Boolean, endPadding: Int, open: PendingIntent?): RemoteViews =
-        RemoteViews(context.packageName, R.layout.widget_timer_item).apply {
-            val density = context.resources.displayMetrics.density
-            fun px(dp: Int) = (dp * density).toInt()
-            fun click(view: Int, action: String) {
-                if (open != null) setOnClickPendingIntent(view, TimerNotifications.intent(context, action, timer.id))
-                else setOnClickFillInIntent(view, Intent().setAction(action).putExtra(TimerReceiver.EXTRA_ID, timer.id))
-            }
-            val ended = timer.ended(now)
-            val paused = !timer.running
-            setViewPadding(R.id.item, px(20), px(2), px(endPadding), px(2))
-            setTextViewText(R.id.label, timerName(context.resources, timer))
-            setViewVisibility(R.id.label, if (names) View.VISIBLE else View.GONE)
-            // The widget of one line has the height for a larger time
-            val size = if (big) 28f else 22f
-            setTextViewTextSize(R.id.left, TypedValue.COMPLEX_UNIT_SP, size)
-            setTextViewTextSize(R.id.left_paused, TypedValue.COMPLEX_UNIT_SP, size)
-            if (timer.running) {
-                // The system counts by itself from here: down to the end, and up from it once ended ("−0:12")
-                setViewVisibility(R.id.left, View.VISIBLE)
-                setViewVisibility(R.id.left_paused, View.GONE)
-                setChronometerCountDown(R.id.left, !ended)
-                setChronometer(R.id.left, SystemClock.elapsedRealtime() + timer.remaining(now), if (ended) "−%s" else null, true)
-            } else {
-                // Paused: the time left stands, as text – a stopped chronometer would be read anew whenever the launcher redraws
-                setViewVisibility(R.id.left, View.GONE)
-                setViewVisibility(R.id.left_paused, View.VISIBLE)
-                setTextViewText(R.id.left_paused, TimerFormat.left(timer.remaining(now)))
-            }
-            setViewVisibility(R.id.plus, if (buttons > 1 && !paused) View.VISIBLE else View.GONE)
-            setTextViewText(R.id.plus, context.getString(R.string.label_plus_minute))
-            setContentDescription(R.id.plus, context.getString(R.string.button_add_minute))
-            click(R.id.plus, TimerReceiver.ACTION_ADD_MINUTE)
-            setViewVisibility(R.id.delete, if (buttons > 1 && paused) View.VISIBLE else View.GONE)
-            setContentDescription(R.id.delete, context.getString(R.string.button_delete_timer))
-            click(R.id.delete, TimerReceiver.ACTION_STOP)
-            val (icon, label, action) = when {
-                ended -> Triple(R.drawable.ic_stop, R.string.button_stop, TimerReceiver.ACTION_STOP)
-                timer.running -> Triple(R.drawable.ic_pause, R.string.button_pause, TimerReceiver.ACTION_PAUSE)
-                else -> Triple(R.drawable.ic_play_arrow, R.string.button_resume, TimerReceiver.ACTION_RESUME)
-            }
-            setImageViewResource(R.id.action, icon)
-            // Round while it runs, a rounded square to resume, as in the app
-            setInt(R.id.action, "setBackgroundResource", if (paused) R.drawable.widget_square_primary else R.drawable.widget_circle_primary)
-            setContentDescription(R.id.action, context.getString(label))
-            click(R.id.action, action)
-            if (open != null) setOnClickPendingIntent(R.id.open, open)
+    private fun RemoteViews.timerRow(context: Context, timer: Timer, now: Moment, large: Boolean) {
+        fun click(view: Int, action: String) = setOnClickPendingIntent(view, TimerNotifications.intent(context, action, timer.id))
+        val ended = timer.ended(now)
+        val paused = !timer.running
+        // The widget of one row has less height for the time
+        val size = if (large) 64f else 44f
+        setTextViewTextSize(R.id.left, TypedValue.COMPLEX_UNIT_DIP, size)
+        setTextViewTextSize(R.id.left_paused, TypedValue.COMPLEX_UNIT_DIP, size)
+        if (timer.running) {
+            // The system counts by itself from here: down to the end, and up from it once ended ("−0:12")
+            setViewVisibility(R.id.left, View.VISIBLE)
+            setViewVisibility(R.id.left_paused, View.GONE)
+            setChronometerCountDown(R.id.left, !ended)
+            setChronometer(R.id.left, SystemClock.elapsedRealtime() + timer.remaining(now), if (ended) "−%s" else null, true)
+        } else {
+            // Paused: the time left stands, as text – a stopped chronometer would be read anew whenever the launcher redraws
+            setViewVisibility(R.id.left, View.GONE)
+            setViewVisibility(R.id.left_paused, View.VISIBLE)
+            // Written as the system's chronometer writes it ("03:59"), so the time doesn't change its form when the timer is paused; rounded up to the second, as everywhere
+            setTextViewText(R.id.left_paused, DateUtils.formatElapsedTime((timer.remaining(now) + 999) / 1000))
         }
+        setViewVisibility(R.id.plus, if (!paused) View.VISIBLE else View.GONE)
+        setTextViewText(R.id.plus, context.getString(R.string.label_plus_minute))
+        setContentDescription(R.id.plus, context.getString(R.string.button_add_minute))
+        click(R.id.plus, TimerReceiver.ACTION_ADD_MINUTE)
+        setViewVisibility(R.id.delete, if (paused) View.VISIBLE else View.GONE)
+        setContentDescription(R.id.delete, context.getString(R.string.button_delete_timer))
+        click(R.id.delete, TimerReceiver.ACTION_STOP)
+        // Pause and Resume are a rounded square, Stop is round
+        setViewVisibility(R.id.action, if (!ended) View.VISIBLE else View.GONE)
+        setViewVisibility(R.id.stop, if (ended) View.VISIBLE else View.GONE)
+        setImageViewResource(R.id.action, if (paused) R.drawable.ic_play_arrow else R.drawable.ic_pause)
+        setContentDescription(R.id.action, context.getString(if (paused) R.string.button_resume else R.string.button_pause))
+        click(R.id.action, if (paused) TimerReceiver.ACTION_RESUME else TimerReceiver.ACTION_PAUSE)
+        setContentDescription(R.id.stop, context.getString(R.string.button_stop))
+        click(R.id.stop, TimerReceiver.ACTION_STOP)
+    }
 
     private fun newTimer(context: Context): PendingIntent = PendingIntent.getActivity(
         context, REQUEST_NEW_TIMER,
@@ -650,6 +705,14 @@ class WorldClockWidget : AppWidgetProvider() {
 }
 
 /** Timer: presets to start with a tap; running timers with their controls. */
+class BareWorldWidget : AppWidgetProvider() {
+    override fun onUpdate(context: Context, manager: AppWidgetManager, ids: IntArray) {
+        // The cities come from storage: the broadcast is held until the widget is drawn
+        val pending = goAsync()
+        Widgets.world(context) { pending.finish() }
+    }
+}
+
 class TimerWidget : AppWidgetProvider() {
     override fun onUpdate(context: Context, manager: AppWidgetManager, ids: IntArray) = Widgets.timer(context)
 }

@@ -1,13 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!-- Timer: four cells wide – its time, buttons and presets need the width; the height can be changed, one row at the least. -->
 <appwidget-provider xmlns:android="http://schemas.android.com/apk/res/android"
     android:description="@string/widget_timer_description"
-    android:initialLayout="@layout/widget_timer_idle_row"
-    android:minWidth="110dp"
+    android:initialLayout="@layout/widget_timer"
+    android:minWidth="250dp"
     android:minHeight="40dp"
-    android:minResizeWidth="110dp"
+    android:minResizeWidth="250dp"
     android:minResizeHeight="40dp"
     android:previewLayout="@layout/widget_timer_preview"
-    android:resizeMode="horizontal|vertical"
+    android:resizeMode="vertical"
     android:targetCellWidth="4"
     android:targetCellHeight="2"
     android:updatePeriodMillis="0"

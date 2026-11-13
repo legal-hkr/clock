@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- A city of the world clock without a background in one row (§4.2): the name – with ", tomorrow" or ", yesterday" when the date differs – over the time. -->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:ignore="SpUsage"
+    android:layout_width="140dp"
+    android:layout_height="wrap_content"
+    android:layout_marginEnd="24dp"
+    android:orientation="vertical">
+
+    <TextView
+        android:id="@+id/city"
+        style="@style/WidgetBareText"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:ellipsize="end"
+        android:fontFamily="sans-serif-medium"
+        android:textSize="14dp" />
+
+    <TextClock
+        android:id="@+id/time"
+        style="@style/WidgetBareText"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:fontFamily="sans-serif-light"
+        android:fontFeatureSettings="tnum"
+        android:letterSpacing="-0.015"
+        android:textSize="34dp" />
+</LinearLayout>

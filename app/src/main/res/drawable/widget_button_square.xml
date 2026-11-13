@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Resume on the timer widget: the primary button as a rounded square, as in the app while a timer is paused. -->
+<!-- Pause and Resume on the timer widget: a rounded square on surface. -->
 <ripple xmlns:android="http://schemas.android.com/apk/res/android" android:color="?android:attr/colorControlHighlight">
     <item>
         <shape android:shape="rectangle">
+            <solid android:color="@color/widget_surface" />
             <corners android:radius="16dp" />
-            <solid android:color="@color/widget_primary" />
         </shape>
     </item>
 </ripple>

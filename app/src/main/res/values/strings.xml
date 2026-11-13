@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<resources>
+<resources xmlns:tools="http://schemas.android.com/tools">
     <string name="app_name">Clock</string>
 
     <!-- Common -->
@@ -397,6 +397,14 @@
     <string name="desc_see_through">The wallpaper shows through the shape</string>
     <string name="widget_analog_name">Analog clock</string>
     <string name="widget_analog_description">A clock face in your colors</string>
+    <string name="widget_bare_world_name">World clock, no background</string>
+    <string name="widget_bare_world_description">The time in your cities, on your wallpaper</string>
+    <!-- The word doesn't change with the number -->
+    <string name="widget_timer_more" tools:ignore="PluralsCandidate">+%d more</string>
+    <string name="widget_world_tomorrow">%s, tomorrow</string>
+    <string name="widget_world_yesterday">%s, yesterday</string>
+    <string name="widget_world_day_ahead" translatable="false">+1</string>
+    <string name="widget_world_day_behind" translatable="false">−1</string>
     <string name="widget_world_name">World clock</string>
     <string name="widget_world_description">The time in your cities</string>
     <string name="widget_timer_name">Timer</string>
@@ -406,8 +414,8 @@
     <string name="widget_preview_city_1">Reykjavík</string>
     <string name="widget_preview_city_2">New York</string>
     <string name="widget_preview_city_3">Tokyo</string>
-    <string name="widget_preview_preset_1">Tea (3 min)</string>
-    <string name="widget_preview_preset_2">Pasta (9 min)</string>
-    <string name="widget_preview_preset_3">Eggs (7 min)</string>
-    <string name="widget_preview_preset_4">Nap (25 min)</string>
+    <string name="widget_preview_preset_1">Tea</string>
+    <string name="widget_preview_preset_2">Pasta</string>
+    <string name="widget_preview_preset_3">Eggs</string>
+    <string name="widget_preview_preset_4">Nap</string>
 </resources>

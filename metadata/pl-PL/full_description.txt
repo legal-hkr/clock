@@ -18,8 +18,9 @@ Minutnik i stoper:
 
 Widżety:
 - Zegar cyfrowy z datą i najbliższym alarmem, okrągły zegar cyfrowy i zegar analogowy, oba z opcjonalnie półprzezroczystym kształtem
-- Zegary bez tła: cyfrowy, mały cyfrowy i analogowy, wprost na tapecie
-- Zegar światowy oraz minutnik z szablonami i działającymi minutnikami
+- Zegar światowy z osobną pastylką dla każdego miasta
+- Zegary bez tła: cyfrowy, mały cyfrowy, analogowy i światowy, wprost na tapecie
+- Minutnik na tapecie: działający minutnik z przyciskami oraz szablony
 
 A także:
 - Kopia zapasowa alarmów, miast, szablonów minutnika i ustawień w wybranym pliku

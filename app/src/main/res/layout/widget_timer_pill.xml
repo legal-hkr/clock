@@ -1,15 +1,25 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- A preset on the timer widget: a tonal pill, 48 dp, that starts its timer in place. -->
-<TextView xmlns:android="http://schemas.android.com/apk/res/android"
+<!-- A preset on the timer widget (further widgets handoff of 13 Nov 2026, §5.3): a see-through white pill with white text – shadowed, as all white text on the widgets, so it reads on a light wallpaper too –, 36 dp in a target of 48, that starts one more timer in place. -->
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:ignore="SpUsage,ContentDescription"
     android:id="@+id/pill"
-    android:layout_width="0dp"
+    android:layout_width="wrap_content"
     android:layout_height="48dp"
-    android:layout_marginEnd="8dp"
-    android:layout_weight="1"
-    android:background="@drawable/widget_pill"
-    android:ellipsize="end"
-    android:gravity="center"
-    android:maxLines="1"
-    android:paddingHorizontal="12dp"
-    android:textColor="@color/widget_on_secondary_container"
-    android:textSize="14sp" />
+    android:layout_marginEnd="6dp">
+
+    <TextView
+        android:id="@+id/pill_text"
+        style="@style/WidgetBareText"
+        android:layout_width="wrap_content"
+        android:layout_height="36dp"
+        android:layout_gravity="center_vertical"
+        android:background="@drawable/widget_bare_pill"
+        android:ellipsize="end"
+        android:fontFamily="sans-serif-medium"
+        android:gravity="center"
+        android:maxWidth="160dp"
+        android:paddingStart="12dp"
+        android:paddingEnd="12dp"
+        android:textSize="14dp" />
+</FrameLayout>

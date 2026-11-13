@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!-- "+" on the timer widget: round, the presets' fill. -->
 <ripple xmlns:android="http://schemas.android.com/apk/res/android" android:color="?android:attr/colorControlHighlight">
     <item>
-        <shape android:shape="rectangle">
-            <solid android:color="@color/widget_secondary_container" />
-            <corners android:radius="24dp" />
+        <shape android:shape="oval">
+            <solid android:color="#66FFFFFF" />
         </shape>
     </item>
 </ripple>

@@ -18,8 +18,9 @@ Timer and stopwatch:
 
 Widgets:
 - Digital clock with the date and the next alarm, round digital clock and analog clock, both with an optional see-through shape
-- Clocks without a background: digital, small digital and analog, straight on the wallpaper
-- World clock and timer with your presets and the running timers
+- World clock with a floating pill for each city
+- Clocks without a background: digital, small digital, analog and world clock, straight on the wallpaper
+- Timer on the wallpaper: the running timer with its buttons, and your presets
 
 And also:
 - Backup and restore of alarms, cities, timer presets and settings to a file you choose

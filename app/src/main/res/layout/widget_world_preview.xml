@@ -1,150 +1,224 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- What the widget picker shows for the world clock. -->
+<!-- What the widget picker shows for the world clock: three cities as pills. -->
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:ignore="SpUsage,UselessParent"
     android:id="@android:id/background"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@drawable/widget_background"
+    android:background="@drawable/widget_frame"
+    android:clipChildren="false"
     android:clipToOutline="true"
     android:gravity="center_vertical"
-    android:orientation="vertical"
-    android:paddingVertical="8dp">
+    android:orientation="vertical">
 
-    <LinearLayout
+    <FrameLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:gravity="center_vertical"
-        android:minHeight="48dp"
-        android:orientation="horizontal"
-        android:paddingHorizontal="16dp"
-        android:paddingVertical="4dp">
+        android:clipChildren="false"
+        android:clipToPadding="false"
+        android:paddingStart="4dp"
+        android:paddingTop="2dp"
+        android:paddingEnd="4dp"
+        android:paddingBottom="4dp">
 
         <LinearLayout
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:orientation="vertical">
+            android:layout_width="match_parent"
+            android:layout_height="48dp"
+            android:background="@drawable/widget_float_surface"
+            android:baselineAligned="false"
+            android:elevation="2dp"
+            android:gravity="center_vertical"
+            android:orientation="horizontal"
+            android:paddingStart="20dp"
+            android:paddingEnd="20dp">
 
-            <TextView
-                android:id="@+id/preview_city1"
-                android:layout_width="match_parent"
+            <!-- The name gives way to the day's word and the time: in a frame it is only as wide as its text, and shrinks when that doesn't fit -->
+            <FrameLayout
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:ellipsize="end"
+                android:layout_weight="1">
+
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal">
+
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:ellipsize="end"
+                        android:includeFontPadding="false"
+                        android:maxLines="1"
+                        android:text="@string/widget_preview_city_1"
+                        android:textColor="@color/widget_on_surface"
+                        android:textSize="16dp" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="8dp"
+                        android:fontFamily="sans-serif-medium"
+                        android:includeFontPadding="false"
+                        android:maxLines="1"
+                        android:visibility="gone"
+                        android:textColor="@color/widget_on_surface_variant"
+                        android:textSize="12dp" />
+                </LinearLayout>
+            </FrameLayout>
+
+            <TextClock
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="12dp"
+                android:fontFeatureSettings="tnum"
+                android:includeFontPadding="false"
                 android:maxLines="1"
-                android:text="@string/widget_preview_city_1"
+                android:timeZone="Atlantic/Reykjavik"
                 android:textColor="@color/widget_on_surface"
-                android:textSize="16sp" />
-
-            <TextView
-                android:id="@+id/preview_day1"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:maxLines="1"
-                android:textColor="@color/widget_on_surface_variant"
-                android:textSize="12sp"
-                android:visibility="gone" />
+                android:textSize="22dp" />
         </LinearLayout>
+    </FrameLayout>
 
-        <TextClock
-            android:id="@+id/preview_time1"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="12dp"
-            android:maxLines="1"
-            android:timeZone="Atlantic/Reykjavik"
-            android:textColor="@color/widget_on_surface"
-            android:textSize="22sp" />
-    </LinearLayout>
-
-    <LinearLayout
+    <FrameLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:gravity="center_vertical"
-        android:minHeight="48dp"
-        android:orientation="horizontal"
-        android:paddingHorizontal="16dp"
-        android:paddingVertical="4dp">
+        android:clipChildren="false"
+        android:clipToPadding="false"
+        android:paddingStart="4dp"
+        android:paddingTop="2dp"
+        android:paddingEnd="4dp"
+        android:paddingBottom="4dp">
 
         <LinearLayout
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:orientation="vertical">
+            android:layout_width="match_parent"
+            android:layout_height="48dp"
+            android:background="@drawable/widget_float_surface"
+            android:baselineAligned="false"
+            android:elevation="2dp"
+            android:gravity="center_vertical"
+            android:orientation="horizontal"
+            android:paddingStart="20dp"
+            android:paddingEnd="20dp">
 
-            <TextView
-                android:id="@+id/preview_city2"
-                android:layout_width="match_parent"
+            <!-- The name gives way to the day's word and the time: in a frame it is only as wide as its text, and shrinks when that doesn't fit -->
+            <FrameLayout
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:ellipsize="end"
+                android:layout_weight="1">
+
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal">
+
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:ellipsize="end"
+                        android:includeFontPadding="false"
+                        android:maxLines="1"
+                        android:text="@string/widget_preview_city_2"
+                        android:textColor="@color/widget_on_surface"
+                        android:textSize="16dp" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="8dp"
+                        android:fontFamily="sans-serif-medium"
+                        android:includeFontPadding="false"
+                        android:maxLines="1"
+                        android:visibility="gone"
+                        android:textColor="@color/widget_on_surface_variant"
+                        android:textSize="12dp" />
+                </LinearLayout>
+            </FrameLayout>
+
+            <TextClock
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="12dp"
+                android:fontFeatureSettings="tnum"
+                android:includeFontPadding="false"
                 android:maxLines="1"
-                android:text="@string/widget_preview_city_2"
+                android:timeZone="America/New_York"
                 android:textColor="@color/widget_on_surface"
-                android:textSize="16sp" />
-
-            <TextView
-                android:id="@+id/preview_day2"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:maxLines="1"
-                android:textColor="@color/widget_on_surface_variant"
-                android:textSize="12sp"
-                android:visibility="gone" />
+                android:textSize="22dp" />
         </LinearLayout>
+    </FrameLayout>
 
-        <TextClock
-            android:id="@+id/preview_time2"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="12dp"
-            android:maxLines="1"
-            android:timeZone="America/New_York"
-            android:textColor="@color/widget_on_surface"
-            android:textSize="22sp" />
-    </LinearLayout>
-
-    <LinearLayout
+    <FrameLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:gravity="center_vertical"
-        android:minHeight="48dp"
-        android:orientation="horizontal"
-        android:paddingHorizontal="16dp"
-        android:paddingVertical="4dp">
+        android:clipChildren="false"
+        android:clipToPadding="false"
+        android:paddingStart="4dp"
+        android:paddingTop="2dp"
+        android:paddingEnd="4dp"
+        android:paddingBottom="4dp">
 
         <LinearLayout
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:orientation="vertical">
+            android:layout_width="match_parent"
+            android:layout_height="48dp"
+            android:background="@drawable/widget_float_surface"
+            android:baselineAligned="false"
+            android:elevation="2dp"
+            android:gravity="center_vertical"
+            android:orientation="horizontal"
+            android:paddingStart="20dp"
+            android:paddingEnd="20dp">
 
-            <TextView
-                android:id="@+id/preview_city3"
-                android:layout_width="match_parent"
+            <!-- The name gives way to the day's word and the time: in a frame it is only as wide as its text, and shrinks when that doesn't fit -->
+            <FrameLayout
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:ellipsize="end"
+                android:layout_weight="1">
+
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal">
+
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:ellipsize="end"
+                        android:includeFontPadding="false"
+                        android:maxLines="1"
+                        android:text="@string/widget_preview_city_3"
+                        android:textColor="@color/widget_on_surface"
+                        android:textSize="16dp" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="8dp"
+                        android:fontFamily="sans-serif-medium"
+                        android:includeFontPadding="false"
+                        android:maxLines="1"
+                        android:visibility="gone"
+                        android:textColor="@color/widget_on_surface_variant"
+                        android:textSize="12dp" />
+                </LinearLayout>
+            </FrameLayout>
+
+            <TextClock
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="12dp"
+                android:fontFeatureSettings="tnum"
+                android:includeFontPadding="false"
                 android:maxLines="1"
-                android:text="@string/widget_preview_city_3"
+                android:timeZone="Asia/Tokyo"
                 android:textColor="@color/widget_on_surface"
-                android:textSize="16sp" />
-
-            <TextView
-                android:id="@+id/preview_day3"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:maxLines="1"
-                android:textColor="@color/widget_on_surface_variant"
-                android:textSize="12sp"
-                android:visibility="gone" />
+                android:textSize="22dp" />
         </LinearLayout>
-
-        <TextClock
-            android:id="@+id/preview_time3"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="12dp"
-            android:maxLines="1"
-            android:timeZone="Asia/Tokyo"
-            android:textColor="@color/widget_on_surface"
-            android:textSize="22sp" />
-    </LinearLayout>
+    </FrameLayout>
 </LinearLayout>

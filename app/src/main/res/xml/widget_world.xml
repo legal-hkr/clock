@@ -1,13 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!-- World clock: cities as floating pills. Four cells wide, where two pills stand side by side in one row; the height can be changed. -->
 <appwidget-provider xmlns:android="http://schemas.android.com/apk/res/android"
     android:description="@string/widget_world_description"
     android:initialLayout="@layout/widget_world_list"
-    android:minWidth="110dp"
+    android:minWidth="250dp"
     android:minHeight="40dp"
-    android:minResizeWidth="110dp"
+    android:minResizeWidth="250dp"
     android:minResizeHeight="40dp"
     android:previewLayout="@layout/widget_world_preview"
-    android:resizeMode="horizontal|vertical"
+    android:resizeMode="vertical"
     android:targetCellWidth="4"
     android:targetCellHeight="2"
     android:updatePeriodMillis="0"

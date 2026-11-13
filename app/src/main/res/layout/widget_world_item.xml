@@ -1,46 +1,76 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- A city in the world clock's list: its name, "Tomorrow" or "Yesterday" when its date differs, and its time, kept by the system's text clock in that zone. -->
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<!-- A city of the world clock widget (further widgets handoff of 13 Nov 2026, §3): a floating pill of its own with the name, "Tomorrow" or "Yesterday" when its date differs, and its time, kept by the system's text clock in that zone. The row around the pill leaves room for its shadow and keeps the pills 6 dp apart. Sizes are in dp, text too. -->
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:ignore="SpUsage,UselessParent"
     android:id="@+id/row"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:gravity="center_vertical"
-    android:minHeight="48dp"
-    android:orientation="horizontal"
-    android:paddingHorizontal="16dp"
-    android:paddingVertical="4dp">
+    android:clipChildren="false"
+    android:clipToPadding="false"
+    android:paddingStart="4dp"
+    android:paddingTop="2dp"
+    android:paddingEnd="4dp"
+    android:paddingBottom="4dp">
 
     <LinearLayout
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_weight="1"
-        android:orientation="vertical">
+        android:id="@+id/pill"
+        android:layout_width="match_parent"
+        android:layout_height="48dp"
+        android:background="@drawable/widget_float_surface"
+        android:baselineAligned="false"
+        android:elevation="2dp"
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
+        android:paddingStart="20dp"
+        android:paddingEnd="20dp">
 
-        <TextView
-            android:id="@+id/city"
-            android:layout_width="match_parent"
+        <!-- The name gives way to the day's word and the time: in a frame it is only as wide as its text, and shrinks when that doesn't fit -->
+        <FrameLayout
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:ellipsize="end"
+            android:layout_weight="1">
+
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:gravity="center_vertical"
+                android:orientation="horizontal">
+
+                <TextView
+                    android:id="@+id/city"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:ellipsize="end"
+                    android:includeFontPadding="false"
+                    android:maxLines="1"
+                    android:textColor="@color/widget_on_surface"
+                    android:textSize="16dp" />
+
+                <TextView
+                    android:id="@+id/day"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="8dp"
+                    android:fontFamily="sans-serif-medium"
+                    android:includeFontPadding="false"
+                    android:maxLines="1"
+                android:visibility="gone"
+                    android:textColor="@color/widget_on_surface_variant"
+                    android:textSize="12dp" />
+            </LinearLayout>
+        </FrameLayout>
+
+        <TextClock
+            android:id="@+id/time"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="12dp"
+            android:fontFeatureSettings="tnum"
+            android:includeFontPadding="false"
             android:maxLines="1"
             android:textColor="@color/widget_on_surface"
-            android:textSize="16sp" />
-
-        <TextView
-            android:id="@+id/day"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:maxLines="1"
-            android:textColor="@color/widget_on_surface_variant"
-            android:textSize="12sp"
-            android:visibility="gone" />
+            android:textSize="22dp" />
     </LinearLayout>
-
-    <TextClock
-        android:id="@+id/time"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="12dp"
-        android:maxLines="1"
-        android:textColor="@color/widget_on_surface"
-        android:textSize="22sp" />
-</LinearLayout>
+</FrameLayout>

@@ -409,6 +409,11 @@
     <string name="desc_see_through">Tapeta prześwituje przez kształt</string>
     <string name="widget_analog_name">Zegar analogowy</string>
     <string name="widget_analog_description">Tarcza zegara w kolorach systemu</string>
+    <string name="widget_bare_world_name">Zegar światowy bez tła</string>
+    <string name="widget_bare_world_description">Godzina w wybranych miastach, na tapecie</string>
+    <string name="widget_timer_more">jeszcze %d</string>
+    <string name="widget_world_tomorrow">%s, jutro</string>
+    <string name="widget_world_yesterday">%s, wczoraj</string>
     <string name="widget_world_name">Zegar światowy</string>
     <string name="widget_world_description">Godzina w wybranych miastach</string>
     <string name="widget_timer_name">Minutnik</string>
@@ -418,8 +423,8 @@
     <string name="widget_preview_city_1">Reykjavík</string>
     <string name="widget_preview_city_2">Nowy Jork</string>
     <string name="widget_preview_city_3">Tokio</string>
-    <string name="widget_preview_preset_1">Herbata (3 min)</string>
-    <string name="widget_preview_preset_2">Makaron (9 min)</string>
-    <string name="widget_preview_preset_3">Jajka (7 min)</string>
-    <string name="widget_preview_preset_4">Drzemka (25 min)</string>
+    <string name="widget_preview_preset_1">Herbata</string>
+    <string name="widget_preview_preset_2">Makaron</string>
+    <string name="widget_preview_preset_3">Jajka</string>
+    <string name="widget_preview_preset_4">Drzemka</string>
 </resources>

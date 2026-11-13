@@ -1,0 +1,158 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- What the widget picker shows for the world clock without a background: three cities. -->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:ignore="SpUsage"
+    android:id="@android:id/background"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/widget_frame"
+    android:clipChildren="false"
+    android:clipToOutline="true"
+    android:gravity="center_vertical"
+    android:orientation="vertical">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:baselineAligned="false"
+        android:gravity="center_vertical"
+        android:minHeight="54dp"
+        android:orientation="horizontal"
+        android:paddingStart="8dp"
+        android:paddingEnd="8dp">
+
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:orientation="vertical">
+
+            <TextView
+                style="@style/WidgetBareText"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:ellipsize="end"
+                android:fontFamily="sans-serif-medium"
+            android:text="@string/widget_preview_city_1"
+                android:textSize="16dp" />
+
+            <TextView
+                style="@style/WidgetBareText"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="2dp"
+                android:alpha="0.8"
+                android:fontFamily="sans-serif-medium"
+                android:textSize="12dp"
+                android:visibility="gone" />
+        </LinearLayout>
+
+        <TextClock
+            style="@style/WidgetBareText"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="12dp"
+            android:fontFamily="sans-serif-light"
+            android:fontFeatureSettings="tnum"
+            android:letterSpacing="-0.015"
+        android:timeZone="Atlantic/Reykjavik"
+            android:textSize="34dp" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:baselineAligned="false"
+        android:gravity="center_vertical"
+        android:minHeight="54dp"
+        android:orientation="horizontal"
+        android:paddingStart="8dp"
+        android:paddingEnd="8dp">
+
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:orientation="vertical">
+
+            <TextView
+                style="@style/WidgetBareText"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:ellipsize="end"
+                android:fontFamily="sans-serif-medium"
+            android:text="@string/widget_preview_city_2"
+                android:textSize="16dp" />
+
+            <TextView
+                style="@style/WidgetBareText"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="2dp"
+                android:alpha="0.8"
+                android:fontFamily="sans-serif-medium"
+                android:textSize="12dp"
+                android:visibility="gone" />
+        </LinearLayout>
+
+        <TextClock
+            style="@style/WidgetBareText"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="12dp"
+            android:fontFamily="sans-serif-light"
+            android:fontFeatureSettings="tnum"
+            android:letterSpacing="-0.015"
+        android:timeZone="America/New_York"
+            android:textSize="34dp" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:baselineAligned="false"
+        android:gravity="center_vertical"
+        android:minHeight="54dp"
+        android:orientation="horizontal"
+        android:paddingStart="8dp"
+        android:paddingEnd="8dp">
+
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:orientation="vertical">
+
+            <TextView
+                style="@style/WidgetBareText"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:ellipsize="end"
+                android:fontFamily="sans-serif-medium"
+            android:text="@string/widget_preview_city_3"
+                android:textSize="16dp" />
+
+            <TextView
+                style="@style/WidgetBareText"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="2dp"
+                android:alpha="0.8"
+                android:fontFamily="sans-serif-medium"
+                android:textSize="12dp"
+                android:visibility="gone" />
+        </LinearLayout>
+
+        <TextClock
+            style="@style/WidgetBareText"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="12dp"
+            android:fontFamily="sans-serif-light"
+            android:fontFeatureSettings="tnum"
+            android:letterSpacing="-0.015"
+        android:timeZone="Asia/Tokyo"
+            android:textSize="34dp" />
+    </LinearLayout>
+</LinearLayout>
