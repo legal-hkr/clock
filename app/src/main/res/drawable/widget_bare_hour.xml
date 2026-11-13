@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Hour hand of the analog clock without a background: white, the shorter and thicker one. A vector can't blur, so the shadow – the one the text of the widgets without a background has: black, soft, about 4 dp – is stacked copies of the shape, each a little larger and nearly clear. It turns with the hand, so it lies evenly around it. -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:ignore="VectorRaster"
+    android:width="480dp"
+    android:height="480dp"
+    android:viewportWidth="200"
+    android:viewportHeight="200">
+    <path android:strokeColor="#FF000000" android:strokeAlpha="0.08" android:strokeWidth="11.0" android:strokeLineCap="round" android:pathData="M100,100L100,50" />
+    <path android:strokeColor="#FF000000" android:strokeAlpha="0.08" android:strokeWidth="12.0" android:strokeLineCap="round" android:pathData="M100,100L100,50" />
+    <path android:strokeColor="#FF000000" android:strokeAlpha="0.08" android:strokeWidth="13.0" android:strokeLineCap="round" android:pathData="M100,100L100,50" />
+    <path android:strokeColor="#FF000000" android:strokeAlpha="0.08" android:strokeWidth="14.5" android:strokeLineCap="round" android:pathData="M100,100L100,50" />
+    <path android:strokeColor="#FF000000" android:strokeAlpha="0.08" android:strokeWidth="16.0" android:strokeLineCap="round" android:pathData="M100,100L100,50" />
+    <path android:strokeColor="@android:color/white" android:strokeWidth="10" android:strokeLineCap="round" android:pathData="M100,100L100,50" />
+</vector>

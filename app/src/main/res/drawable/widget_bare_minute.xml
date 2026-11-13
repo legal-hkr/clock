@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Minute hand of the analog clock without a background, with the pin: white, the longer and thinner one. A vector can't blur, so the shadow – the one the text of the widgets without a background has: black, soft, about 4 dp – is stacked copies of the shape, each a little larger and nearly clear. It turns with the hand, so it lies evenly around it. -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:ignore="VectorRaster"
+    android:width="480dp"
+    android:height="480dp"
+    android:viewportWidth="200"
+    android:viewportHeight="200">
+    <path android:strokeColor="#FF000000" android:strokeAlpha="0.08" android:strokeWidth="7.0" android:strokeLineCap="round" android:pathData="M100,100L100,26" />
+    <path android:fillColor="#FF000000" android:fillAlpha="0.08" android:pathData="M100.00,93.50a6.5,6.5 0 1,0 0.01,0Z" />
+    <path android:strokeColor="#FF000000" android:strokeAlpha="0.08" android:strokeWidth="8.0" android:strokeLineCap="round" android:pathData="M100,100L100,26" />
+    <path android:fillColor="#FF000000" android:fillAlpha="0.08" android:pathData="M100.00,93.00a7.0,7.0 0 1,0 0.01,0Z" />
+    <path android:strokeColor="#FF000000" android:strokeAlpha="0.08" android:strokeWidth="9.0" android:strokeLineCap="round" android:pathData="M100,100L100,26" />
+    <path android:fillColor="#FF000000" android:fillAlpha="0.08" android:pathData="M100.00,92.50a7.5,7.5 0 1,0 0.01,0Z" />
+    <path android:strokeColor="#FF000000" android:strokeAlpha="0.08" android:strokeWidth="10.5" android:strokeLineCap="round" android:pathData="M100,100L100,26" />
+    <path android:fillColor="#FF000000" android:fillAlpha="0.08" android:pathData="M100.00,91.75a8.2,8.2 0 1,0 0.01,0Z" />
+    <path android:strokeColor="#FF000000" android:strokeAlpha="0.08" android:strokeWidth="12.0" android:strokeLineCap="round" android:pathData="M100,100L100,26" />
+    <path android:fillColor="#FF000000" android:fillAlpha="0.08" android:pathData="M100.00,91.00a9.0,9.0 0 1,0 0.01,0Z" />
+    <path android:strokeColor="@android:color/white" android:strokeWidth="6" android:strokeLineCap="round" android:pathData="M100,100L100,26" />
+    <path android:fillColor="@android:color/white" android:pathData="M100.00,94.00a6.0,6.0 0 1,0 0.01,0Z" />
+</vector>

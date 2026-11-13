@@ -298,7 +298,7 @@
 
     <!-- First run -->
     <string name="title_welcome_wizard">Witaj w Zegarze</string>
-    <string name="msg_welcome">Alarmy, zegar światowy, minutnik i stoper. Aplikacja nigdy nie łączy się z internetem i nie zna położenia telefonu.</string>
+    <string name="msg_welcome">Alarmy, zegar światowy, minutnik i stoper. Aplikacja nigdy nie łączy się z Internetem i nie zna położenia telefonu.</string>
     <string name="label_welcome_question">Co chcesz zrobić?</string>
     <string name="label_welcome_start">Zacznij od zera</string>
     <string name="desc_welcome_start">Ustaw pierwszy alarm</string>
@@ -332,7 +332,7 @@
     <string name="title_about_source">Kod źródłowy</string>
     <string name="label_licenses">Licencje open source</string>
     <string name="desc_licenses">Składniki open source użyte w aplikacji</string>
-    <string name="msg_about_privacy">Aplikacja działa bez dostępu do internetu, nie zna położenia telefonu i nie widzi plików.</string>
+    <string name="msg_about_privacy">Aplikacja działa bez dostępu do Internetu, nie zna położenia telefonu i nie widzi plików.</string>
     <string name="whats_new_title">Co nowego</string>
     <string name="whats_new_badge">Nowe</string>
     <plurals name="whats_new_row_supporting">
@@ -399,6 +399,14 @@
     <string name="widget_digital_description">Godzina, data i najbliższy alarm</string>
     <string name="widget_digital_round_name">Okrągły zegar cyfrowy</string>
     <string name="widget_digital_round_description">Godzina w kształcie, w kolorach systemu</string>
+    <string name="widget_bare_digital_name">Zegar cyfrowy bez tła</string>
+    <string name="widget_bare_digital_description">Godzina, data i alarm na tapecie</string>
+    <string name="widget_bare_small_name">Mały zegar cyfrowy bez tła</string>
+    <string name="widget_bare_small_description">Godziny nad minutami, na tapecie</string>
+    <string name="widget_bare_analog_name">Zegar analogowy bez tła</string>
+    <string name="widget_bare_analog_description">Same wskazówki na tapecie</string>
+    <string name="label_see_through">Półprzezroczyste tło</string>
+    <string name="desc_see_through">Tapeta prześwituje przez kształt</string>
     <string name="widget_analog_name">Zegar analogowy</string>
     <string name="widget_analog_description">Tarcza zegara w kolorach systemu</string>
     <string name="widget_world_name">Zegar światowy</string>

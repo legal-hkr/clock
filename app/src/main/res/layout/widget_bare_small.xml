@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Small digital clock without a background (lighter widgets handoff of 13 Nov 2026, §7.4): the date, the hours over the minutes – medium over light – and the next alarm in white, straight on the wallpaper. Sizes are in dp, text too, and the same at every widget size. Also the picker's preview. -->
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:ignore="SpUsage,ContentDescription,UseCompoundDrawables,UselessParent"
+    android:id="@android:id/background"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/widget_frame"
+    android:clipToOutline="true">
+
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:gravity="center_horizontal"
+        android:orientation="vertical">
+
+        <TextClock
+            android:id="@+id/date"
+            style="@style/WidgetBareText"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="2dp"
+            android:fontFamily="sans-serif-medium"
+            android:format12Hour="EEE d MMM"
+            android:format24Hour="EEE d MMM"
+            android:textSize="14dp" />
+
+        <!-- The margins take away the empty room a line keeps above and below its digits -->
+        <TextClock
+            android:id="@+id/hours"
+            style="@style/WidgetBareText"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="-8dp"
+            android:layout_marginBottom="-10dp"
+            android:fontFamily="sans-serif-medium"
+            android:fontFeatureSettings="tnum"
+            android:format12Hour="h"
+            android:format24Hour="HH"
+            android:letterSpacing="-0.017"
+            android:textSize="60dp" />
+
+        <TextClock
+            android:id="@+id/minutes"
+            style="@style/WidgetBareText"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="-8dp"
+            android:layout_marginBottom="-10dp"
+            android:fontFamily="sans-serif-light"
+            android:fontFeatureSettings="tnum"
+            android:format12Hour="mm"
+            android:format24Hour="mm"
+            android:letterSpacing="-0.017"
+            android:textSize="60dp" />
+
+        <LinearLayout
+            android:id="@+id/alarm"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:gravity="center_vertical"
+            android:orientation="horizontal"
+            android:visibility="gone">
+
+            <ImageView
+                android:id="@+id/alarm_icon"
+                android:layout_width="18dp"
+                android:layout_height="18dp"
+                android:importantForAccessibility="no"
+                android:src="@drawable/ic_alarm"
+                android:tint="@android:color/white" />
+
+            <TextView
+                android:id="@+id/alarm_text"
+                style="@style/WidgetBareText"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="4dp"
+                android:fontFamily="sans-serif-medium"
+                android:textSize="12dp" />
+        </LinearLayout>
+    </LinearLayout>
+</FrameLayout>

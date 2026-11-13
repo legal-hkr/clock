@@ -1,6 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<!-- The analog widget's face (SPEC §3.10.2): the widgets' cookie and a dot at twelve. -->
-<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
-    <item android:drawable="@drawable/widget_cookie" />
-    <item android:drawable="@drawable/widget_clock_dot" />
-</layer-list>

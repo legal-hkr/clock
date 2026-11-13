@@ -1,15 +1,23 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Analogue clock (SPEC §3.10.2): no container – the face is the widget. The system's clock view moves the hands by itself. -->
+<!-- Analog clock (SPEC §3.10.2, lighter widgets handoff of 13 Nov 2026 §4): no container – the face is the widget. The cookie is drawn under the clock, so that it alone can be made see-through; the system's clock view draws the dot at twelve and moves the hands by itself. Both scale the same way: down to the smaller side, centered. -->
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@android:id/background"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
+    <ImageView
+        android:id="@+id/cookie"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:importantForAccessibility="no"
+        android:scaleType="fitCenter"
+        android:src="@drawable/widget_cookie" />
+
     <AnalogClock
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_gravity="center"
-        android:dial="@drawable/widget_clock_dial"
+        android:dial="@drawable/widget_clock_dot"
         android:hand_hour="@drawable/widget_clock_hour"
         android:hand_minute="@drawable/widget_clock_minute" />
 </FrameLayout>

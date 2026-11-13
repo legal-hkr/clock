@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- The next alarm's pill on the digital clock widget, the widget's one accent. -->
+<ripple xmlns:android="http://schemas.android.com/apk/res/android" android:color="?android:attr/colorControlHighlight">
+    <item>
+        <shape android:shape="rectangle">
+            <solid android:color="@color/widget_primary" />
+            <corners android:radius="20dp" />
+        </shape>
+    </item>
+</ripple>

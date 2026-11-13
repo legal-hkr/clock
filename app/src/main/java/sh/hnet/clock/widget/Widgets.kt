@@ -13,6 +13,7 @@ import android.util.SizeF
 import android.util.TypedValue
 import android.view.View
 import android.widget.RemoteViews
+import androidx.core.content.edit
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -65,8 +66,6 @@ object Widgets {
     /** A line of the timer widget with the space under it (dp), and the least heights of a widget of one to five lines (12 dp around). */
     private const val LINE = 52f
     private val TIMER_HEIGHTS = listOf(40f, 124f, 176f, 228f, 280f)
-    /** The least width (dp) at which the digital clock's group has its full size. */
-    private const val DIGITAL_FULL = 320f
 
     /** The sides (dp) the round clock is laid out for; a widget may carry at most 16 layouts. */
     private val ROUND_SIDES = listOf(110f, 125f, 140f, 155f, 170f, 185f, 200f, 220f, 240f, 260f, 285f, 310f, 340f, 370f, 400f, 440f)
@@ -86,9 +85,9 @@ object Widgets {
 
     /** Everything again: after a restart, an unlock, a change of language, clock or time zone. */
     fun all(context: Context) {
-        digital(context)
-        round(context)
+        clocks(context)
         analog(context)
+        bareAnalog(context)
         world(context)
         timer(context)
     }
@@ -120,7 +119,7 @@ object Widgets {
         setCharSequence(view, "setFormat24Hour", twentyFour)
     }
 
-    // ---- Digital clock and Round digital clock (§3.10.1, digital widgets handoff of 12 Nov 2026) ----
+    // ---- The clock widgets (§3.10.1, §3.10.2, lighter widgets handoff of 13 Nov 2026) ----
 
     /** The next alarm as the widgets show it, and whether alarms may not ring (§3.2.8): the text stays the alarm's time either way. */
     private class AlarmLine(val text: String, val problem: Boolean) {
@@ -135,48 +134,61 @@ object Widgets {
         return AlarmLine(alarmText(context, locale, next.second, zone), problem)
     }
 
-    /** The hours of the locale's time pattern up to the minutes ("HH:", "h:", "H."): the widgets' clocks show hours and minutes apart and never the period. */
-    private fun hourPatterns(locale: Locale, separator: Boolean): Pair<String, String> {
-        val (twelve, twentyFour) = timePatterns(locale, period = false)
-        // Without the separator only the hour's own letters count: a pattern may carry quoted words ("HH 'h' mm")
-        fun hours(pattern: String) = if (separator) pattern.substringBefore('m') else HOUR.find(pattern)?.value ?: "H"
-        return hours(twelve) to hours(twentyFour)
+    /**
+     * A time pattern without the period, taken apart for clocks that show hours and minutes in
+     * views of their own: the hour's letters ("HH", "h") and what follows them (":mm").
+     */
+    private class TimeParts(pattern: String) {
+        // Only the hour's own letters count: a pattern may carry quoted words ("HH 'h' mm")
+        private val match = HOUR.find(pattern)
+        val hours: String = match?.value ?: "H"
+        val rest: String = match?.let { pattern.substring(it.range.last + 1) } ?: ":mm"
     }
 
-    /** A card with the date in the cookie, the time with the minutes in primary, and the next alarm as a pill. One size, 4 × 2; in narrow cells the group steps down once. */
+    /** The alarm line of a widget, or nothing where no alarm is on; [tint] colors its icon and text unless that is left to the layout. */
+    private fun RemoteViews.alarm(context: Context, line: AlarmLine?, tint: Int? = null) {
+        if (line == null) {
+            setViewVisibility(R.id.alarm, View.GONE)
+            return
+        }
+        setViewVisibility(R.id.alarm, View.VISIBLE)
+        setTextViewText(R.id.alarm_text, line.text)
+        setContentDescription(R.id.alarm, line.description(context))
+        // Told by the icon as well, never by color alone
+        setImageViewResource(R.id.alarm_icon, if (line.problem) R.drawable.ic_error else R.drawable.ic_alarm)
+        if (tint != null) {
+            setColorStateList(R.id.alarm_icon, "setImageTintList", tint)
+            setColorStateList(R.id.alarm_text, "setTextColor", tint)
+        }
+    }
+
+    /** The widgets that show the next alarm: again when it changes, or when what decides whether it rings does. */
+    fun clocks(context: Context) {
+        digital(context)
+        round(context)
+        bareDigital(context)
+        bareSmall(context)
+    }
+
+    /** No card: the date in the light cookie, over it a pill with the time and the day's name, under that a small pill with the next alarm – the arrangement of Music's player widget. */
     fun digital(context: Context) {
         if (ids(context, DigitalClockWidget::class.java).isEmpty()) return
         val locale = locale(context)
         val line = alarmLine(context, locale)
-        val (twelve, twentyFour) = hourPatterns(locale, separator = true)
-        val views = sized(listOf(250f, DIGITAL_FULL), listOf(110f)) { width, _ ->
-            RemoteViews(context.packageName, R.layout.widget_digital).apply {
-                clockFormat(R.id.hours, twelve, twentyFour)
-                clockFormat(R.id.weekday, DateFormat.getBestDateTimePattern(locale, "EEE"))
-                clockFormat(R.id.day, DateFormat.getBestDateTimePattern(locale, "d"))
-                clockFormat(R.id.month, DateFormat.getBestDateTimePattern(locale, "MMM"))
-                if (width < DIGITAL_FULL) {
-                    setViewLayoutWidth(R.id.cookie, 104f, TypedValue.COMPLEX_UNIT_DIP)
-                    setViewLayoutHeight(R.id.cookie, 104f, TypedValue.COMPLEX_UNIT_DIP)
-                    setTextViewTextSize(R.id.day, TypedValue.COMPLEX_UNIT_DIP, 44f)
-                    setTextViewTextSize(R.id.hours, TypedValue.COMPLEX_UNIT_DIP, 48f)
-                    setTextViewTextSize(R.id.minutes, TypedValue.COMPLEX_UNIT_DIP, 48f)
-                }
-                if (line != null) {
-                    setViewVisibility(R.id.alarm, View.VISIBLE)
-                    setTextViewText(R.id.alarm_text, line.text)
-                    setContentDescription(R.id.alarm, line.description(context))
-                    setImageViewResource(R.id.alarm_icon, if (line.problem) R.drawable.ic_error else R.drawable.ic_alarm)
-                    setInt(R.id.alarm_pill, "setBackgroundResource", if (line.problem) R.drawable.widget_pill_error else R.drawable.widget_pill)
-                    val color = if (line.problem) R.color.widget_on_error_container else R.color.widget_on_secondary_container
-                    setColorStateList(R.id.alarm_icon, "setImageTintList", if (line.problem) R.color.widget_error else color)
-                    setColorStateList(R.id.alarm_text, "setTextColor", color)
-                    setOnClickPendingIntent(R.id.alarm, Notifications.open(context, Tab.ALARMS))
-                } else {
-                    setViewVisibility(R.id.alarm, View.GONE)
-                }
-                setOnClickPendingIntent(android.R.id.background, Notifications.open(context, Tab.CLOCK))
-            }
+        val (twelve, twentyFour) = timePatterns(locale, period = false)
+        val clock = Notifications.open(context, Tab.CLOCK)
+        val views = RemoteViews(context.packageName, R.layout.widget_digital).apply {
+            clockFormat(R.id.time, twelve, twentyFour)
+            clockFormat(R.id.weekday, DateFormat.getBestDateTimePattern(locale, "EEE"))
+            clockFormat(R.id.day, DateFormat.getBestDateTimePattern(locale, "d"))
+            clockFormat(R.id.month, DateFormat.getBestDateTimePattern(locale, "MMM"))
+            clockFormat(R.id.day_name, DateFormat.getBestDateTimePattern(locale, "EEEE"))
+            // The pill is the widget's one accent; where alarms may not ring it turns to the error role, with the error icon
+            alarm(context, line, tint = if (line?.problem == true) R.color.widget_on_error else R.color.widget_on_primary)
+            setInt(R.id.alarm_pill, "setBackgroundResource", if (line?.problem == true) R.drawable.widget_float_error else R.drawable.widget_float_primary)
+            setOnClickPendingIntent(R.id.alarm, Notifications.open(context, Tab.ALARMS))
+            setOnClickPendingIntent(R.id.cookie, clock)
+            setOnClickPendingIntent(R.id.time_pill, clock)
         }
         show(context, DigitalClockWidget::class.java, views)
     }
@@ -184,48 +196,103 @@ object Widgets {
     /**
      * The cookie with the hours over the minutes, the short date above and the next alarm below.
      * Everything in it follows the cookie's size: a widget can't scale its text by itself, so there
-     * is one layout for each of [ROUND_SIDES] and the launcher shows the largest that fits.
+     * is one layout for each of [ROUND_SIDES] and the launcher shows the largest that fits. Each
+     * placed widget has its own cookie, solid or see-through.
      */
     fun round(context: Context) {
-        if (ids(context, RoundClockWidget::class.java).isEmpty()) return
+        val ids = ids(context, RoundClockWidget::class.java)
+        if (ids.isEmpty()) return
         val locale = locale(context)
         val line = alarmLine(context, locale)
-        val (twelve, twentyFour) = hourPatterns(locale, separator = false)
+        val (twelve, twentyFour) = timePatterns(locale, period = false).let { TimeParts(it.first).hours to TimeParts(it.second).hours }
         val dip = TypedValue.COMPLEX_UNIT_DIP
-        // Square sizes only: the cookie is as large as the smaller side
-        val views = RemoteViews(ROUND_SIDES.associate { side ->
-            SizeF(side, side) to RemoteViews(context.packageName, R.layout.widget_digital_round).apply {
-                clockFormat(R.id.hours, twelve, twentyFour)
-                clockFormat(R.id.date, DateFormat.getBestDateTimePattern(locale, "EEEdMMM"))
-                val digits = side * ROUND_DIGITS
-                // The date and the alarm grow with the cookie but never go under label-medium
-                val text = (side * ROUND_TEXT).coerceAtLeast(12f)
-                for (view in intArrayOf(R.id.hours, R.id.minutes)) {
-                    setTextViewTextSize(view, dip, digits)
-                    // A line keeps empty room above and below its digits: without it hours and minutes nearly touch
-                    setViewLayoutMargin(view, RemoteViews.MARGIN_TOP, -0.19f * digits, dip)
-                    setViewLayoutMargin(view, RemoteViews.MARGIN_BOTTOM, -0.23f * digits, dip)
+        val manager = AppWidgetManager.getInstance(context)
+        for (id in ids) {
+            val alpha = cookieAlpha(context, id)
+            // Square sizes only: the cookie is as large as the smaller side
+            manager.updateAppWidget(id, RemoteViews(ROUND_SIDES.associate { side ->
+                SizeF(side, side) to RemoteViews(context.packageName, R.layout.widget_digital_round).apply {
+                    setInt(R.id.cookie, "setImageAlpha", alpha)
+                    clockFormat(R.id.hours, twelve, twentyFour)
+                    clockFormat(R.id.date, DateFormat.getBestDateTimePattern(locale, "EEEdMMM"))
+                    val digits = side * ROUND_DIGITS
+                    // The date and the alarm grow with the cookie but never go under label-medium
+                    val text = (side * ROUND_TEXT).coerceAtLeast(12f)
+                    for (view in intArrayOf(R.id.hours, R.id.minutes)) {
+                        setTextViewTextSize(view, dip, digits)
+                        // A line keeps empty room above and below its digits: without it hours and minutes nearly touch
+                        setViewLayoutMargin(view, RemoteViews.MARGIN_TOP, -0.19f * digits, dip)
+                        setViewLayoutMargin(view, RemoteViews.MARGIN_BOTTOM, -0.23f * digits, dip)
+                    }
+                    setTextViewTextSize(R.id.date, dip, text)
+                    setTextViewTextSize(R.id.alarm_text, dip, text)
+                    setViewLayoutWidth(R.id.alarm_icon, text * 1.5f, dip)
+                    setViewLayoutHeight(R.id.alarm_icon, text * 1.5f, dip)
+                    alarm(context, line, tint = if (line?.problem == true) R.color.widget_error else R.color.widget_on_secondary_container)
+                    // While alarms may not ring, a tap leads to where that is said and fixed
+                    setOnClickPendingIntent(android.R.id.background, Notifications.open(context, if (line?.problem == true) Tab.ALARMS else Tab.CLOCK))
                 }
-                setTextViewTextSize(R.id.date, dip, text)
-                setTextViewTextSize(R.id.alarm_text, dip, text)
-                setViewLayoutWidth(R.id.alarm_icon, text * 1.5f, dip)
-                setViewLayoutHeight(R.id.alarm_icon, text * 1.5f, dip)
-                if (line != null) {
-                    setViewVisibility(R.id.alarm, View.VISIBLE)
-                    setTextViewText(R.id.alarm_text, line.text)
-                    setContentDescription(R.id.alarm, line.description(context))
-                    setImageViewResource(R.id.alarm_icon, if (line.problem) R.drawable.ic_error else R.drawable.ic_alarm)
-                    val color = if (line.problem) R.color.widget_error else R.color.widget_on_primary_container
-                    setColorStateList(R.id.alarm_icon, "setImageTintList", color)
-                    setColorStateList(R.id.alarm_text, "setTextColor", color)
-                } else {
-                    setViewVisibility(R.id.alarm, View.GONE)
-                }
-                // While alarms may not ring, a tap leads to where that is said and fixed
-                setOnClickPendingIntent(android.R.id.background, Notifications.open(context, if (line?.problem == true) Tab.ALARMS else Tab.CLOCK))
-            }
-        })
-        show(context, RoundClockWidget::class.java, views)
+            }))
+        }
+    }
+
+    /** The cookie's opacity for one placed widget: 55 % where its see-through setting is on (§6.3). What stands on the cookie stays solid. */
+    private fun cookieAlpha(context: Context, id: Int): Int = if (WidgetSettings.seeThrough(context, id)) 140 else 255
+
+    // ---- Analog clock (§3.10.2) ----
+
+    fun analog(context: Context) {
+        val ids = ids(context, AnalogClockWidget::class.java)
+        if (ids.isEmpty()) return
+        val manager = AppWidgetManager.getInstance(context)
+        for (id in ids) {
+            manager.updateAppWidget(id, RemoteViews(context.packageName, R.layout.widget_analog).apply {
+                setInt(R.id.cookie, "setImageAlpha", cookieAlpha(context, id))
+                setOnClickPendingIntent(android.R.id.background, Notifications.open(context, Tab.CLOCK))
+            })
+        }
+    }
+
+    // ---- The widgets without a background (lighter widgets handoff §7): white with a soft shadow, straight on the wallpaper ----
+
+    fun bareDigital(context: Context) {
+        if (ids(context, BareDigitalWidget::class.java).isEmpty()) return
+        val locale = locale(context)
+        val (twelve, twentyFour) = timePatterns(locale, period = false).let { TimeParts(it.first) to TimeParts(it.second) }
+        val clock = Notifications.open(context, Tab.CLOCK)
+        val views = RemoteViews(context.packageName, R.layout.widget_bare_digital).apply {
+            // Hours medium, the separator and the minutes light
+            clockFormat(R.id.hours, twelve.hours, twentyFour.hours)
+            clockFormat(R.id.minutes, twelve.rest, twentyFour.rest)
+            clockFormat(R.id.date, DateFormat.getBestDateTimePattern(locale, "EEEdMMM"))
+            alarm(context, alarmLine(context, locale))
+            setOnClickPendingIntent(R.id.alarm, Notifications.open(context, Tab.ALARMS))
+            setOnClickPendingIntent(R.id.date, clock)
+            setOnClickPendingIntent(R.id.time, clock)
+        }
+        show(context, BareDigitalWidget::class.java, views)
+    }
+
+    fun bareSmall(context: Context) {
+        if (ids(context, BareSmallWidget::class.java).isEmpty()) return
+        val locale = locale(context)
+        val line = alarmLine(context, locale)
+        val (twelve, twentyFour) = timePatterns(locale, period = false).let { TimeParts(it.first).hours to TimeParts(it.second).hours }
+        val views = RemoteViews(context.packageName, R.layout.widget_bare_small).apply {
+            clockFormat(R.id.hours, twelve, twentyFour)
+            clockFormat(R.id.date, DateFormat.getBestDateTimePattern(locale, "EEEdMMM"))
+            alarm(context, line)
+            // While alarms may not ring, a tap leads to where that is said and fixed
+            setOnClickPendingIntent(android.R.id.background, Notifications.open(context, if (line?.problem == true) Tab.ALARMS else Tab.CLOCK))
+        }
+        show(context, BareSmallWidget::class.java, views)
+    }
+
+    fun bareAnalog(context: Context) {
+        if (ids(context, BareAnalogWidget::class.java).isEmpty()) return
+        val views = RemoteViews(context.packageName, R.layout.widget_bare_analog)
+        views.setOnClickPendingIntent(android.R.id.background, Notifications.open(context, Tab.CLOCK))
+        show(context, BareAnalogWidget::class.java, views)
     }
 
     /** "Thu, 06:30" within a week, else the date. No "today" or "tomorrow": the line must stay true past midnight without a redraw. */
@@ -236,15 +303,6 @@ object Widgets {
         val days = ChronoUnit.DAYS.between(now.atZone(zone).toLocalDate(), at.atZone(zone).toLocalDate())
         val day = if (days in 0..6) formats.weekdayShort(at, zone) else formats.shortDate(at, zone, now)
         return context.getString(R.string.label_day_and_time, day, formats.time(at, zone))
-    }
-
-    // ---- Analogue clock (§3.10.2) ----
-
-    fun analog(context: Context) {
-        if (ids(context, AnalogClockWidget::class.java).isEmpty()) return
-        val views = RemoteViews(context.packageName, R.layout.widget_analog)
-        views.setOnClickPendingIntent(android.R.id.background, Notifications.open(context, Tab.CLOCK))
-        show(context, AnalogClockWidget::class.java, views)
     }
 
     // ---- World clock (§3.10.3) ----
@@ -534,10 +592,42 @@ class DigitalClockWidget : AppWidgetProvider() {
 /** Analogue clock: the face alone. */
 class RoundClockWidget : AppWidgetProvider() {
     override fun onUpdate(context: Context, manager: AppWidgetManager, ids: IntArray) = Widgets.round(context)
+    override fun onDeleted(context: Context, ids: IntArray) = WidgetSettings.forget(context, ids)
 }
 
 class AnalogClockWidget : AppWidgetProvider() {
     override fun onUpdate(context: Context, manager: AppWidgetManager, ids: IntArray) = Widgets.analog(context)
+    override fun onDeleted(context: Context, ids: IntArray) = WidgetSettings.forget(context, ids)
+}
+
+class BareDigitalWidget : AppWidgetProvider() {
+    override fun onUpdate(context: Context, manager: AppWidgetManager, ids: IntArray) = Widgets.bareDigital(context)
+}
+
+class BareSmallWidget : AppWidgetProvider() {
+    override fun onUpdate(context: Context, manager: AppWidgetManager, ids: IntArray) = Widgets.bareSmall(context)
+}
+
+class BareAnalogWidget : AppWidgetProvider() {
+    override fun onUpdate(context: Context, manager: AppWidgetManager, ids: IntArray) = Widgets.bareAnalog(context)
+}
+
+/**
+ * What is set for one placed widget (lighter widgets handoff §6): whether the cookie of an analog
+ * or a round digital clock is see-through. Kept by the widget's id, in storage that can be read
+ * before the phone is first unlocked, as the widgets are drawn then too.
+ */
+object WidgetSettings {
+    private fun store(context: Context) = context.createDeviceProtectedStorageContext().getSharedPreferences("widgets", Context.MODE_PRIVATE)
+
+    fun seeThrough(context: Context, id: Int): Boolean = store(context).getBoolean(SEE_THROUGH + id, false)
+
+    fun setSeeThrough(context: Context, id: Int, on: Boolean) = store(context).edit { if (on) putBoolean(SEE_THROUGH + id, true) else remove(SEE_THROUGH + id) }
+
+    /** Removed widgets take their settings with them. */
+    fun forget(context: Context, ids: IntArray) = store(context).edit { ids.forEach { remove(SEE_THROUGH + it) } }
+
+    private const val SEE_THROUGH = "see_through_"
 }
 
 /** World clock: the user's cities. */

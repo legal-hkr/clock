@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Text of the widgets without a background: white – a widget can't read the wallpaper – with a soft shadow that keeps it readable on a light one. The one fixed color in the widgets. -->
+    <style name="WidgetBareText">
+        <item name="android:textColor">@android:color/white</item>
+        <item name="android:shadowColor">#73000000</item>
+        <item name="android:shadowDx">0</item>
+        <item name="android:shadowDy">@dimen/widget_text_shadow_dy</item>
+        <item name="android:shadowRadius">@dimen/widget_text_shadow_radius</item>
+        <item name="android:includeFontPadding">false</item>
+        <item name="android:maxLines">1</item>
+    </style>
+</resources>

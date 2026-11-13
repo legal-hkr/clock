@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- One size: 4 × 2, which is also the least it resizes to. -->
+<!-- Typical size 4 × 2; the group of about 270 dp fits three cells where they are wide enough. -->
 <appwidget-provider xmlns:android="http://schemas.android.com/apk/res/android"
     android:description="@string/widget_digital_description"
     android:initialLayout="@layout/widget_digital"

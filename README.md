@@ -10,7 +10,7 @@ Bug reports and feature requests: [github.com/legal-hkr/clock](https://github.co
 
 ## Overview
 
-Clock is an alarm clock, world clock, timer and stopwatch with home-screen widgets. It has no internet permission, doesn’t ask for your location, storage or media, and keeps nothing about you: alarms and settings stay on the device.
+Clock is an alarm clock, world clock, timer and stopwatch with home-screen widgets. It has no Internet permission, doesn’t ask for your location, storage or media, and keeps nothing about you: alarms and settings stay on the device.
 
 ## Screenshots
 
@@ -42,7 +42,9 @@ Clock is an alarm clock, world clock, timer and stopwatch with home-screen widge
 
 ### Widgets
 
-- **Digital clock** with the date and the next alarm, **round digital clock**, **analog clock**, **world clock** and **timer** with your presets and the running timers
+- **Digital clock** with the date and the next alarm, **round digital clock** and **analog clock**, both with an optional see-through shape
+- **Clocks without a background**: digital, small digital and analog, straight on the wallpaper
+- **World clock** and **timer** with your presets and the running timers
 
 ### Settings
 

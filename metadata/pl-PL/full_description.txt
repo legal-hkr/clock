@@ -1,4 +1,4 @@
-Zegar to budzik, zegar światowy, minutnik i stoper z widżetami na ekran główny. Aplikacja nie ma uprawnienia dostępu do internetu, nie prosi o dostęp do położenia, pamięci ani multimediów i nie zbiera żadnych danych: alarmy i ustawienia pozostają w telefonie.
+Zegar to budzik, zegar światowy, minutnik i stoper z widżetami na ekran główny. Aplikacja nie ma uprawnienia dostępu do Internetu, nie prosi o dostęp do położenia, pamięci ani multimediów i nie zbiera żadnych danych: alarmy i ustawienia pozostają w telefonie.
 
 Alarmy:
 - Codziennie, w dni robocze, w weekendy, w wybrane dni albo jednorazowo, w wybranym dniu; każdy z własną etykietą i dźwiękiem
@@ -17,7 +17,9 @@ Minutnik i stoper:
 - Okrążenia z oznaczonym najszybszym i najwolniejszym, gotowe do udostępnienia
 
 Widżety:
-- Zegar cyfrowy z datą i najbliższym alarmem, okrągły zegar cyfrowy, zegar analogowy, zegar światowy oraz minutnik z szablonami i działającymi minutnikami
+- Zegar cyfrowy z datą i najbliższym alarmem, okrągły zegar cyfrowy i zegar analogowy, oba z opcjonalnie półprzezroczystym kształtem
+- Zegary bez tła: cyfrowy, mały cyfrowy i analogowy, wprost na tapecie
+- Zegar światowy oraz minutnik z szablonami i działającymi minutnikami
 
 A także:
 - Kopia zapasowa alarmów, miast, szablonów minutnika i ustawień w wybranym pliku

@@ -325,7 +325,7 @@
     <string name="label_licenses">Open-source licenses</string>
     <string name="desc_licenses">Open-source components used by Clock</string>
     <string name="label_apache_license" translatable="false">Apache License 2.0</string>
-    <string name="msg_about_privacy">Clock has no internet access, doesn’t know where you are and can’t see your files.</string>
+    <string name="msg_about_privacy">Clock has no Internet access, doesn’t know where you are and can’t see your files.</string>
     <string name="whats_new_title">What’s new</string>
     <string name="whats_new_badge">New</string>
     <plurals name="whats_new_row_supporting">
@@ -387,6 +387,14 @@
     <string name="widget_digital_description">Time, date and your next alarm</string>
     <string name="widget_digital_round_name">Round digital clock</string>
     <string name="widget_digital_round_description">The time in a shape, in your colors</string>
+    <string name="widget_bare_digital_name">Digital clock, no background</string>
+    <string name="widget_bare_digital_description">The time, date and alarm on your wallpaper</string>
+    <string name="widget_bare_small_name">Small digital clock, no background</string>
+    <string name="widget_bare_small_description">Hours over minutes, on your wallpaper</string>
+    <string name="widget_bare_analog_name">Analog clock, no background</string>
+    <string name="widget_bare_analog_description">Just the hands on your wallpaper</string>
+    <string name="label_see_through">See-through background</string>
+    <string name="desc_see_through">The wallpaper shows through the shape</string>
     <string name="widget_analog_name">Analog clock</string>
     <string name="widget_analog_description">A clock face in your colors</string>
     <string name="widget_world_name">World clock</string>

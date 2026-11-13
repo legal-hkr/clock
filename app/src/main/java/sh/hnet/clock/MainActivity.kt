@@ -43,8 +43,7 @@ class MainActivity : ComponentActivity() {
     override fun onResume() {
         super.onResume()
         // What the user changed in the system's settings meanwhile may decide whether alarms and timers ring: the digital widgets say so, and the timer widget's presets start a timer only if it can
-        Widgets.digital(this)
-        Widgets.round(this)
+        Widgets.clocks(this)
         Widgets.timer(this)
     }
 

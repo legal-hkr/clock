@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Analog clock without a background (lighter widgets handoff of 13 Nov 2026, §7.5): twelve dots and two hands in white, straight on the wallpaper, with the soft shadow of the other widgets without a background (drawn into the dial and the hands). The system's clock view moves the hands by itself. -->
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@android:id/background"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/widget_frame"
+    android:clipToOutline="true">
+
+    <AnalogClock
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_gravity="center"
+        android:dial="@drawable/widget_bare_dial"
+        android:hand_hour="@drawable/widget_bare_hour"
+        android:hand_minute="@drawable/widget_bare_minute" />
+</FrameLayout>

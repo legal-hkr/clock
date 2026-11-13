@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- The shadow of text on widgets without a background: radius 4 dp, 1 dp down. Text shadows are given in pixels, hence one file for each density. -->
+    <item name="widget_text_shadow_radius" format="float" type="dimen">6</item>
+    <item name="widget_text_shadow_dy" format="float" type="dimen">1.5</item>
+</resources>

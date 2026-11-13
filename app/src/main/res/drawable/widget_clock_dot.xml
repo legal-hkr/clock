@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- The dot that marks twelve on the analog widget's face, on the cookie's canvas. -->
+<!-- The analog widget's dial: the dot that marks twelve, on the cookie's canvas. The cookie itself is drawn under the clock, where it can be made see-through without the dot. -->
 <vector xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     tools:ignore="VectorRaster"
@@ -7,5 +7,5 @@
     android:height="480dp"
     android:viewportWidth="200"
     android:viewportHeight="200">
-    <path android:fillColor="@color/widget_on_primary_container" android:pathData="M100,18.5a3.5,3.5 0 1,0 0.01,0Z" />
+    <path android:fillColor="@color/widget_on_secondary_container" android:pathData="M100,18.5a3.5,3.5 0 1,0 0.01,0Z" />
 </vector>

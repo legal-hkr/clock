@@ -149,6 +149,48 @@
                 android:resource="@xml/widget_analog" />
         </receiver>
         <receiver
+            android:name=".widget.BareDigitalWidget"
+            android:exported="true"
+            android:label="@string/widget_bare_digital_name">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/widget_bare_digital" />
+        </receiver>
+        <receiver
+            android:name=".widget.BareSmallWidget"
+            android:exported="true"
+            android:label="@string/widget_bare_small_name">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/widget_bare_small" />
+        </receiver>
+        <receiver
+            android:name=".widget.BareAnalogWidget"
+            android:exported="true"
+            android:label="@string/widget_bare_analog_name">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/widget_bare_analog" />
+        </receiver>
+        <!-- The settings of the analog and the round digital clock widgets, opened by the launcher through the system. -->
+        <activity
+            android:name=".widget.ClockWidgetSettingsActivity"
+            android:exported="false"
+            android:theme="@style/Theme.Clock">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_CONFIGURE" />
+            </intent-filter>
+        </activity>
+        <receiver
             android:name=".widget.WorldClockWidget"
             android:exported="true"
             android:label="@string/widget_world_name">
