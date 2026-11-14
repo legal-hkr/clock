@@ -1,0 +1,10 @@
+v0.3.1
+
+New:
+- Stopwatch widget without a background: the time, the current lap and the last two, with Start, Pause, Lap and Reset
+
+Changes:
+- The digital clock widget shows the time zone under the time instead of repeating the day
+
+Fixes:
+- The digital clock widget could fail to appear when the phone’s time zone was set only as an offset

@@ -1,0 +1,10 @@
+v0.3.1
+
+Nowości:
+- Widżet stopera bez tła: czas, bieżące okrążenie i dwa ostatnie, z przyciskami Start, Wstrzymaj, Okrążenie i Wyzeruj
+
+Zmiany:
+- Widżet zegara cyfrowego pokazuje pod godziną strefę czasową zamiast powtórzonego dnia tygodnia
+
+Poprawki:
+- Widżet zegara cyfrowego mógł się nie wyświetlać, gdy strefa czasowa telefonu była ustawiona jako samo przesunięcie

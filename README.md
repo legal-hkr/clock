@@ -2,7 +2,7 @@
 
 A private, offline clock for Android: alarms, world clock, timer and stopwatch.
 
-**Current version**: v0.3.0
+**Current version**: v0.3.1
 
 Source code and releases: [git.hnet.sh/hkr/clock](https://git.hnet.sh/hkr/clock)
 
