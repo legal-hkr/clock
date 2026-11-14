@@ -13,8 +13,8 @@ android {
         applicationId = "sh.hnet.clock"
         minSdk = 34
         targetSdk = 37
-        versionCode = 2
-        versionName = "v0.2.0"
+        versionCode = 3
+        versionName = "v0.3.0"
     }
 
     buildTypes {
