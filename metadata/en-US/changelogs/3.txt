@@ -1,0 +1,11 @@
+v0.3.0
+
+New:
+- Widgets without a background: digital clock, small digital clock, analog clock and world clock
+- See-through background for the analog and round digital clock widgets, in the widget’s settings
+
+Changes:
+- Widgets no longer have a card: the digital clock, world clock and timer sit directly on the wallpaper
+- The timer widget shows one timer with its controls and a row of presets
+- Clock widgets stay readable in the monochrome theme
+- New app icon

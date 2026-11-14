@@ -1,0 +1,11 @@
+v0.3.0
+
+Nowości:
+- Widżety bez tła: zegar cyfrowy, mały zegar cyfrowy, zegar analogowy i zegar światowy
+- Półprzezroczyste tło zegara analogowego i okrągłego cyfrowego, w ustawieniach widżetu
+
+Zmiany:
+- Widżety nie mają już karty: zegar cyfrowy, zegar światowy i minutnik są wyświetlane bezpośrednio na tapecie
+- Widżet minutnika pokazuje jeden minutnik z przyciskami i rząd szablonów
+- Widżety zegara są czytelne także w motywie monochromatycznym
+- Nowa ikona aplikacji
