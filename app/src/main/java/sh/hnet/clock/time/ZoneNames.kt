@@ -46,7 +46,12 @@ class ZoneNames(private val locale: Locale) {
     fun city(zoneId: String, at: Instant = Instant.now()): City {
         val id = canonical(zoneId)
         val name = names.getExemplarLocationName(id)?.takeIf { it.isNotBlank() } ?: id.substringAfterLast('/').replace('_', ' ')
-        val region = TimeZone.getRegion(id)
+        // A zone the time zone data doesn't list (a bare offset such as "GMT+02:00") has no region, and asking for one fails
+        val region = try {
+            TimeZone.getRegion(id)
+        } catch (_: IllegalArgumentException) {
+            null
+        }
         // "001" is the world: zones that belong to no country
         val country = if (region.isNullOrEmpty() || region == "001") "" else Locale.Builder().setRegion(region).build().getDisplayCountry(locale)
         val zone = zoneOrNull(id)

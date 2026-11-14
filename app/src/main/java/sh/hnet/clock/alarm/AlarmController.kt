@@ -126,7 +126,11 @@ class AlarmController(context: Context) {
         schedule(advanced, zone, settings, now)
         notifications.show(advanced, zone, settings, now)
         RingService.sync(context)
-        Widgets.clocks(context)
+        // Last, and never in the way: by now the alarms are scheduled and ringing, and a widget that can't be drawn must not take the process – and the ringing – down with it
+        try {
+            Widgets.clocks(context)
+        } catch (_: RuntimeException) {
+        }
     }
 
     @Synchronized
