@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Digital clock (lighter widgets handoff of 13 Nov 2026, §3): no card. A light cookie with the date, over it a pill with the time and the day's name, under that a small pill with the next alarm – the arrangement of Music's player widget. The group keeps its size and stands at the widget's start; sizes are in dp, text too, as the shapes can't grow with the font. Also the picker's preview. -->
+<!-- Digital clock (lighter widgets handoff of 13 Nov 2026, §3): no card. A light cookie with the date, over it a pill with the time and the phone's time zone, under that a small pill with the next alarm – the arrangement of Music's player widget. The group keeps its size and stands at the widget's start; sizes are in dp, text too, as the shapes can't grow with the font. Also the picker's preview. -->
 <!-- The outer frame is there for the launcher: a widget that names its background and clips to it is left alone, where otherwise the whole widget is cut to the system's rounded corners. The frame draws nothing. -->
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
@@ -113,14 +113,17 @@
                 android:textColor="@color/widget_on_surface"
                 android:textSize="40dp" />
 
+            <!-- The phone's time zone, "CET (GMT+1)"; a text clock only so that the picker's preview, which the app doesn't draw, has the zone's short name here -->
             <TextClock
-                android:id="@+id/day_name"
+                android:id="@+id/zone"
                 android:layout_width="wrap_content"
                 android:layout_height="20dp"
-                android:format12Hour="EEEE"
-                android:format24Hour="EEEE"
+                android:ellipsize="end"
+                android:format12Hour="z"
+                android:format24Hour="z"
                 android:gravity="center_vertical"
                 android:includeFontPadding="false"
+                android:maxWidth="180dp"
                 android:maxLines="1"
                 android:textColor="@color/widget_on_surface_variant"
                 android:textSize="14dp" />

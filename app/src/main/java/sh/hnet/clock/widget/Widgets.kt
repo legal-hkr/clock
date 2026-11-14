@@ -170,7 +170,22 @@ object Widgets {
         bareSmall(context)
     }
 
-    /** No card: the date in the light cookie, over it a pill with the time and the day's name, under that a small pill with the next alarm – the arrangement of Music's player widget. */
+    /**
+     * The phone's time zone, short enough for the pill under the time whatever the zone: its
+     * abbreviation with the offset from GMT, "CET (GMT+1)", or the offset alone where the zone has
+     * no abbreviation, "GMT+7". No city: some are far too long for the pill (owner, 14 Nov 2026).
+     */
+    private fun zoneName(context: Context, locale: Locale): String {
+        val names = (context.applicationContext as ClockApplication).zoneNames(locale)
+        val zone = ZoneId.systemDefault().id
+        val now = Instant.now()
+        val offset = names.offset(zone, now)
+        // A zone without an abbreviation goes by its offset already
+        val abbreviation = names.city(zone, now).abbreviation
+        return if (abbreviation == offset) offset else context.getString(R.string.label_country_zone, abbreviation, offset)
+    }
+
+    /** No card: the date in the light cookie, over it a pill with the time and the phone's time zone, under that a small pill with the next alarm – the arrangement of Music's player widget. */
     fun digital(context: Context) {
         if (ids(context, DigitalClockWidget::class.java).isEmpty()) return
         val locale = locale(context)
@@ -182,7 +197,8 @@ object Widgets {
             clockFormat(R.id.weekday, DateFormat.getBestDateTimePattern(locale, "EEE"))
             clockFormat(R.id.day, DateFormat.getBestDateTimePattern(locale, "d"))
             clockFormat(R.id.month, DateFormat.getBestDateTimePattern(locale, "MMM"))
-            clockFormat(R.id.day_name, DateFormat.getBestDateTimePattern(locale, "EEEE"))
+            // Under the time, the time zone – the cookie already says the day. Written out by the app, in its language, and given to the text clock as a quoted word
+            clockFormat(R.id.zone, "'" + zoneName(context, locale).replace("'", "''") + "'")
             // The pill is the widget's one accent; where alarms may not ring it turns to the error role, with the error icon
             alarm(context, line, tint = if (line?.problem == true) R.color.widget_on_error else R.color.widget_on_primary)
             setInt(R.id.alarm_pill, "setBackgroundResource", if (line?.problem == true) R.drawable.widget_float_error else R.drawable.widget_float_primary)

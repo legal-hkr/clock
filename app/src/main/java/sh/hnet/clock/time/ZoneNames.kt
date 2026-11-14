@@ -58,6 +58,10 @@ class ZoneNames(private val locale: Locale) {
         return City(id, name, country, current ?: offset, listOfNotNull(other, offset.takeIf { current != null }))
     }
 
+    /** The offset of [zoneId] from GMT as of [at], as the language writes it: "GMT+1", "GMT+5:30". */
+    fun offset(zoneId: String, at: Instant = Instant.now()): String =
+        offsets.formatOffsetShortLocalizedGMT((zoneOrNull(canonical(zoneId))?.rules?.getOffset(at)?.totalSeconds ?: 0) * 1000)
+
     private fun shortName(id: String, type: NameType, at: Long): String? =
         (sequenceOf(names) + abbreviations).firstNotNullOfOrNull { source -> source.getDisplayName(id, type, at)?.takeIf { it.isNotBlank() } }
 
