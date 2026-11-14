@@ -27,6 +27,8 @@ import sh.hnet.clock.reliability.Reliability
 import sh.hnet.clock.reliability.Ringing
 import sh.hnet.clock.ring.SoundChoice
 import sh.hnet.clock.stopwatch.Moment
+import sh.hnet.clock.stopwatch.StopwatchFormat
+import sh.hnet.clock.stopwatch.StopwatchReceiver
 import sh.hnet.clock.time.TimeDifference
 import sh.hnet.clock.time.zoneOrNull
 import sh.hnet.clock.timer.Timer
@@ -65,6 +67,9 @@ object Widgets {
     private const val TIMER_TALL = 130f
     private const val ADD_WIDTH = 36f
 
+    /** The least height (dp) at which the stopwatch widget has its first row and its laps. */
+    private const val STOPWATCH_TALL = 110f
+
     /** The least width (dp) at which the world clock without a background shows two cities side by side. */
     private const val BARE_WORLD_TWO = 300f
 
@@ -90,6 +95,7 @@ object Widgets {
         bareAnalog(context)
         world(context)
         timer(context)
+        stopwatch(context)
     }
 
     private fun ids(context: Context, widget: Class<*>): IntArray = try {
@@ -636,6 +642,85 @@ object Widgets {
         click(R.id.stop, TimerReceiver.ACTION_STOP)
     }
 
+    // ---- Stopwatch (stopwatch widget handoff of 14 Nov 2026): the timer widget's sibling ----
+
+    /**
+     * The time large and light with its two buttons – Start at zero, Lap and Pause while it runs,
+     * Reset and Resume while it is paused. From two rows up, the first row names the widget or,
+     * from the first lap mark, the current lap with its own running time, and the last two
+     * finished laps stand under the time. Running times are the system's chronometers, in whole
+     * seconds; a standing time is text in the same form, so nothing changes shape at a pause.
+     * Reset exists only on a paused stopwatch: a home screen has no Undo.
+     */
+    fun stopwatch(context: Context) {
+        val app = context.applicationContext as ClockApplication
+        // The stopwatch is locked until the phone is first unlocked after a restart
+        if (ids(context, StopwatchWidget::class.java).isEmpty() || !app.unlocked) return
+        val state = app.stopwatch.state.value
+        val elapsed = state.elapsed(app.stopwatch.now())
+        val open = Notifications.open(context, Tab.STOPWATCH)
+        fun press(action: String): PendingIntent =
+            PendingIntent.getBroadcast(context, 0, Intent(context, StopwatchReceiver::class.java).setAction(action), PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE)
+        /** A time that runs by itself in [running], or stands as text in [standing]. */
+        fun RemoteViews.time(running: Int, standing: Int, ms: Long) {
+            setViewVisibility(running, if (state.running) View.VISIBLE else View.GONE)
+            setViewVisibility(standing, if (state.running) View.GONE else View.VISIBLE)
+            if (state.running) setChronometer(running, SystemClock.elapsedRealtime() - ms, null, true) else setTextViewText(standing, StopwatchFormat.main(ms))
+        }
+        val views = sized(listOf(250f), listOf(40f, STOPWATCH_TALL)) { _, height ->
+            val tall = height >= STOPWATCH_TALL
+            RemoteViews(context.packageName, if (tall) R.layout.widget_stopwatch else R.layout.widget_stopwatch_row).apply {
+                setTextViewText(R.id.title, context.getString(R.string.label_nav_stopwatch))
+                if (tall) {
+                    time(R.id.time, R.id.time_standing, elapsed)
+                    // The first row: the widget's name, or the lap being timed – the finished ones plus one
+                    val marked = state.laps.isNotEmpty()
+                    setViewVisibility(R.id.head, if (marked) View.GONE else View.VISIBLE)
+                    setViewVisibility(R.id.current, if (marked) View.VISIBLE else View.GONE)
+                    if (marked) {
+                        setTextViewText(R.id.current_label, context.getString(R.string.label_lap_n, state.laps.size + 1))
+                        time(R.id.current_time, R.id.current_standing, elapsed - state.laps.last())
+                    }
+                    // Under the time: the last two finished laps, the newest first
+                    setViewVisibility(R.id.laps, if (marked) View.VISIBLE else View.GONE)
+                    listOf(Triple(R.id.lap1, R.id.lap1_label, R.id.lap1_time), Triple(R.id.lap2, R.id.lap2_label, R.id.lap2_time)).forEachIndexed { back, (lap, label, time) ->
+                        val index = state.laps.lastIndex - back
+                        setViewVisibility(lap, if (index >= 0) View.VISIBLE else View.INVISIBLE)
+                        if (index < 0) return@forEachIndexed
+                        val took = StopwatchFormat.main(state.laps[index] - if (index > 0) state.laps[index - 1] else 0)
+                        setTextViewText(label, context.getString(R.string.label_lap_n, index + 1))
+                        setTextViewText(time, took)
+                        setContentDescription(lap, context.getString(R.string.widget_stopwatch_lap, index + 1, took))
+                    }
+                    setOnClickPendingIntent(R.id.first_row, open)
+                    setOnClickPendingIntent(R.id.laps, open)
+                } else {
+                    // One row: at zero the widget's name stands where the time would
+                    setViewVisibility(R.id.head, if (state.isZero) View.VISIBLE else View.GONE)
+                    if (state.isZero) {
+                        setViewVisibility(R.id.time, View.GONE)
+                        setViewVisibility(R.id.time_standing, View.GONE)
+                    } else time(R.id.time, R.id.time_standing, elapsed)
+                }
+                // Lap and Reset share the place before the main button; at zero there is only Start
+                setViewVisibility(R.id.first, if (state.isZero) View.GONE else View.VISIBLE)
+                setImageViewResource(R.id.first, if (state.running) R.drawable.ic_flag else R.drawable.ic_replay)
+                setContentDescription(R.id.first, context.getString(if (state.running) R.string.button_lap else R.string.button_reset))
+                setOnClickPendingIntent(R.id.first, press(if (state.running) StopwatchReceiver.ACTION_LAP else StopwatchReceiver.ACTION_RESET))
+                setImageViewResource(R.id.action, if (state.running) R.drawable.ic_pause else R.drawable.ic_play_arrow)
+                setContentDescription(R.id.action, context.getString(when {
+                    state.running -> R.string.button_pause
+                    state.isZero -> R.string.button_start
+                    else -> R.string.button_resume
+                }))
+                setOnClickPendingIntent(R.id.action, press(if (state.running) StopwatchReceiver.ACTION_PAUSE else StopwatchReceiver.ACTION_RESUME))
+                setOnClickPendingIntent(R.id.open, open)
+                setOnClickPendingIntent(android.R.id.background, open)
+            }
+        }
+        show(context, StopwatchWidget::class.java, views)
+    }
+
     private fun newTimer(context: Context): PendingIntent = PendingIntent.getActivity(
         context, REQUEST_NEW_TIMER,
         Intent(context, MainActivity::class.java).setAction(Intent.ACTION_MAIN).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_SINGLE_TOP)
@@ -719,6 +804,11 @@ class BareWorldWidget : AppWidgetProvider() {
         val pending = goAsync()
         Widgets.world(context) { pending.finish() }
     }
+}
+
+/** Stopwatch: the time with its controls, the current lap and the last two finished ones. */
+class StopwatchWidget : AppWidgetProvider() {
+    override fun onUpdate(context: Context, manager: AppWidgetManager, ids: IntArray) = Widgets.stopwatch(context)
 }
 
 /** Timer: the first timer with its controls, and presets to start with a tap. */

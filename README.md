@@ -46,6 +46,7 @@ Clock is an alarm clock, world clock, timer and stopwatch with home-screen widge
 - **World clock** with a floating pill for each city
 - **Clocks without a background**: digital, small digital, analog and world clock, directly on the wallpaper
 - **Timer without a background**: the running timer with its controls, and your presets
+- **Stopwatch without a background**: the time with its controls, the current lap and the last two
 
 ### Settings
 

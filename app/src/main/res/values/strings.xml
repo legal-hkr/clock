@@ -407,6 +407,11 @@
     <string name="widget_world_day_behind" translatable="false">−1</string>
     <string name="widget_world_name">World clock</string>
     <string name="widget_world_description">The time in your cities</string>
+    <string name="widget_stopwatch_description">Start, pause and mark laps from the home screen</string>
+    <string name="widget_stopwatch_lap">Lap %1$d: %2$s</string>
+    <string name="widget_preview_lap_1">Lap 1</string>
+    <string name="widget_preview_lap_2">Lap 2</string>
+    <string name="widget_preview_lap_3">Lap 3</string>
     <string name="widget_timer_name">Timer</string>
     <string name="widget_timer_description">Start your presets from the home screen</string>
     <string name="widget_world_empty">Add cities in Clock</string>

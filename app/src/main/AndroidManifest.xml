@@ -213,6 +213,17 @@
                 android:resource="@xml/widget_bare_world" />
         </receiver>
         <receiver
+            android:name=".widget.StopwatchWidget"
+            android:exported="true"
+            android:label="@string/label_nav_stopwatch">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/widget_stopwatch" />
+        </receiver>
+        <receiver
             android:name=".widget.TimerWidget"
             android:exported="true"
             android:label="@string/widget_timer_name">

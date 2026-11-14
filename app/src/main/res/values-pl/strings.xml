@@ -416,6 +416,11 @@
     <string name="widget_world_yesterday">%s, wczoraj</string>
     <string name="widget_world_name">Zegar światowy</string>
     <string name="widget_world_description">Godzina w wybranych miastach</string>
+    <string name="widget_stopwatch_description">Start, pauza i okrążenia z ekranu głównego</string>
+    <string name="widget_stopwatch_lap">Okrążenie %1$d: %2$s</string>
+    <string name="widget_preview_lap_1">Okrążenie 1</string>
+    <string name="widget_preview_lap_2">Okrążenie 2</string>
+    <string name="widget_preview_lap_3">Okrążenie 3</string>
     <string name="widget_timer_name">Minutnik</string>
     <string name="widget_timer_description">Szablony uruchamiane z ekranu głównego</string>
     <string name="widget_world_empty">Dodaj miasta w aplikacji</string>

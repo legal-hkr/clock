@@ -1,0 +1,214 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- What the widget picker shows for the stopwatch: running, with two laps finished. -->
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:ignore="SpUsage,ContentDescription,UselessParent,UseCompoundDrawables,HardcodedText"
+    android:id="@android:id/background"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/widget_frame"
+    android:clipChildren="false"
+    android:clipToOutline="true">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_vertical"
+        android:clipChildren="false"
+        android:clipToPadding="false"
+        android:orientation="vertical"
+        android:paddingStart="8dp"
+        android:paddingEnd="8dp">
+
+        <!-- The first row: the widget's name until a lap is marked, then the current lap and its time -->
+        <FrameLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content">
+
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:gravity="center_vertical"
+                android:orientation="horizontal"
+                android:visibility="gone">
+
+                <ImageView
+                    android:layout_width="20dp"
+                    android:layout_height="20dp"
+                    android:importantForAccessibility="no"
+                    android:src="@drawable/ic_timer"
+                    android:tint="@android:color/white" />
+
+                <TextView
+                    style="@style/WidgetBareText"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="6dp"
+                    android:fontFamily="sans-serif-medium"
+                    android:text="@string/label_nav_stopwatch"
+                    android:textSize="16dp" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal">
+
+                <TextView
+                    style="@style/WidgetBareText"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:fontFamily="sans-serif-medium"
+                    android:text="@string/widget_preview_lap_3"
+                    android:textSize="16dp" />
+
+                <Chronometer
+                    style="@style/WidgetBareText"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="10dp"
+                    android:fontFamily="sans-serif-medium"
+                    android:fontFeatureSettings="tnum"
+                    android:textSize="16dp"
+                android:visibility="gone" />
+
+                <TextView
+                    style="@style/WidgetBareText"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="10dp"
+                    android:fontFamily="sans-serif-medium"
+                    android:fontFeatureSettings="tnum"
+                    android:text="00:38"
+                    android:textSize="16dp" />
+            </LinearLayout>
+        </FrameLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:baselineAligned="false"
+            android:clipChildren="false"
+            android:clipToPadding="false"
+            android:gravity="center_vertical"
+            android:orientation="horizontal">
+
+            <!-- The time fits itself into the room beside the buttons: 64 dp, and less from one hour on, when it gains digits without any event that could redraw the widget. The margins take away the empty room a line keeps above and below its digits -->
+            <FrameLayout
+                android:layout_width="0dp"
+                android:layout_height="76dp"
+                android:layout_marginTop="-6dp"
+                android:layout_marginBottom="-8dp"
+                android:layout_weight="1">
+
+                <Chronometer
+                    style="@style/WidgetBareText"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:autoSizeMaxTextSize="64dp"
+                    android:autoSizeMinTextSize="40dp"
+                    android:autoSizeStepGranularity="2dp"
+                    android:autoSizeTextType="uniform"
+                    android:fontFamily="sans-serif-light"
+                    android:fontFeatureSettings="tnum"
+                    android:letterSpacing="-0.023"
+                    android:gravity="center_vertical|start"
+                    android:textSize="64dp"
+                android:visibility="gone" />
+
+                <TextView
+                    style="@style/WidgetBareText"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:autoSizeMaxTextSize="64dp"
+                    android:autoSizeMinTextSize="40dp"
+                    android:autoSizeStepGranularity="2dp"
+                    android:autoSizeTextType="uniform"
+                    android:fontFamily="sans-serif-light"
+                    android:fontFeatureSettings="tnum"
+                    android:letterSpacing="-0.023"
+                    android:gravity="center_vertical|start"
+                    android:text="04:12"
+                    android:textSize="64dp" />
+            </FrameLayout>
+
+            <!-- Lap while it runs, Reset while it is paused: round -->
+            <ImageButton
+                android:layout_width="44dp"
+                android:layout_height="44dp"
+                android:layout_marginStart="8dp"
+                android:background="@drawable/widget_button_circle"
+                android:elevation="2dp"
+                android:src="@drawable/ic_flag"
+                android:tint="@color/widget_on_surface" />
+
+            <!-- Start, Pause, Resume: a rounded square, always at the end -->
+            <ImageButton
+                android:layout_width="56dp"
+                android:layout_height="44dp"
+                android:layout_marginStart="8dp"
+                android:layout_marginEnd="2dp"
+                android:background="@drawable/widget_button_square"
+                android:elevation="2dp"
+                android:src="@drawable/ic_pause"
+                android:tint="@color/widget_on_surface" />
+        </LinearLayout>
+
+        <!-- The last two finished laps, the newest first, each in its half of the width -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:baselineAligned="false"
+            android:orientation="horizontal">
+
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:orientation="horizontal">
+
+                <TextView
+                    style="@style/WidgetBareText"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/widget_preview_lap_2"
+                    android:textSize="14dp" />
+
+                <TextView
+                    style="@style/WidgetBareText"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="8dp"
+                    android:fontFamily="sans-serif-medium"
+                    android:fontFeatureSettings="tnum"
+                    android:text="01:12"
+                    android:textSize="14dp" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:orientation="horizontal">
+
+                <TextView
+                    style="@style/WidgetBareText"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/widget_preview_lap_1"
+                    android:textSize="14dp" />
+
+                <TextView
+                    style="@style/WidgetBareText"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="8dp"
+                    android:fontFamily="sans-serif-medium"
+                    android:fontFeatureSettings="tnum"
+                    android:text="02:22"
+                    android:textSize="14dp" />
+            </LinearLayout>
+        </LinearLayout>
+    </LinearLayout>
+</FrameLayout>

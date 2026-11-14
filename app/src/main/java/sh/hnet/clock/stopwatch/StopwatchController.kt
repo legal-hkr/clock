@@ -7,6 +7,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.serialization.SerializationException
 import kotlinx.serialization.json.Json
+import sh.hnet.clock.widget.Widgets
 
 /** The present [Moment], as the stopwatch and the timers read it. */
 object Moments {
@@ -56,6 +57,7 @@ class StopwatchController(private val context: Context) {
         store.edit { putString(KEY, json.encodeToString(Stopwatch.serializer(), next)) }
         _state.value = next
         notification.show(next, now())
+        Widgets.stopwatch(context)
     }
 
     private fun read(): Stopwatch = store.getString(KEY, null)?.let { text ->

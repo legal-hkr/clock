@@ -21,6 +21,7 @@ Widgets:
 - World clock with a floating pill for each city
 - Clocks without a background: digital, small digital, analog and world clock, straight on the wallpaper
 - Timer on the wallpaper: the running timer with its buttons, and your presets
+- Stopwatch on the wallpaper: the time with its buttons, the current lap and the last two
 
 And also:
 - Backup and restore of alarms, cities, timer presets and settings to a file you choose

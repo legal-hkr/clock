@@ -1,0 +1,224 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Stopwatch (stopwatch widget handoff of 14 Nov 2026, §3), two rows and taller: the sibling of the timer widget. The first row says what this is – the widget's name, or from the first lap mark the current lap with its own running time; then the time, large and light, with its two buttons on surfaces of their own; under it the last two finished laps. White with a soft shadow, straight on the wallpaper. What is shown is chosen in code; sizes are in dp, text too. -->
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:ignore="SpUsage,ContentDescription,UselessParent,UseCompoundDrawables"
+    android:id="@android:id/background"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/widget_frame"
+    android:clipChildren="false"
+    android:clipToOutline="true">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_vertical"
+        android:clipChildren="false"
+        android:clipToPadding="false"
+        android:orientation="vertical"
+        android:paddingStart="8dp"
+        android:paddingEnd="8dp">
+
+        <!-- The first row: the widget's name until a lap is marked, then the current lap and its time -->
+        <FrameLayout
+            android:id="@+id/first_row"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content">
+
+            <LinearLayout
+                android:id="@+id/head"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:gravity="center_vertical"
+                android:orientation="horizontal">
+
+                <ImageView
+                    android:layout_width="20dp"
+                    android:layout_height="20dp"
+                    android:importantForAccessibility="no"
+                    android:src="@drawable/ic_timer"
+                    android:tint="@android:color/white" />
+
+                <TextView
+                    android:id="@+id/title"
+                    style="@style/WidgetBareText"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="6dp"
+                    android:fontFamily="sans-serif-medium"
+                    android:textSize="16dp" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/current"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:visibility="gone">
+
+                <TextView
+                    android:id="@+id/current_label"
+                    style="@style/WidgetBareText"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:fontFamily="sans-serif-medium"
+                    android:textSize="16dp" />
+
+                <Chronometer
+                    android:id="@+id/current_time"
+                    style="@style/WidgetBareText"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="10dp"
+                    android:fontFamily="sans-serif-medium"
+                    android:fontFeatureSettings="tnum"
+                    android:textSize="16dp"
+                android:visibility="gone" />
+
+                <TextView
+                    android:id="@+id/current_standing"
+                    style="@style/WidgetBareText"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="10dp"
+                    android:fontFamily="sans-serif-medium"
+                    android:fontFeatureSettings="tnum"
+                    android:textSize="16dp" />
+            </LinearLayout>
+        </FrameLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:baselineAligned="false"
+            android:clipChildren="false"
+            android:clipToPadding="false"
+            android:gravity="center_vertical"
+            android:orientation="horizontal">
+
+            <!-- The time fits itself into the room beside the buttons: 64 dp, and less from one hour on, when it gains digits without any event that could redraw the widget. The margins take away the empty room a line keeps above and below its digits -->
+            <FrameLayout
+                android:id="@+id/open"
+                android:layout_width="0dp"
+                android:layout_height="76dp"
+                android:layout_marginTop="-6dp"
+                android:layout_marginBottom="-8dp"
+                android:layout_weight="1">
+
+                <Chronometer
+                    android:id="@+id/time"
+                    style="@style/WidgetBareText"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:autoSizeMaxTextSize="64dp"
+                    android:autoSizeMinTextSize="40dp"
+                    android:autoSizeStepGranularity="2dp"
+                    android:autoSizeTextType="uniform"
+                    android:fontFamily="sans-serif-light"
+                    android:fontFeatureSettings="tnum"
+                    android:letterSpacing="-0.023"
+                    android:gravity="center_vertical|start"
+                    android:textSize="64dp"
+                android:visibility="gone" />
+
+                <TextView
+                    android:id="@+id/time_standing"
+                    style="@style/WidgetBareText"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:autoSizeMaxTextSize="64dp"
+                    android:autoSizeMinTextSize="40dp"
+                    android:autoSizeStepGranularity="2dp"
+                    android:autoSizeTextType="uniform"
+                    android:fontFamily="sans-serif-light"
+                    android:fontFeatureSettings="tnum"
+                    android:letterSpacing="-0.023"
+                    android:gravity="center_vertical|start"
+                    android:textSize="64dp" />
+            </FrameLayout>
+
+            <!-- Lap while it runs, Reset while it is paused: round -->
+            <ImageButton
+                android:id="@+id/first"
+                android:layout_width="44dp"
+                android:layout_height="44dp"
+                android:layout_marginStart="8dp"
+                android:background="@drawable/widget_button_circle"
+                android:elevation="2dp"
+                android:tint="@color/widget_on_surface" />
+
+            <!-- Start, Pause, Resume: a rounded square, always at the end -->
+            <ImageButton
+                android:id="@+id/action"
+                android:layout_width="56dp"
+                android:layout_height="44dp"
+                android:layout_marginStart="8dp"
+                android:layout_marginEnd="2dp"
+                android:background="@drawable/widget_button_square"
+                android:elevation="2dp"
+                android:tint="@color/widget_on_surface" />
+        </LinearLayout>
+
+        <!-- The last two finished laps, the newest first, each in its half of the width -->
+        <LinearLayout
+            android:id="@+id/laps"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:baselineAligned="false"
+            android:orientation="horizontal"
+                android:visibility="gone">
+
+            <LinearLayout
+                android:id="@+id/lap1"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:orientation="horizontal">
+
+                <TextView
+                    android:id="@+id/lap1_label"
+                    style="@style/WidgetBareText"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textSize="14dp" />
+
+                <TextView
+                    android:id="@+id/lap1_time"
+                    style="@style/WidgetBareText"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="8dp"
+                    android:fontFamily="sans-serif-medium"
+                    android:fontFeatureSettings="tnum"
+                    android:textSize="14dp" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/lap2"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:orientation="horizontal">
+
+                <TextView
+                    android:id="@+id/lap2_label"
+                    style="@style/WidgetBareText"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textSize="14dp" />
+
+                <TextView
+                    android:id="@+id/lap2_time"
+                    style="@style/WidgetBareText"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="8dp"
+                    android:fontFamily="sans-serif-medium"
+                    android:fontFeatureSettings="tnum"
+                    android:textSize="14dp" />
+            </LinearLayout>
+        </LinearLayout>
+    </LinearLayout>
+</FrameLayout>

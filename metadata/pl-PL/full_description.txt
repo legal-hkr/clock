@@ -21,6 +21,7 @@ Widżety:
 - Zegar światowy z osobną pastylką dla każdego miasta
 - Zegary bez tła: cyfrowy, mały cyfrowy, analogowy i światowy, wprost na tapecie
 - Minutnik na tapecie: działający minutnik z przyciskami oraz szablony
+- Stoper na tapecie: czas z przyciskami, bieżące okrążenie i dwa ostatnie
 
 A także:
 - Kopia zapasowa alarmów, miast, szablonów minutnika i ustawień w wybranym pliku

@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Stopwatch, one row high (stopwatch widget handoff of 14 Nov 2026, §4): the time and its two buttons; at zero the widget's name stands where the time would, with Start. No laps here: they show when the widget is made taller. -->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:ignore="SpUsage,ContentDescription,UseCompoundDrawables"
+    android:id="@android:id/background"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/widget_frame"
+    android:clipChildren="false"
+    android:clipToOutline="true"
+    android:baselineAligned="false"
+    android:gravity="center_vertical"
+    android:orientation="horizontal"
+    android:paddingStart="8dp"
+    android:paddingEnd="8dp">
+
+    <FrameLayout
+        android:id="@+id/open"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="1">
+
+        <LinearLayout
+            android:id="@+id/head"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:gravity="center_vertical"
+            android:orientation="horizontal"
+            android:layout_gravity="center_vertical"
+            android:visibility="gone">
+
+            <ImageView
+                android:layout_width="20dp"
+                android:layout_height="20dp"
+                android:importantForAccessibility="no"
+                android:src="@drawable/ic_timer"
+                android:tint="@android:color/white" />
+
+            <TextView
+                android:id="@+id/title"
+                style="@style/WidgetBareText"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="6dp"
+                android:fontFamily="sans-serif-medium"
+                android:textSize="16dp" />
+        </LinearLayout>
+
+        <Chronometer
+            android:id="@+id/time"
+            style="@style/WidgetBareText"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:fontFamily="sans-serif-light"
+            android:fontFeatureSettings="tnum"
+            android:letterSpacing="-0.023"
+            android:textSize="44dp"
+            android:visibility="gone" />
+
+        <TextView
+            android:id="@+id/time_standing"
+            style="@style/WidgetBareText"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:fontFamily="sans-serif-light"
+            android:fontFeatureSettings="tnum"
+            android:letterSpacing="-0.023"
+            android:textSize="44dp" />
+    </FrameLayout>
+
+    <!-- Lap while it runs, Reset while it is paused: round -->
+    <ImageButton
+        android:id="@+id/first"
+        android:layout_width="44dp"
+        android:layout_height="44dp"
+        android:layout_marginStart="8dp"
+        android:background="@drawable/widget_button_circle"
+        android:elevation="2dp"
+        android:tint="@color/widget_on_surface" />
+
+    <!-- Start, Pause, Resume: a rounded square, always at the end -->
+    <ImageButton
+        android:id="@+id/action"
+        android:layout_width="56dp"
+        android:layout_height="44dp"
+        android:layout_marginStart="8dp"
+        android:layout_marginEnd="2dp"
+        android:background="@drawable/widget_button_square"
+        android:elevation="2dp"
+        android:tint="@color/widget_on_surface" />
+</LinearLayout>
