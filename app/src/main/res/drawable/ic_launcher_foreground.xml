@@ -1,43 +1,55 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Clock launcher icon, foreground layer. 108 dp canvas, viewport 768; the art stays inside the central 470 units. -->
+<!-- Clock launcher icon, foreground layer (the owner's icon set of 14 Nov 2026): a graphite ring (#9A9DAA to #3E4150) with a dot at twelve and an hour hand of the same, and a minute hand in blue (#1D3FA8 to #4FA3FF), each hand ending in a round hub. 108 dp canvas, viewport 768. Also the app's mark on Welcome and About. -->
 <vector xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:aapt="http://schemas.android.com/aapt"
     android:width="108dp"
     android:height="108dp"
     android:viewportWidth="768"
     android:viewportHeight="768">
-    <!-- Face -->
-    <path android:pathData="M172,384 a212,212 0 1 0 424,0 a212,212 0 1 0 -424,0 Z">
-        <aapt:attr name="android:fillColor">
-            <gradient
-                android:type="linear"
-                android:startX="234"
-                android:startY="234"
-                android:endX="534"
-                android:endY="534"
-                android:startColor="#FFC3C6D0"
-                android:endColor="#FF6E7182" />
-        </aapt:attr>
-    </path>
-    <!-- Dot at twelve -->
-    <path
-        android:fillColor="#FFFFFFFF"
-        android:pathData="M367,214 a17,17 0 1 0 34,0 a17,17 0 1 0 -34,0 Z" />
-    <!-- Hour hand with its round hub at the centre (one shape) -->
-    <path
-        android:fillColor="#FFFFFFFF"
-        android:pathData="M342.1,381.8 L277.7,337.4 A22,22 0 0 1 302.7,301.2 L367,345.6 A42,42 0 1 1 342.1,381.8 Z" />
-    <!-- Minute hand with its smaller hub (one shape), on top -->
-    <path android:pathData="M393.8,354.6 L506.1,273 A18,18 0 0 1 527.3,302.2 L415,383.7 A31,31 0 1 1 393.8,354.6 Z">
-        <aapt:attr name="android:fillColor">
-            <gradient
-                android:type="linear"
-                android:startX="384"
-                android:startY="384"
-                android:endX="516.7"
-                android:endY="287.6"
-                android:startColor="#FF2F6BF0"
-                android:endColor="#FF8B45E8" />
-        </aapt:attr>
-    </path>
+    <!-- Drawn on a 512 × 512 grid and moved by 128 to stand in the adaptive icon's safe zone -->
+    <group android:translateX="128" android:translateY="128">
+        <path
+            android:pathData="M66,256 a190,190 0 1,0 380,0 a190,190 0 1,0 -380,0 Z"
+            android:strokeWidth="44">
+            <aapt:attr name="android:strokeColor">
+                <gradient android:type="linear" android:startX="80" android:startY="80" android:endX="432" android:endY="432" android:startColor="#FF9A9DAA" android:endColor="#FF3E4150" />
+            </aapt:attr>
+        </path>
+        <path
+            android:pathData="M239.5,120 a16.5,16.5 0 1,0 33,0 a16.5,16.5 0 1,0 -33,0 Z">
+            <aapt:attr name="android:fillColor">
+                <gradient android:type="linear" android:startX="80" android:startY="80" android:endX="432" android:endY="432" android:startColor="#FF9A9DAA" android:endColor="#FF3E4150" />
+            </aapt:attr>
+        </path>
+        <path
+            android:pathData="M256,256 L177.7,201.7"
+            android:strokeWidth="44"
+            android:strokeLineCap="round"
+            android:strokeLineJoin="round">
+            <aapt:attr name="android:strokeColor">
+                <gradient android:type="linear" android:startX="80" android:startY="80" android:endX="432" android:endY="432" android:startColor="#FF9A9DAA" android:endColor="#FF3E4150" />
+            </aapt:attr>
+        </path>
+        <path
+            android:pathData="M214,256 a42,42 0 1,0 84,0 a42,42 0 1,0 -84,0 Z">
+            <aapt:attr name="android:fillColor">
+                <gradient android:type="linear" android:startX="80" android:startY="80" android:endX="432" android:endY="432" android:startColor="#FF9A9DAA" android:endColor="#FF3E4150" />
+            </aapt:attr>
+        </path>
+        <path
+            android:pathData="M256,256 L365.8,175.8"
+            android:strokeWidth="34"
+            android:strokeLineCap="round"
+            android:strokeLineJoin="round">
+            <aapt:attr name="android:strokeColor">
+                <gradient android:type="linear" android:startX="256" android:startY="256" android:endX="380.4" android:endY="165.2" android:startColor="#FF1D3FA8" android:endColor="#FF4FA3FF" />
+            </aapt:attr>
+        </path>
+        <path
+            android:pathData="M225,256 a31,31 0 1,0 62,0 a31,31 0 1,0 -62,0 Z">
+            <aapt:attr name="android:fillColor">
+                <gradient android:type="linear" android:startX="256" android:startY="256" android:endX="380.4" android:endY="165.2" android:startColor="#FF1D3FA8" android:endColor="#FF4FA3FF" />
+            </aapt:attr>
+        </path>
+    </group>
 </vector>

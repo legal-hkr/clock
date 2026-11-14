@@ -56,8 +56,8 @@ fun AboutScreen(onBack: () -> Unit, onOpenWhatsNew: () -> Unit, onOpenLicense: (
     val noBrowser = stringResource(R.string.msg_no_browser)
     SettingsPage(title = stringResource(R.string.title_settings_about), onBack = onBack) {
         Column(Modifier.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally) {
-            // The launcher icon as a launcher shows it; the name follows as text
-            AppMark(240.dp, Modifier.padding(top = 8.dp, bottom = 24.dp))
+            // The launcher icon's mark at a launcher's size, on the page itself, without the icon's white background; the name follows as text
+            AppMark(240.dp, Modifier.padding(top = 8.dp, bottom = 24.dp), background = false)
             Text(stringResource(R.string.app_name), style = MaterialTheme.typography.headlineLarge)
             Text(stringResource(R.string.label_version_value, version), style = MaterialTheme.typography.bodyLarge, color = MaterialTheme.colorScheme.onSurfaceVariant)
         }

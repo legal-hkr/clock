@@ -117,11 +117,12 @@ fun AppLogo(titleInset: Dp, modifier: Modifier = Modifier) {
 /**
  * The app's mark as a launcher shows it (icon handoff of 12 Nov 2026, §5): the icon's foreground
  * layer at one and a half times [size], of which the round mask shows the middle, on the icon's own
- * white background layer. That white is the icon's, not a color of the UI.
+ * white background layer. That white is the icon's, not a color of the UI. Without [background]
+ * the mark stands on the page itself, at the same size.
  */
 @Composable
-fun AppMark(size: Dp, modifier: Modifier = Modifier) {
-    Box(modifier.size(size).clip(CircleShape).background(Color.White), contentAlignment = Alignment.Center) {
+fun AppMark(size: Dp, modifier: Modifier = Modifier, background: Boolean = true) {
+    Box(modifier.size(size).clip(CircleShape).then(if (background) Modifier.background(Color.White) else Modifier), contentAlignment = Alignment.Center) {
         Image(painterResource(R.drawable.ic_launcher_foreground), contentDescription = null, modifier = Modifier.requiredSize(size * 1.5f))
     }
 }

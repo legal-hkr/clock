@@ -1,12 +1,36 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Clock launcher icon, monochrome layer for themed icons. One path, even-odd fill: the face with the dot, the minute hand with its hub, and the hour hand cut out; the hour hand stops 12 units short of the minute hand's hub. -->
+<!-- Clock launcher icon, monochrome layer for themed icons, which the system tints; also the mark in the empty Alarms page. Laid out as ic_launcher_foreground. -->
 <vector xmlns:android="http://schemas.android.com/apk/res/android"
     android:width="108dp"
     android:height="108dp"
     android:viewportWidth="768"
     android:viewportHeight="768">
-    <path
-        android:fillColor="#FF000000"
-        android:fillType="evenOdd"
-        android:pathData="M172,384 a212,212 0 1 0 424,0 a212,212 0 1 0 -424,0 Z M367,214 a17,17 0 1 0 34,0 a17,17 0 1 0 -34,0 Z M341.1,381.1 L277.7,337.4 A22,22 0 0 1 302.7,301.2 L366.1,344.9 A43,43 0 0 0 341.1,381.1 Z M393.8,354.6 L506.1,273 A18,18 0 0 1 527.3,302.2 L415,383.7 A31,31 0 1 1 393.8,354.6 Z" />
+    <!-- Drawn on a 512 × 512 grid and moved by 128 to stand in the adaptive icon's safe zone -->
+    <group android:translateX="128" android:translateY="128">
+        <path
+            android:pathData="M66,256 a190,190 0 1,0 380,0 a190,190 0 1,0 -380,0 Z"
+            android:strokeWidth="44"
+            android:strokeColor="#FF000000" />
+        <path
+            android:pathData="M239.5,120 a16.5,16.5 0 1,0 33,0 a16.5,16.5 0 1,0 -33,0 Z"
+            android:fillColor="#FF000000" />
+        <path
+            android:pathData="M256,256 L177.7,201.7"
+            android:strokeWidth="44"
+            android:strokeLineCap="round"
+            android:strokeLineJoin="round"
+            android:strokeColor="#FF000000" />
+        <path
+            android:pathData="M214,256 a42,42 0 1,0 84,0 a42,42 0 1,0 -84,0 Z"
+            android:fillColor="#FF000000" />
+        <path
+            android:pathData="M256,256 L365.8,175.8"
+            android:strokeWidth="34"
+            android:strokeLineCap="round"
+            android:strokeLineJoin="round"
+            android:strokeColor="#FF000000" />
+        <path
+            android:pathData="M225,256 a31,31 0 1,0 62,0 a31,31 0 1,0 -62,0 Z"
+            android:fillColor="#FF000000" />
+    </group>
 </vector>
